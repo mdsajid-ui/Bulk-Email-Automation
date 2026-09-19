@@ -1,66 +1,94 @@
-# Bulk Email Automator ✉️
+# DV Analytics &bull; LMS Assignment Report & Bulk Email Automator 🚀
 
-A modern, fast, and secure web application designed to send bulk emails to 100+ recipients with attachments in a single click.
+[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://mdsajid-ui.github.io/Bulk-Email-Automation/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://python.org)
+[![Fast & Modern](https://img.shields.io/badge/UI-TailwindCSS-indigo?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
 
----
+A web application designed for education teams to automate **Weekly LMS Assignment Evaluation Reports** and **1-Click Bulk Email Dispatching**.
 
-## Features
-- **One-Click Send**: Attach any file (PDF, Word, Excel, Images, Zip, etc.) and dispatch it to hundreds of recipients simultaneously.
-- **Recipient Ingestion**:
-  - Drag & drop CSV or Excel spreadsheets (`.xlsx`, `.xls`, `.csv`).
-  - Direct paste option for comma, semicolon, or newline-separated email addresses.
-  - Automatic email validation and duplicate removal.
-- **Personalization**:
-  - Insert dynamic tags into subject and body like `{{name}}` or `{{company}}` matching your spreadsheet columns.
-- **SMTP Support & Presets**:
-  - One-click presets for **Gmail**, **Microsoft 365 / Outlook**, and **Custom SMTP**.
-  - Built-in **Test Connection** button to verify credentials before sending.
-  - Rate-limiting delay controls (0.2s, 1s, 2s, 5s) to avoid spam filters.
-- **Real-Time Monitoring**:
-  - Live progress bar with percentage.
-  - Live activity feed showing each recipient, status (sent/failed), timestamp, and error messages.
-  - Emergency cancel/stop button.
-  - Downloadable CSV delivery report.
-- **Dry-Run Mode**:
-  - Simulate email blasts without actually emailing recipients to preview the process safely.
+🔗 **Live Web Dashboard:** [https://mdsajid-ui.github.io/Bulk-Email-Automation/](https://mdsajid-ui.github.io/Bulk-Email-Automation/)
 
 ---
 
-## Quick Start (How to Run)
+## 🌟 Key Capabilities
 
-### Method 1: Double-Click (Windows)
-Double click `run.bat` in this folder. It will start the server and open `http://localhost:5000` automatically in your default browser.
+### 1. Weekly LMS Assignment Reporting
+- **Multi-Format Ingestion**: Parses LMS exports in any format: `.xls` (HTML table exports), `.xlsx`, or `.csv` (e.g. `Assignment (10).xls` with **13,590+ rows**).
+- **Candidate Aggregation**: Groups submissions by candidate (`Student ID`, `Student Name`, `Batch`), tracking:
+  - Total assignments completed (e.g. `14 submissions`)
+  - Modules covered (e.g. `Python Programming`, `SQL Server`, `Excel Base & Advanced`)
+  - Latest submission details & timestamps
+- **Auto-Linked Student Directory**: Pre-loaded with **6,390 students** from the master database, automatically resolving student emails by Student ID and Name.
+- **Inline Email Editing**: Missing an email? Edit or add any student's email address with 1 click right in the table.
+- **1-Click Report Dispatch**:
+  - **Individual Candidate Send**: Click **"Send Report"** on any candidate to email them immediately.
+  - **Send All Pending**: 1-click batch dispatch for all active students in the selected batch.
+- **Interactive Report Preview**: Inspect the exact branded, responsive HTML report email before sending.
 
-### Method 2: Command Line
-Open a terminal in this directory:
+### 2. General Bulk Email Automator
+- Broadcast any file attachments (PDFs, docs, images, spreadsheets, archives) to 100+ recipients simultaneously in 1 click.
+- Upload recipient lists via CSV or Excel (`.xlsx`, `.xls`) or paste emails directly.
+- Downloadable **Sample CSV** and **Sample Excel** templates generated in 1 click.
+- SMTP presets for **Gmail**, **Microsoft 365 / Outlook**, and **Custom SMTP**.
+- Safety pacing interval (0.5s to 5s) to safeguard against provider spam rate limits.
+- Downloadable CSV delivery report receipts.
+
+---
+
+## 🚀 How to Run
+
+### Method 1: Use Live on GitHub Pages (No installation needed)
+Open the deployed dashboard directly in your browser:
+👉 **[https://mdsajid-ui.github.io/Bulk-Email-Automation/](https://mdsajid-ui.github.io/Bulk-Email-Automation/)**
+
+- Drop your weekly LMS file (`.xls`, `.xlsx`, `.csv`) directly into the browser.
+- The web app parses all records, matches student emails, and generates preview reports completely client-side!
+
+### Method 2: One-Click Launch on Windows (Local Python Engine)
+1. Clone or download this repository.
+2. Double-click **`run.bat`** in the project folder.
+3. Your default web browser will automatically open [http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+### Method 3: Command Line
 ```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run the application
 py app.py
 ```
-Then visit [http://127.0.0.1:5000](http://127.0.0.1:5000) in your web browser.
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
 
 ---
 
-## Email Provider Setup Tips
-
-### 1. Gmail
-- **SMTP Host**: `smtp.gmail.com`
-- **Port**: `587` (STARTTLS)
-- **Email**: Your Gmail address
-- **Password**: A 16-character **App Password** (Generate at: Google Account > Security > 2-Step Verification > App passwords).
-
-### 2. Microsoft 365 / Outlook
-- **SMTP Host**: `smtp.office365.com`
-- **Port**: `587` (STARTTLS)
-- **Email**: Your Microsoft 365 / Outlook email
-- **Password**: Your password or App Password.
+## 📁 Repository Structure
+```text
+├── index.html                 # Root single-page application for GitHub Pages
+├── app.py                     # Flask backend server with REST & streaming APIs
+├── assignment_processor.py    # LMS report parser, candidate aggregator & HTML report builder
+├── student_directory.py       # Student master database seed & lookup engine
+├── student_directory.json     # Pre-compiled student master directory (2,000+ verified emails)
+├── sample_recipients.csv      # Sample CSV template
+├── sample_recipients.xlsx     # Sample Excel template
+├── run.bat                    # One-click Windows batch launcher
+├── requirements.txt           # Python package requirements
+├── templates/
+│   └── index.html             # Server-rendered template mirror
+└── tests/
+    ├── test_bulk_email.py         # Test suite for bulk email engine
+    └── test_assignment_report.py  # Test suite for LMS assignment processor
+```
 
 ---
 
-## File Structure
-- `app.py`: Flask application server and REST / SSE streaming endpoints.
-- `email_engine.py`: SMTP engine with attachment caching, rate pacing, and background worker threads.
-- `templates/index.html`: Responsive, modern single-page dashboard.
-- `static/app.js`: Frontend logic for file uploads, live status streaming, and alerts.
-- `sample_recipients.csv`: Sample CSV file ready for testing.
-- `test_bulk_email.py`: Pytest test suite.
-- `run.bat`: Quick launcher for Windows.
+## 🧪 Testing & Verification
+Run the automated test suite with pytest:
+```bash
+py -m pytest -v
+```
+All 6 automated tests verify email validation, MIME construction with attachments, LMS file parsing (13,590 rows), student master directory lookups, and API endpoints.
+
+---
+
+## 📄 License
+Created for DV Data & Analytics Pvt Ltd. All rights reserved.

@@ -358,11 +358,28 @@
         let activeModalCandidate = null;
         let localServerOnline = false;
         const API_BASE = 'http://127.0.0.1:5000';
+        let masterStudentLookup = {};
+
+        async function loadClientSideMasterDirectory() {
+            try {
+                const res = await fetch('student_directory.json');
+                if (res.ok) {
+                    const list = await res.json();
+                    list.forEach(s => {
+                        if (s.student_id) masterStudentLookup[s.student_id.toUpperCase()] = s.email;
+                        if (s.student_name) masterStudentLookup[s.student_name.trim().toLowerCase()] = s.email;
+                    });
+                    console.log('Loaded client-side student master directory:', Object.keys(masterStudentLookup).length);
+                }
+            } catch (e) {
+                console.warn('Could not load student_directory.json', e);
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             loadSavedConfig();
+            loadClientSideMasterDirectory();
             checkServerStatus();
-            // Automatically attempt to load default assignment on startup
             quickLoadDefaultAssignment();
         });
 
@@ -429,25 +446,139 @@
         async function handleLmsReportUpload(file) {
             if (!file) return;
             setLoadingCandidateTable(`Processing ${file.name}...`);
-            const formData = new FormData();
-            formData.append("file", file);
 
-            try {
-                const res = await fetch(`${API_BASE}/api/assignment/upload`, {
-                    method: "POST",
-                    body: formData
-                });
-                const data = await res.json();
-                if (data.success) {
-                    populateBatchesDropdown(data.batches || []);
-                    document.getElementById("metricTotalRows").textContent = (data.total_rows || 0).toLocaleString();
-                    fetchCandidatesList();
-                } else {
-                    alert("Upload error: " + data.error);
+            if (localServerOnline) {
+                const formData = new FormData();
+                formData.append("file", file);
+                try {
+                    const res = await fetch(`${API_BASE}/api/assignment/upload`, {
+                        method: "POST",
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        populateBatchesDropdown(data.batches || []);
+                        document.getElementById("metricTotalRows").textContent = (data.total_rows || 0).toLocaleString();
+                        fetchCandidatesList();
+                        return;
+                    }
+                } catch (err) {
+                    console.warn("Local backend upload failed, falling back to client-side parse...", err);
                 }
-            } catch (err) {
-                alert("Upload failed: " + err.message);
             }
+
+            // Client-Side parsing for GitHub Pages
+            try {
+                await parseLmsFileClientSide(file);
+            } catch (err) {
+                alert("Client-side parse failed: " + err.message);
+                renderEmptyTable("Error parsing file. Please try another file.");
+            }
+        }
+
+        async function parseLmsFileClientSide(file) {
+            const text = await file.text();
+            let rows = [];
+
+            if (text.includes("<table") || text.includes("<html") || text.includes("<tr")) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, "text/html");
+                const trs = doc.querySelectorAll("table tr");
+                if (trs.length > 1) {
+                    for (let i = 1; i < trs.length; i++) {
+                        const tds = Array.from(trs[i].querySelectorAll("td")).map(el => el.textContent.trim());
+                        if (tds.length >= 4) {
+                            rows.push({
+                                student_id: tds[2] || "",
+                                student_name: (tds[3] || "").replace(/\s+/g, " "),
+                                batch: tds[4] || "",
+                                application: tds[5] || "",
+                                description: tds[6] || "",
+                                date: tds[1] || ""
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (rows.length === 0) {
+                const arrayBuf = await file.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(arrayBuf), { type: 'array' });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                rows = raw.map(r => {
+                    const obj = {};
+                    for (let k in r) {
+                        const kl = k.toLowerCase();
+                        if (kl.includes("id")) obj.student_id = String(r[k]).trim();
+                        else if (kl.includes("name")) obj.student_name = String(r[k]).trim().replace(/\s+/g, " ");
+                        else if (kl.includes("batch")) obj.batch = String(r[k]).trim();
+                        else if (kl.includes("app") || kl.includes("course")) obj.application = String(r[k]).trim();
+                        else if (kl.includes("desc") || kl.includes("assign")) obj.description = String(r[k]).trim();
+                        else if (kl.includes("date")) obj.date = String(r[k]).trim();
+                    }
+                    return obj;
+                });
+            }
+
+            if (rows.length === 0) {
+                throw new Error("No assignment submission rows found in file.");
+            }
+
+            const candMap = {};
+            const batchesSet = new Set();
+
+            rows.forEach(r => {
+                const sid = r.student_id;
+                const sname = r.student_name;
+                const key = sid || sname;
+                if (!key) return;
+
+                if (r.batch) batchesSet.add(r.batch);
+
+                if (!candMap[key]) {
+                    const matchedEmail = masterStudentLookup[sid.toUpperCase()] || 
+                                         masterStudentLookup[sname.toLowerCase()] || "";
+                    candMap[key] = {
+                        student_id: sid,
+                        student_name: sname,
+                        batch: r.batch,
+                        email: matchedEmail,
+                        submissions: [],
+                        modules: {},
+                        latest_date: r.date,
+                        latest_submission: r.description,
+                        status: "pending"
+                    };
+                }
+                candMap[key].submissions.push({
+                    date: r.date,
+                    application: r.application,
+                    description: r.description
+                });
+                if (r.application) {
+                    candMap[key].modules[r.application] = (candMap[key].modules[r.application] || 0) + 1;
+                }
+                if (r.date) {
+                    candMap[key].latest_date = r.date;
+                    candMap[key].latest_submission = r.description;
+                }
+            });
+
+            const candidates = Object.values(candMap);
+            candidates.forEach(c => {
+                c.submissions_count = c.submissions.length;
+                c.submissions.reverse();
+            });
+            candidates.sort((a, b) => a.student_name.localeCompare(b.student_name));
+
+            allCandidates = candidates;
+            populateBatchesDropdown(Array.from(batchesSet).sort());
+            document.getElementById("metricTotalRows").textContent = rows.length.toLocaleString();
+            document.getElementById("metricCandidates").textContent = candidates.length.toLocaleString();
+            document.getElementById("metricSentCount").textContent = "0";
+            document.getElementById("metricPendingCount").textContent = candidates.length.toLocaleString();
+            applyCandidateFilters();
         }
 
         // Fetch Candidate List from API
@@ -773,14 +904,137 @@
 
             document.getElementById("previewModalTitle").textContent = `Report Preview: ${cand.student_name} (${cand.batch})`;
             document.getElementById("modalTrainerNoteInput").value = "";
-            document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${studentId}`;
+            
+            if (localServerOnline) {
+                document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${studentId}`;
+            } else {
+                const html = generateClientSideReportHtml(cand, "");
+                document.getElementById("previewReportIframe").srcdoc = html;
+            }
             document.getElementById("previewModal").classList.remove("hidden");
         }
 
         function refreshPreviewWithNote() {
             if (!activeModalCandidate) return;
-            const note = encodeURIComponent(document.getElementById("modalTrainerNoteInput").value.trim());
-            document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${activeModalCandidate.student_id}?note=${note}`;
+            const note = document.getElementById("modalTrainerNoteInput").value.trim();
+            if (localServerOnline) {
+                document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${activeModalCandidate.student_id}?note=${encodeURIComponent(note)}`;
+            } else {
+                const html = generateClientSideReportHtml(activeModalCandidate, note);
+                document.getElementById("previewReportIframe").srcdoc = html;
+            }
+        }
+
+        function generateClientSideReportHtml(candidate, trainerNote) {
+            const name = escapeHtml(candidate.student_name || "Student");
+            const sid = escapeHtml(candidate.student_id || "-");
+            const batch = escapeHtml(candidate.batch || "-");
+            const subs = candidate.submissions || [];
+            const totalSubs = subs.length;
+            const modules = candidate.modules || {};
+            const reportDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            let moduleCards = "";
+            for (let mod in modules) {
+                moduleCards += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-right:8px; margin-bottom:8px; display:inline-block; vertical-align:top;">
+                    <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">${escapeHtml(mod)}</div>
+                    <div style="font-size:16px; font-weight:800; color:#1e293b; margin-top:2px;">${modules[mod]} <span style="font-size:11px; font-weight:500; color:#94a3b8;">submissions</span></div>
+                </div>`;
+            }
+
+            let rowsHtml = "";
+            subs.forEach((s, idx) => {
+                const bg = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
+                rowsHtml += `<tr style="background:${bg}; border-bottom:1px solid #edf2f7;">
+                    <td style="padding:10px 14px; font-size:12px; color:#64748b; font-family:monospace;">${idx + 1}</td>
+                    <td style="padding:10px 14px; font-size:12px; color:#1e293b; font-weight:600; white-space:nowrap;">${escapeHtml(s.date || '-')}</td>
+                    <td style="padding:10px 14px; font-size:12px; color:#4338ca; font-weight:600;">${escapeHtml(s.application || '-')}</td>
+                    <td style="padding:10px 14px; font-size:12px; color:#334155;">${escapeHtml(s.description || '-')}</td>
+                    <td style="padding:10px 14px; text-align:center;">
+                        <span style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-size:10px; font-weight:700; padding:3px 8px; border-radius:12px;">Verified</span>
+                    </td>
+                </tr>`;
+            });
+
+            let noteBlock = "";
+            if (trainerNote) {
+                noteBlock = `<div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:6px; padding:12px 16px; margin-bottom:24px;">
+                    <div style="font-size:12px; font-weight:700; color:#1e40af; margin-bottom:4px;">Trainer Remarks / Guidance</div>
+                    <div style="font-size:13px; color:#1e3a8a; line-height:1.5;">${escapeHtml(trainerNote)}</div>
+                </div>`;
+            }
+
+            return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Weekly Report</title></head>
+            <body style="margin:0; padding:0; background-color:#f1f5f9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f1f5f9; padding:24px 12px;">
+                    <tr><td align="center">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:680px; background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e2e8f0;">
+                            <tr><td style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); padding:30px 32px; color:#ffffff;">
+                                <div style="display:inline-block; background:rgba(255,255,255,0.15); border-radius:20px; padding:4px 12px; font-size:11px; font-weight:700; text-transform:uppercase;">DV Data &amp; Analytics &bull; LMS Portal</div>
+                                <h1 style="margin:8px 0 0; font-size:22px; font-weight:800; color:#ffffff;">Weekly Assignment Progress Report</h1>
+                                <p style="margin:4px 0 0; font-size:13px; color:#c7d2fe;">Evaluation &bull; Generated on ${reportDate}</p>
+                            </td></tr>
+                            <tr><td style="padding:24px 32px 16px;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                                    <tr>
+                                        <td width="50%">
+                                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Student Name</div>
+                                            <div style="font-size:17px; font-weight:800; color:#0f172a;">${name}</div>
+                                            <div style="font-size:12px; color:#64748b; font-family:monospace;">ID: ${sid}</div>
+                                        </td>
+                                        <td width="50%" align="right">
+                                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Batch</div>
+                                            <div style="font-size:15px; font-weight:700; color:#4338ca;">${batch}</div>
+                                            <div style="font-size:12px; color:#059669; font-weight:600;">&bull; Active Learner</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td></tr>
+                            <tr><td style="padding:0 32px 20px;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>
+                                    <td width="32%" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; text-align:center;">
+                                        <div style="font-size:24px; font-weight:800; color:#166534;">${totalSubs}</div>
+                                        <div style="font-size:11px; font-weight:700; color:#15803d; text-transform:uppercase;">Assignments Done</div>
+                                    </td>
+                                    <td width="2%"></td>
+                                    <td width="32%" style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; padding:14px; text-align:center;">
+                                        <div style="font-size:24px; font-weight:800; color:#3730a3;">${Object.keys(modules).length}</div>
+                                        <div style="font-size:11px; font-weight:700; color:#4338ca; text-transform:uppercase;">Modules</div>
+                                    </td>
+                                    <td width="2%"></td>
+                                    <td width="32%" style="background:#fefce8; border:1px solid #fef08a; border-radius:10px; padding:14px; text-align:center;">
+                                        <div style="font-size:14px; font-weight:800; color:#854d0e; padding-top:6px;">${escapeHtml(candidate.latest_date || '-')}</div>
+                                        <div style="font-size:11px; font-weight:700; color:#a16207; text-transform:uppercase; margin-top:6px;">Latest Sub</div>
+                                    </td>
+                                </tr></table>
+                            </td></tr>
+                            <tr><td style="padding:0 32px 16px;">
+                                <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:8px;">Subject Submission Breakdown</div>
+                                <div>${moduleCards}</div>
+                            </td></tr>
+                            <tr><td style="padding:0 32px;">${noteBlock}</td></tr>
+                            <tr><td style="padding:8px 32px 24px;">
+                                <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">Submission History</div>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+                                    <thead><tr style="background:#f1f5f9;">
+                                        <th align="left" style="padding:8px 12px; font-size:11px;">#</th>
+                                        <th align="left" style="padding:8px 12px; font-size:11px;">Date</th>
+                                        <th align="left" style="padding:8px 12px; font-size:11px;">Module</th>
+                                        <th align="left" style="padding:8px 12px; font-size:11px;">Session</th>
+                                        <th align="center" style="padding:8px 12px; font-size:11px;">Status</th>
+                                    </tr></thead>
+                                    <tbody>${rowsHtml}</tbody>
+                                </table>
+                            </td></tr>
+                            <tr><td style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 32px; font-size:12px; color:#64748b;">
+                                <div style="font-weight:700; color:#334155; margin-bottom:4px;">Need Help or Mentorship?</div>
+                                <div style="font-size:11px;">Mr. Sajid &bull; 8431424165 | Mrs. Lakshmi &bull; 7907991738 | Mr. Ajith &bull; 9916000655</div>
+                                <div style="text-align:center; margin-top:14px; color:#94a3b8; font-size:11px;">&copy; 2026 DV Data &amp; Analytics Pvt Ltd.</div>
+                            </td></tr>
+                        </table>
+                    </td></tr>
+                </table>
+            </body></html>`;
         }
 
         async function sendModalReport() {
