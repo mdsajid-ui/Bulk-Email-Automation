@@ -36,6 +36,18 @@ class SMTPConfig:
         self.sender_name = (sender_name or "").strip()
         self.reply_to = (reply_to or "").strip()
 
+        # Intelligent Auto-Correction: Fix host if user enters a Gmail address with an Outlook host
+        user_lower = self.username.lower()
+        if user_lower.endswith(("@gmail.com", "@googlemail.com")):
+            if "office365" in self.host.lower() or "outlook" in self.host.lower() or not self.host:
+                self.host = "smtp.gmail.com"
+                if self.port != 465:
+                    self.port = 587
+        elif user_lower.endswith(("@outlook.com", "@hotmail.com", "@live.com")):
+            if "gmail" in self.host.lower() or not self.host:
+                self.host = "smtp.office365.com"
+                self.port = 587
+
     def validate(self) -> Tuple[bool, str]:
         if not self.host:
             return False, "SMTP Host is required."
@@ -55,16 +67,23 @@ class SMTPConfig:
             if self.use_ssl:
                 with smtplib.SMTP_SSL(self.host, self.port, context=context, timeout=15) as server:
                     server.login(self.username, self.password)
-                    return True, "SMTP connection and authentication successful!"
+                    return True, f"SMTP connection and authentication successful ({self.host}:{self.port})!"
             else:
                 with smtplib.SMTP(self.host, self.port, timeout=15) as server:
                     server.ehlo()
                     server.starttls(context=context)
                     server.ehlo()
                     server.login(self.username, self.password)
-                    return True, "SMTP connection and authentication successful!"
+                    return True, f"SMTP connection and authentication successful ({self.host}:{self.port})!"
         except smtplib.SMTPAuthenticationError as e:
-            return False, f"Authentication failed: {e.smtp_error.decode('utf-8', errors='ignore') if hasattr(e, 'smtp_error') else str(e)}. Note: Gmail and Office 365 require an App Password."
+            raw_err = e.smtp_error.decode('utf-8', errors='ignore') if hasattr(e, 'smtp_error') else str(e)
+            if "5.7.3" in raw_err or "OUTLOOK.COM" in raw_err:
+                if self.username.lower().endswith("@gmail.com"):
+                    return False, "Host Mismatch: Your email is @gmail.com but server was set to Microsoft Outlook (smtp.office365.com). Switch Host to smtp.gmail.com and use a 16-letter Google App Password."
+                return False, f"Microsoft 365 Authentication Failed: {raw_err}. Ensure SMTP AUTH is enabled or use an App Password."
+            elif "535" in str(e) or "5.7.8" in raw_err or "Username and Password not accepted" in raw_err:
+                return False, "Gmail Authentication Failed: Google requires a 16-character Google App Password (not your regular account password). Generate one at https://myaccount.google.com/apppasswords"
+            return False, f"Authentication failed: {raw_err}"
         except Exception as e:
             return False, f"Connection failed: {str(e)}"
 

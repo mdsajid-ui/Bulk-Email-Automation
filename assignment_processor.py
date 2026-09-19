@@ -702,6 +702,19 @@ class AssignmentProcessor:
             student_directory.update_delivery_status(sid, name, email, batch, "sent", "", subs_count)
             return {"success": True, "message": f"Report successfully delivered to {email}!"}
 
+        except smtplib.SMTPAuthenticationError as e:
+            raw_err = e.smtp_error.decode('utf-8', errors='ignore') if hasattr(e, 'smtp_error') else str(e)
+            if "5.7.3" in raw_err or "OUTLOOK.COM" in raw_err:
+                if smtp_config.username.lower().endswith("@gmail.com"):
+                    err = "Host Mismatch: Your sender email is @gmail.com but server was set to Microsoft Outlook (smtp.office365.com). Switch Host to smtp.gmail.com and use a 16-letter Google App Password."
+                else:
+                    err = f"Microsoft 365 Authentication Failed: {raw_err}. Check your password or generate an App Password."
+            elif "535" in str(e) or "5.7.8" in raw_err or "Username and Password not accepted" in raw_err:
+                err = "Gmail Authentication Failed: Google requires a 16-character Google App Password (not your regular login password). Generate one at https://myaccount.google.com/apppasswords"
+            else:
+                err = f"Authentication failed: {raw_err}"
+            student_directory.update_delivery_status(sid, name, email, batch, "failed", err, subs_count)
+            return {"success": False, "error": err, "requires_smtp": True}
         except Exception as e:
             err = str(e)
             student_directory.update_delivery_status(sid, name, email, batch, "failed", err, subs_count)

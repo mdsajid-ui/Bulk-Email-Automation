@@ -1913,6 +1913,29 @@
                         }
                     } catch (e) {}
                 }
+
+                // Auto-Correct Host Mismatch: If user has a Gmail address but Host is set to Outlook/Office365
+                const userVal = (document.getElementById("smtpUsername")?.value || "").toLowerCase().trim();
+                const hostEl = document.getElementById("smtpHost");
+                if (userVal.endsWith("@gmail.com") || userVal.endsWith("@googlemail.com")) {
+                    if (hostEl && (hostEl.value.includes("office365") || hostEl.value.includes("outlook") || !hostEl.value)) {
+                        applyPreset("gmail");
+                        saveConfig();
+                    }
+                }
+
+                // Attach dynamic input listener
+                const userInp = document.getElementById("smtpUsername");
+                if (userInp) {
+                    userInp.addEventListener("input", () => {
+                        const v = userInp.value.toLowerCase().trim();
+                        if (v.endsWith("@gmail.com") || v.endsWith("@googlemail.com")) {
+                            applyPreset("gmail");
+                        } else if (v.endsWith("@outlook.com") || v.endsWith("@hotmail.com") || v.endsWith("@live.com")) {
+                            applyPreset("office365");
+                        }
+                    });
+                }
             } catch (e) {}
         }
 
@@ -1925,20 +1948,26 @@
                 document.body.appendChild(container);
             }
             const toast = document.createElement("div");
-            toast.className = `px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center space-x-2 transition-all transform duration-300 pointer-events-auto max-w-sm ${
+            toast.className = `px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center justify-between space-x-3 transition-all transform duration-300 pointer-events-auto max-w-md ${
                 type === 'success' ? 'bg-slate-900 text-emerald-400 border border-emerald-500/30' :
-                type === 'error' ? 'bg-rose-900 text-rose-100 border border-rose-500/30' :
+                type === 'error' ? 'bg-rose-950 text-rose-100 border border-rose-500/40' :
                 'bg-slate-900 text-slate-100 border border-slate-700'
             }`;
             const icon = type === 'success' ? 'fa-circle-check text-emerald-400' :
                          type === 'error' ? 'fa-circle-exclamation text-rose-400' :
                          'fa-circle-info text-indigo-400';
-            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${escapeHtml(msg)}</span>`;
+            
+            let fixBtnHtml = "";
+            if (type === 'error' && (msg.includes("Authentication") || msg.includes("SMTP") || msg.includes("Password") || msg.includes("535"))) {
+                fixBtnHtml = `<button onclick="openSmtpSettingsModal()" class="ml-2 px-2 py-1 bg-white/20 hover:bg-white/30 text-white rounded text-[11px] font-bold shrink-0 transition">Fix Setup</button>`;
+            }
+
+            toast.innerHTML = `<div class="flex items-center space-x-2"><i class="fa-solid ${icon} shrink-0"></i> <span>${escapeHtml(msg)}</span></div>${fixBtnHtml}`;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.classList.add("opacity-0", "translate-y-2");
                 setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            }, 6000);
         }
 
         // Helpers
