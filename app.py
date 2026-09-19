@@ -20,6 +20,14 @@ os.makedirs(ATTACHMENTS_DIR, exist_ok=True)
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max upload size
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
+    return response
+
+
 # Global state for current running task and attachments
 active_task: BulkEmailTask = None
 task_lock = threading.Lock()
@@ -44,8 +52,8 @@ def save_smtp_config(data: dict):
 
 @app.route("/")
 def index():
-    saved_cfg = get_saved_smtp_config()
-    return render_template("index.html", saved_config=saved_cfg)
+    return send_file(os.path.join(BASE_DIR, "index.html"))
+
 
 @app.route("/sample_recipients.csv")
 @app.route("/download-sample/csv")
