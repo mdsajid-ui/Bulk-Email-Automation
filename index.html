@@ -683,19 +683,53 @@
         // Quick Load Default Assignment (10).xls
         async function quickLoadDefaultAssignment() {
             setLoadingCandidateTable("Reading and parsing Assignment (10).xls (13,590 submissions)...");
+
+            // 1. Try local server first if connected
+            if (localServerOnline) {
+                try {
+                    const res = await fetch(`${API_BASE}/api/assignment/load-default`, { method: "POST" });
+                    const data = await res.json();
+                    if (data.success) {
+                        populateBatchesDropdown(data.batches || []);
+                        document.getElementById("metricTotalRows").textContent = (data.total_rows || 0).toLocaleString();
+                        fetchCandidatesList();
+                        return;
+                    }
+                } catch (e) {
+                    console.log("Local API not answering, switching to client-side data...");
+                }
+            }
+
+            // 2. Client-side / GitHub Pages: Load from pre-compiled assignment_data.json
             try {
-                const res = await fetch(`${API_BASE}/api/assignment/load-default`, { method: "POST" });
-                const data = await res.json();
-                if (data.success) {
+                const res = await fetch('assignment_data.json');
+                if (res.ok) {
+                    const data = await res.json();
+                    allCandidates = data.candidates || [];
                     populateBatchesDropdown(data.batches || []);
                     document.getElementById("metricTotalRows").textContent = (data.total_rows || 0).toLocaleString();
-                    fetchCandidatesList();
-                } else {
-                    renderEmptyTable("Could not automatically load local file. Please click 'Upload Weekly LMS Report' above.");
+                    applyCandidateFilters();
+                    updateMetricCounters();
+                    return;
                 }
             } catch (err) {
-                renderEmptyTable("Click 'Upload Weekly LMS Report' above to select your report file.");
+                console.warn("Could not load assignment_data.json directly:", err);
             }
+
+            // 3. Fallback: Try fetching Assignment (10).xls directly from repo root and parse client-side
+            try {
+                const res = await fetch('Assignment (10).xls');
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Assignment (10).xls');
+                    await parseLmsFileClientSide(file);
+                    return;
+                }
+            } catch (err) {
+                console.warn("Could not load Assignment (10).xls directly:", err);
+            }
+
+            renderEmptyTable("Click 'Upload Weekly LMS Report' above to select your report file.");
         }
 
         // Upload Weekly LMS Report File

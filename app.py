@@ -71,7 +71,7 @@ def save_smtp_config(data: dict):
         print(f"Failed to save SMTP config: {e}")
 
 def resolve_smtp_config(smtp_data: dict) -> SMTPConfig:
-    saved = get_saved_smtp_config()
+    saved = {} if smtp_data.get("ignore_saved") else get_saved_smtp_config()
     host = (smtp_data.get("host") or "").strip() or saved.get("host") or os.environ.get("SMTP_HOST", "smtp.gmail.com")
     raw_port = smtp_data.get("port") or saved.get("port") or os.environ.get("SMTP_PORT", 587)
     try:
@@ -510,7 +510,9 @@ def assignment_upload():
 
 @app.route("/api/assignment/load-default", methods=["POST"])
 def assignment_load_default():
-    default_path = r"C:\Users\mdsaj\Downloads\Assignment (10).xls"
+    local_repo_file = os.path.join(BASE_DIR, "Assignment (10).xls")
+    downloads_file = r"C:\Users\mdsaj\Downloads\Assignment (10).xls"
+    default_path = local_repo_file if os.path.exists(local_repo_file) else downloads_file
     if not os.path.exists(default_path):
         return jsonify({"success": False, "error": f"Default file not found at {default_path}"}), 404
 

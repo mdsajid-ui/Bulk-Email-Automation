@@ -128,7 +128,7 @@ def test_assignment_api_endpoints():
         "student_id": sajid_cand["student_id"],
         "email": "skabdulsajid8144@gmail.com",
         "dry_run": False,
-        "smtp": {}
+        "smtp": {"ignore_saved": True}
     })
     assert res_no_smtp.status_code == 400
     no_smtp_data = res_no_smtp.get_json()
