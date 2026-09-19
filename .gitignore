@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+env/
+venv/
+
+# Testing & Cache
+.pytest_cache/
+
+# App dynamic runtime data
+uploads/
+smtp_saved_config.json
+
+# IDE
+.vscode/
+.idea/

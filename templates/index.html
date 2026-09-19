@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Email Automator | Send Attachments in 1 Click</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-paper-plane text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-900 tracking-tight leading-none">Bulk Email Automator</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Send attachments to 100+ recipients with 1 click</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span id="headerSmtpStatusBadge" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span> SMTP Not Tested
+                </span>
+                <a href="/download-sample/csv" download class="inline-flex items-center text-xs font-medium text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition border border-emerald-200 shadow-xs">
+                    <i class="fa-solid fa-file-csv mr-1.5 text-emerald-600"></i> Sample CSV
+                </a>
+                <a href="/download-sample/excel" download class="inline-flex items-center text-xs font-medium text-indigo-700 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition border border-indigo-200 shadow-xs">
+                    <i class="fa-solid fa-file-excel mr-1.5 text-indigo-600"></i> Sample Excel
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT COLUMN: Workflow Steps (Recipients, Message & Attachments, SMTP) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- STEP 1: Recipients List -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <h2 class="font-semibold text-slate-800">Recipients List</h2>
+                        </div>
+                        <div id="recipientsCountBadge" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
+                            0 Recipients Loaded
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <!-- Tab switcher: File Upload vs Manual Paste -->
+                        <div class="flex border-b border-slate-200 mb-4 text-sm font-medium">
+                            <button id="tabFileBtn" onclick="switchRecipientTab('file')" class="pb-2.5 px-4 border-b-2 border-indigo-600 text-indigo-600 flex items-center space-x-2">
+                                <i class="fa-solid fa-file-csv"></i>
+                                <span>Upload CSV / Excel</span>
+                            </button>
+                            <button id="tabPasteBtn" onclick="switchRecipientTab('paste')" class="pb-2.5 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-paste"></i>
+                                <span>Paste Emails</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab 1: File Dropzone -->
+                        <div id="tabFileContent">
+                            <label for="recipientsFileInput" class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-6 cursor-pointer bg-slate-50/50 hover:bg-indigo-50/30 transition group">
+                                <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:scale-110 transition duration-200">
+                                    <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                                </div>
+                                <p class="mt-3 text-sm font-medium text-slate-700">
+                                    Click or drag & drop recipient spreadsheet here
+                                </p>
+                                <p class="text-xs text-slate-400 mt-1">Supports .csv, .xlsx, .xls</p>
+                                <div class="mt-3 flex items-center space-x-2 text-xs" onclick="event.stopPropagation()">
+                                    <span class="text-slate-500 font-medium">Download template:</span>
+                                    <a href="/download-sample/csv" download class="inline-flex items-center text-emerald-700 hover:text-emerald-800 bg-white hover:bg-emerald-50 border border-slate-200 px-2.5 py-1 rounded-md shadow-xs font-semibold transition">
+                                        <i class="fa-solid fa-file-csv text-emerald-600 mr-1"></i> Sample CSV
+                                    </a>
+                                    <a href="/download-sample/excel" download class="inline-flex items-center text-indigo-700 hover:text-indigo-800 bg-white hover:bg-indigo-50 border border-slate-200 px-2.5 py-1 rounded-md shadow-xs font-semibold transition">
+                                        <i class="fa-solid fa-file-excel text-indigo-600 mr-1"></i> Sample Excel (.xlsx)
+                                    </a>
+                                </div>
+                                <input id="recipientsFileInput" type="file" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleRecipientsFileUpload(this.files[0])">
+                            </label>
+                        </div>
+
+                        <!-- Tab 2: Paste Emails -->
+                        <div id="tabPasteContent" class="hidden">
+                            <textarea id="pasteEmailsInput" rows="4" placeholder="Paste emails separated by commas, semicolons, or newlines...&#10;alice@example.com&#10;bob@example.com&#10;carol@example.com" class="w-full text-sm rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"></textarea>
+                            <button onclick="handleRecipientsPaste()" class="mt-2 w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition flex items-center justify-center space-x-1.5">
+                                <i class="fa-solid fa-check"></i>
+                                <span>Parse & Load Emails</span>
+                            </button>
+                        </div>
+
+                        <!-- Preview Table & Tags -->
+                        <div id="recipientsPreviewSection" class="mt-4 hidden">
+                            <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+                                <span id="recipientStatsText">Loaded recipients preview</span>
+                                <div id="availableTagsContainer" class="flex items-center space-x-1"></div>
+                            </div>
+                            <div class="border border-slate-200 rounded-lg max-h-44 overflow-y-auto custom-scrollbar">
+                                <table class="min-w-full divide-y divide-slate-200 text-xs">
+                                    <thead class="bg-slate-50 sticky top-0">
+                                        <tr id="previewTableHeaders">
+                                            <th class="px-3 py-2 text-left font-semibold text-slate-600">#</th>
+                                            <th class="px-3 py-2 text-left font-semibold text-slate-600">Email</th>
+                                            <th class="px-3 py-2 text-left font-semibold text-slate-600">Name / Extra</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="previewTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Message & File Attachments -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                            <h2 class="font-semibold text-slate-800">Email Message & File Attachments</h2>
+                        </div>
+                        <span class="text-xs text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                            Same attachment sends to all
+                        </span>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <!-- Subject Line -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">Subject Line</label>
+                                <span class="text-[11px] text-slate-400">Use <code class="text-indigo-600">{{name}}</code> for custom names</span>
+                            </div>
+                            <input id="emailSubject" type="text" placeholder="e.g. Important Document: Attached is your file" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Attachments Box (Key Highlight) -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-paperclip text-indigo-600"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-700">File Attachments (Sent to everyone)</span>
+                                </div>
+                                <span id="attachmentCountBadge" class="text-xs text-slate-500">0 files attached</span>
+                            </div>
+
+                            <!-- Attachment Dropzone -->
+                            <label for="attachmentFileInput" class="flex items-center justify-center p-3 border-2 border-dashed border-indigo-200 hover:border-indigo-500 rounded-lg cursor-pointer bg-white hover:bg-indigo-50/20 transition group">
+                                <i class="fa-solid fa-cloud-arrow-up text-indigo-500 mr-2 group-hover:scale-110 transition"></i>
+                                <span class="text-xs font-medium text-slate-600 group-hover:text-indigo-600">Click to choose files (PDF, Word, Excel, Images, Zip, etc.)</span>
+                                <input id="attachmentFileInput" type="file" multiple class="hidden" onchange="handleAttachmentUpload(this.files)">
+                            </label>
+
+                            <!-- Attachment List -->
+                            <div id="attachmentsList" class="mt-3 space-y-2">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Email Body -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">Email Body</label>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-[11px] text-slate-500 flex items-center cursor-pointer">
+                                        <input id="isHtmlCheckbox" type="checkbox" class="rounded text-indigo-600 mr-1" checked> HTML Format
+                                    </label>
+                                </div>
+                            </div>
+                            <textarea id="emailBody" rows="6" placeholder="Hello {{name}},&#10;&#10;Please find the requested file attached with this email. Let us know if you have any questions.&#10;&#10;Best regards,&#10;Team" class="w-full text-sm rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono text-slate-700"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: SMTP Settings -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                            <h2 class="font-semibold text-slate-800">Sender & SMTP Setup</h2>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <button type="button" onclick="applyPreset('gmail')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition font-medium">Gmail</button>
+                            <button type="button" onclick="applyPreset('office365')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition font-medium">Outlook/O365</button>
+                            <button type="button" onclick="applyPreset('custom')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition font-medium">Custom</button>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 block mb-1">SMTP Host</label>
+                                <input id="smtpHost" type="text" value="{{ saved_config.get('host', 'smtp.gmail.com') }}" placeholder="smtp.gmail.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-700 block mb-1">Port</label>
+                                    <input id="smtpPort" type="number" value="{{ saved_config.get('port', 587) }}" placeholder="587" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-700 block mb-1">Security</label>
+                                    <select id="smtpSecurity" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white">
+                                        <option value="tls" selected>STARTTLS (587)</option>
+                                        <option value="ssl">SSL (465)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 block mb-1">Sender Email / Username</label>
+                                <input id="smtpUsername" type="email" value="{{ saved_config.get('username', '') }}" placeholder="your-email@gmail.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 block mb-1">Password or App Password</label>
+                                <div class="relative">
+                                    <input id="smtpPassword" type="password" placeholder="16-character App Password" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 pr-10">
+                                    <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i id="passwordToggleIcon" class="fa-regular fa-eye text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 block mb-1">Sender Display Name (Optional)</label>
+                                <input id="smtpSenderName" type="text" value="{{ saved_config.get('sender_name', '') }}" placeholder="e.g. Sales Operations" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 block mb-1">Reply-To Email (Optional)</label>
+                                <input id="smtpReplyTo" type="email" value="{{ saved_config.get('reply_to', '') }}" placeholder="reply-here@company.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <!-- Test & Action Buttons -->
+                        <div class="pt-2 flex items-center justify-between">
+                            <button id="testSmtpBtn" type="button" onclick="testSmtpConnection()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition inline-flex items-center space-x-2">
+                                <i class="fa-solid fa-plug"></i>
+                                <span>Test Connection</span>
+                            </button>
+                            <button type="button" onclick="saveSmtpSettings()" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save as default
+                            </button>
+                        </div>
+                        <div id="smtpTestResult" class="text-xs hidden p-3 rounded-xl"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Send Control Center & Live Progress Monitor -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- One-Click Send Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Dispatch Center</span>
+                            <h3 class="text-xl font-bold mt-0.5">One-Click Launch</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <i class="fa-solid fa-bolt text-lg"></i>
+                        </div>
+                    </div>
+
+                    <!-- Safety pacing delay & Dry Run -->
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 mb-5 border border-white/10 space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-300 flex items-center">
+                                <i class="fa-regular fa-clock mr-1.5"></i> Interval between sends
+                            </span>
+                            <select id="delayInterval" class="bg-slate-800 text-white rounded-lg px-2.5 py-1 text-xs border border-white/20 focus:outline-none">
+                                <option value="0.2">0.2 seconds (Fast)</option>
+                                <option value="1.0" selected>1.0 second (Recommended)</option>
+                                <option value="2.0">2.0 seconds (Safe)</option>
+                                <option value="5.0">5.0 seconds (Strict limits)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between text-xs pt-1 border-t border-white/10">
+                            <label for="dryRunCheckbox" class="text-slate-300 flex items-center cursor-pointer">
+                                <input id="dryRunCheckbox" type="checkbox" class="rounded mr-2 text-indigo-500 focus:ring-0">
+                                <span>Dry-Run / Test Mode (Simulate without emailing)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats before Send -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="bg-white/5 rounded-xl p-3 border border-white/10 text-center">
+                            <span class="text-xs text-slate-400 block">Recipients</span>
+                            <span id="cardRecipientCount" class="text-2xl font-bold text-white">0</span>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-3 border border-white/10 text-center">
+                            <span class="text-xs text-slate-400 block">Attachments</span>
+                            <span id="cardAttachmentCount" class="text-2xl font-bold text-indigo-300">0</span>
+                        </div>
+                    </div>
+
+                    <!-- The Master Action Button -->
+                    <button id="sendBulkBtn" onclick="confirmAndSendBulk()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/40 transition transform active:scale-98 flex items-center justify-center space-x-2 text-base">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span id="sendBulkBtnText">Send Bulk Emails Now</span>
+                    </button>
+
+                    <!-- Emergency Stop Button -->
+                    <button id="stopSendBtn" onclick="stopSending()" class="hidden mt-3 w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-2 shadow">
+                        <i class="fa-solid fa-hand"></i>
+                        <span>Cancel / Stop Sending</span>
+                    </button>
+                </div>
+
+                <!-- Live Progress & Activity Feed -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span id="statusIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                            <h3 class="font-semibold text-slate-800 text-sm">Delivery Status</h3>
+                        </div>
+                        <button id="exportReportBtn" onclick="exportReport()" disabled class="text-xs font-medium text-slate-400 disabled:opacity-50 hover:text-indigo-600 flex items-center space-x-1 cursor-pointer">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                            <span>Download Report</span>
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span id="progressStatusLabel" class="text-slate-600">Ready</span>
+                            <span id="progressPercentLabel" class="text-indigo-600">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200">
+                            <div id="progressBarFill" class="bg-gradient-to-r from-indigo-500 to-violet-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Badges -->
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2">
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Total</span>
+                            <span id="statTotal" class="font-bold text-slate-700 text-sm">0</span>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-2 text-emerald-700">
+                            <span class="text-emerald-500 block text-[10px] uppercase font-bold">Sent</span>
+                            <span id="statSent" class="font-bold text-sm">0</span>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-rose-700">
+                            <span class="text-rose-500 block text-[10px] uppercase font-bold">Failed</span>
+                            <span id="statFailed" class="font-bold text-sm">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Activity Feed -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-600">Live Log</span>
+                            <span id="currentProcessingEmail" class="text-[11px] text-slate-400 truncate max-w-[200px]"></span>
+                        </div>
+                        <div id="liveActivityLog" class="bg-slate-900 text-slate-200 rounded-xl p-3 h-64 overflow-y-auto font-mono text-[11px] space-y-1 custom-scrollbar">
+                            <div class="text-slate-500 italic">[System ready. Load recipients and click Send to begin.]</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
+                <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Confirm Bulk Email Blast</h3>
+            <p class="text-sm text-slate-600 mb-4">
+                You are about to launch an email blast with the following configuration:
+            </p>
+            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs space-y-2 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Total Recipients:</span>
+                    <span id="modalRecipientCount" class="font-bold text-slate-800">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Attachments:</span>
+                    <span id="modalAttachmentSummary" class="font-bold text-indigo-600">None</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">From Account:</span>
+                    <span id="modalSenderEmail" class="font-bold text-slate-800 truncate max-w-[200px]">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Mode:</span>
+                    <span id="modalMode" class="font-bold text-emerald-600">Live Send</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="closeConfirmModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
+                    Back to Edit
+                </button>
+                <button onclick="executeBulkSend()" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-md transition">
+                    Yes, Send Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
