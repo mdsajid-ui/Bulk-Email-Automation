@@ -97,6 +97,15 @@ def resolve_smtp_config(smtp_data: dict) -> SMTPConfig:
 def index():
     return send_file(os.path.join(BASE_DIR, "index.html"))
 
+@app.route("/sample-report")
+@app.route("/report-format")
+@app.route("/sample_candidate_report.html")
+def sample_report():
+    sample_path = os.path.join(BASE_DIR, "sample_candidate_report.html")
+    if os.path.exists(sample_path):
+        return send_file(sample_path)
+    return "Sample report not found", 404
+
 
 @app.route("/sample_recipients.csv")
 @app.route("/download-sample/csv")
