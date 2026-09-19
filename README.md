@@ -1,53 +1,87 @@
-# DV Analytics &bull; LMS Assignment Report & Bulk Email Automator 🚀
+# Candidate Assignment Reports & Bulk Email Automator 🚀
 
-[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://mdsajid-ui.github.io/Bulk-Email-Automation/)
+[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://mdsajid-ui.github.io/Candidate-Assignment-Reports/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://python.org)
 [![Fast & Modern](https://img.shields.io/badge/UI-TailwindCSS-indigo?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
 
-A web application designed for education teams to automate **Weekly LMS Assignment Evaluation Reports** and **1-Click Bulk Email Dispatching**.
+A web application designed for training and education teams to automate **Weekly LMS Assignment Evaluation Reports**, **Industrial Tool Milestone Tracking (Excel, SQL, Python, Power BI, Tableau, Machine Learning)**, and **1-Click Bulk Email Dispatching**.
 
-🔗 **Live Web Dashboard:** [https://mdsajid-ui.github.io/Bulk-Email-Automation/](https://mdsajid-ui.github.io/Bulk-Email-Automation/)
+🔗 **Live GitHub Pages Dashboard:** [https://mdsajid-ui.github.io/Candidate-Assignment-Reports/](https://mdsajid-ui.github.io/Candidate-Assignment-Reports/)  
+📦 **GitHub Repository:** [https://github.com/mdsajid-ui/Candidate-Assignment-Reports](https://github.com/mdsajid-ui/Candidate-Assignment-Reports)
+
+---
+
+## 📧 Outgoing Email & SMTP Setup (Why it's required & How to setup)
+
+When you click **"Send Report"** or **"Send All Pending"**, the app delivers the personalized evaluation email to the candidate's real inbox using SMTP. If sender credentials are not yet configured, the app prompts you with options:
+
+### Option A: Send Real Emails via Gmail (Quick 3-Step Setup)
+Because Google requires Two-Factor Authentication (2FA), your standard account login password will not work. You need a **Google 16-Character App Password**:
+1. Open your Google Account &rarr; **Security** &rarr; Ensure **2-Step Verification** is turned ON.
+2. Visit [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+3. Under App Name, enter `Assignment Reports` and click **Create**.
+4. Copy the 16-letter password into the **Password** field in the **⚙️ SMTP Setup** modal (or in `.env`).
+5. Click **Save Settings** &mdash; your device will remember the credentials.
+
+### Option B: Test in Simulation Mode (Instant &bull; No Password Needed)
+Want to verify reports without entering an email password?
+- When clicking **Send Report**, choose **"Send in Simulation Mode"** in the prompt dialog.
+- The system renders the complete HTML report card, verifies all calculations, marks the student as `Simulated / Sent`, and updates your dashboard counters without making an actual SMTP connection.
+
+### Option C: Configure via Environment Variables / `.env`
+You can copy `.env.example` to `.env` in the root folder:
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=skabdulsajid8144@gmail.com
+SMTP_PASS=your-16-char-app-password
+SMTP_SENDER_NAME=SK Sajid | DV Analytics Mentorship Team
+```
+When configured, the backend automatically uses these settings for all dispatches.
 
 ---
 
 ## 🌟 Key Capabilities
 
-### 1. Weekly LMS Assignment Reporting
-- **Multi-Format Ingestion**: Parses LMS exports in any format: `.xls` (HTML table exports), `.xlsx`, or `.csv` (e.g. `Assignment (10).xls` with **13,590+ rows**).
-- **Candidate Aggregation**: Groups submissions by candidate (`Student ID`, `Student Name`, `Batch`), tracking:
-  - Total assignments completed (e.g. `14 submissions`)
-  - Modules covered (e.g. `Python Programming`, `SQL Server`, `Excel Base & Advanced`)
-  - Latest submission details & timestamps
-- **Auto-Linked Student Directory**: Pre-loaded with **6,390 students** from the master database, automatically resolving student emails by Student ID and Name.
-- **Inline Email Editing**: Missing an email? Edit or add any student's email address with 1 click right in the table.
-- **1-Click Report Dispatch**:
-  - **Individual Candidate Send**: Click **"Send Report"** on any candidate to email them immediately.
-  - **Send All Pending**: 1-click batch dispatch for all active students in the selected batch.
-- **Interactive Report Preview**: Inspect the exact branded, responsive HTML report email before sending.
-
-### 2. General Bulk Email Automator
-- Broadcast any file attachments (PDFs, docs, images, spreadsheets, archives) to 100+ recipients simultaneously in 1 click.
-- Upload recipient lists via CSV or Excel (`.xlsx`, `.xls`) or paste emails directly.
-- Downloadable **Sample CSV** and **Sample Excel** templates generated in 1 click.
-- SMTP presets for **Gmail**, **Microsoft 365 / Outlook**, and **Custom SMTP**.
-- Safety pacing interval (0.5s to 5s) to safeguard against provider spam rate limits.
-- Downloadable CSV delivery report receipts.
+### 1. Weekly LMS Assignment Reporting & Industrial Milestones
+- **6 Core Data Analytics & Engineering Tools**:
+  - **Excel**: 4 Assignments (SVG Donut Tracking)
+  - **SQL**: 5 Assignments
+  - **Python**: 5 Assignments
+  - **Power BI**: 4 Assignments
+  - **Tableau**: 4 Assignments
+  - **Machine Learning**: 1 Capstone Project
+- **Sajid's Pre-Seeded Industrial Record**:
+  - Pre-configured with **Excel (4/4)**, **SQL (5/5)**, **Python (5/5)**, and **ML Capstone (100% Completed)** &rarr; **`65.2%` Industrial Placement Readiness**.
+- **Interactive Mentorship & Upload Hub**:
+  - Live threaded student-mentor messaging.
+  - Drag-and-drop submission uploads (`.ipynb`, `.sql`, `.pbix`, `.xlsx`, `.pdf`, `.zip`).
+  - Real-time tool counters and Capstone project toggles.
+- **Pure Vector Inline SVG Donuts**:
+  - Render flawlessly across Gmail, Outlook, Apple Mail, and mobile browsers with zero broken images.
+- **Auto-Linked Student Directory**: Pre-loaded with **6,390 students** from the master database.
 
 ---
 
 ## 🚀 How to Run
 
 ### Method 1: Use Live on GitHub Pages (No installation needed)
-Open the deployed dashboard directly in your browser:
-👉 **[https://mdsajid-ui.github.io/Bulk-Email-Automation/](https://mdsajid-ui.github.io/Bulk-Email-Automation/)**
-
-- Drop your weekly LMS file (`.xls`, `.xlsx`, `.csv`) directly into the browser.
-- The web app parses all records, matches student emails, and generates preview reports completely client-side!
+👉 **[https://mdsajid-ui.github.io/Candidate-Assignment-Reports/](https://mdsajid-ui.github.io/Candidate-Assignment-Reports/)**
 
 ### Method 2: One-Click Launch on Windows (Local Python Engine)
 1. Clone or download this repository.
 2. Double-click **`run.bat`** in the project folder.
 3. Your default web browser will automatically open [http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+### Method 3: Command Line
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run the application
+py app.py
+```
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
 
 ### Method 3: Command Line
 ```bash

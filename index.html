@@ -466,61 +466,146 @@
 
     <!-- ================= MODAL 2: SMTP SETUP MODAL ================= -->
     <div id="smtpSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 space-y-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-server text-indigo-600"></i>
-                    <h3 class="font-bold text-slate-800 text-base">Email Sender & SMTP Setup</h3>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Outgoing Email & SMTP Setup</h3>
+                        <p class="text-[11px] text-slate-400">Configure your email account to send assignment reports to candidates</p>
+                    </div>
                 </div>
                 <button onclick="closeSmtpSettingsModal()" class="text-slate-400 hover:text-slate-600">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Presets -->
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-500 font-semibold">Presets:</span>
-                <div class="flex space-x-1">
-                    <button onclick="applyPreset('gmail')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded">Gmail</button>
-                    <button onclick="applyPreset('office365')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded">Office 365</button>
-                    <button onclick="applyPreset('custom')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded">Custom</button>
+            <!-- Provider Presets -->
+            <div class="flex items-center justify-between text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
+                <span class="text-slate-600 font-bold text-[11px]">Email Provider:</span>
+                <div class="flex space-x-1.5">
+                    <button type="button" onclick="applyPreset('gmail')" id="presetBtn-gmail" class="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 font-bold rounded-lg shadow-2xs text-[11px]">Gmail (Recommended)</button>
+                    <button type="button" onclick="applyPreset('office365')" id="presetBtn-office365" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[11px]">Office 365</button>
+                    <button type="button" onclick="applyPreset('custom')" id="presetBtn-custom" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[11px]">Custom</button>
+                </div>
+            </div>
+
+            <!-- Gmail App Password Guide Callout -->
+            <div id="gmailGuideBox" class="p-3 bg-gradient-to-br from-indigo-50/90 to-blue-50/70 border border-indigo-100 rounded-xl text-xs space-y-2 text-indigo-950">
+                <div class="flex items-center justify-between">
+                    <div class="font-bold flex items-center text-indigo-900 text-xs">
+                        <i class="fa-brands fa-google text-rose-500 mr-1.5"></i>
+                        Using Gmail? Follow these 3 easy steps:
+                    </div>
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-[11px] text-indigo-600 font-bold hover:underline inline-flex items-center">
+                        Open Google App Passwords <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i>
+                    </a>
+                </div>
+                <ol class="list-decimal list-inside text-[11px] text-slate-600 space-y-0.5">
+                    <li>Enable <b>2-Step Verification</b> in your Google Account Security.</li>
+                    <li>Open <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-indigo-600 font-bold underline">myaccount.google.com/apppasswords</a>.</li>
+                    <li>Generate a 16-letter App Password (e.g. name it <i>"Assignment Reports"</i>) and paste below.</li>
+                </ol>
+                <div class="pt-1 flex items-center space-x-2">
+                    <button type="button" onclick="prefillSajidEmail()" class="text-[11px] font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-200 hover:bg-indigo-50 shadow-2xs transition flex items-center space-x-1">
+                        <i class="fa-solid fa-bolt text-amber-500"></i>
+                        <span>Fill Sajid's Email: skabdulsajid8144@gmail.com</span>
+                    </button>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-xs">
                 <div class="col-span-2">
-                    <label class="font-semibold text-slate-700 block mb-1">Sender Email</label>
-                    <input id="smtpUsername" type="email" placeholder="e.g. trainer@dvdataanalytics.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20">
+                    <label class="font-bold text-slate-700 block mb-1">Sender Email Address</label>
+                    <input id="smtpUsername" type="email" placeholder="e.g. skabdulsajid8144@gmail.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
                 </div>
                 <div class="col-span-2">
-                    <label class="font-semibold text-slate-700 block mb-1">Password or App Password</label>
-                    <input id="smtpPassword" type="password" placeholder="16-digit App Password" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="font-bold text-slate-700 block">16-Character App Password</label>
+                        <span class="text-[10px] text-slate-400">Never share your password</span>
+                    </div>
+                    <input id="smtpPassword" type="password" placeholder="e.g. abcd efgh ijkl mnop" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div class="col-span-2 flex items-center justify-between py-0.5">
+                    <label class="flex items-center space-x-2 cursor-pointer text-[11px] text-slate-600">
+                        <input id="chkRememberPassword" type="checkbox" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5">
+                        <span class="font-medium">Remember credentials on this device (saved in browser local storage)</span>
+                    </label>
                 </div>
                 <div>
-                    <label class="font-semibold text-slate-700 block mb-1">SMTP Host</label>
-                    <input id="smtpHost" type="text" value="smtp.office365.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    <label class="font-bold text-slate-700 block mb-1">SMTP Host</label>
+                    <input id="smtpHost" type="text" value="smtp.gmail.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs">
                 </div>
                 <div>
-                    <label class="font-semibold text-slate-700 block mb-1">Port</label>
-                    <input id="smtpPort" type="number" value="587" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    <label class="font-bold text-slate-700 block mb-1">Port</label>
+                    <input id="smtpPort" type="number" value="587" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs">
                 </div>
                 <div class="col-span-2">
-                    <label class="font-semibold text-slate-700 block mb-1">Sender Display Name</label>
-                    <input id="smtpSenderName" type="text" value="DV Analytics Assignment Team" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    <label class="font-bold text-slate-700 block mb-1">Sender Display Name</label>
+                    <input id="smtpSenderName" type="text" value="SK Sajid | DV Analytics Assignment Team" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs">
                 </div>
             </div>
 
             <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                <button onclick="testSmtpConnection()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
-                    Test Connection
+                <button onclick="testSmtpConnection()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-plug"></i>
+                    <span>Test Connection</span>
                 </button>
-                <button onclick="saveSmtpConfigAndClose()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-xs transition">
-                    Save Settings
-                </button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="closeSmtpSettingsModal()" class="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs font-semibold">
+                        Cancel
+                    </button>
+                    <button onclick="saveSmtpConfigAndClose()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save Settings</span>
+                    </button>
+                </div>
             </div>
             <div id="smtpTestResultBox" class="text-xs hidden p-2.5 rounded-xl"></div>
         </div>
     </div>
+
+    <!-- ================= MODAL 3: SMTP PROMPT / SIMULATION MODAL ================= -->
+    <div id="smtpPromptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 space-y-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mx-auto shadow-inner">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+            </div>
+            <div class="text-center space-y-1">
+                <h3 class="font-bold text-slate-800 text-base">Outgoing Email Setup Required</h3>
+                <p class="text-xs text-slate-500">
+                    To send the evaluation report to <b id="promptCandName" class="text-slate-800">Candidate</b> (<span id="promptCandEmail" class="text-indigo-600 font-medium"></span>), an email sender account is needed.
+                </p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
+                <div class="flex items-center text-slate-700 font-semibold">
+                    <i class="fa-solid fa-lightbulb text-amber-500 mr-2"></i> Choose how you would like to proceed:
+                </div>
+                <div class="text-[11px] text-slate-600 space-y-1">
+                    <p>• <b>Real Send</b>: Enter your Gmail & 16-letter App Password to send real emails to students.</p>
+                    <p>• <b>Simulation Mode</b>: Instantly test and record report generation without needing any password right now.</p>
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-2">
+                <button onclick="openSmtpSettingsModal(); closeSmtpPromptModal();" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-600/20 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Configure Email & App Password</span>
+                </button>
+                <button onclick="executeSimulatedSendFromPrompt()" class="w-full py-2.5 px-4 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-flask"></i>
+                    <span>Send in Simulation Mode (Instant &bull; No Password)</span>
+                </button>
+                <button onclick="closeSmtpPromptModal()" class="w-full py-2 text-slate-400 hover:text-slate-600 text-xs font-semibold transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Application Script -->
     <script>
@@ -1000,7 +1085,31 @@
         }
 
         // 1-Click Send Report to Candidate
-        async function sendOneReport(studentId) {
+        let promptTargetCandidate = null;
+
+        function showSmtpRequiredModal(cand) {
+            promptTargetCandidate = cand;
+            const nameEl = document.getElementById("promptCandName");
+            const emailEl = document.getElementById("promptCandEmail");
+            if (nameEl) nameEl.textContent = cand.student_name;
+            if (emailEl) emailEl.textContent = cand.email || "No email assigned";
+            const modal = document.getElementById("smtpPromptModal");
+            if (modal) modal.classList.remove("hidden");
+        }
+
+        function closeSmtpPromptModal() {
+            const modal = document.getElementById("smtpPromptModal");
+            if (modal) modal.classList.add("hidden");
+        }
+
+        function executeSimulatedSendFromPrompt() {
+            closeSmtpPromptModal();
+            if (promptTargetCandidate) {
+                sendOneReport(promptTargetCandidate.student_id, { simulate: true });
+            }
+        }
+
+        async function sendOneReport(studentId, options = {}) {
             const cand = allCandidates.find(c => c.student_id === studentId);
             if (!cand) return;
 
@@ -1009,13 +1118,21 @@
                 if (!cand.email) return;
             }
 
+            const isSimulate = Boolean(options.simulate);
+            const smtp = getSmtpPayload();
+
+            // Intercept before sending if SMTP credentials missing and not in simulation
+            if (!isSimulate && (!smtp.username || !smtp.password) && !hasBackendPassword) {
+                showSmtpRequiredModal(cand);
+                return;
+            }
+
             const statusCell = document.getElementById(`status-${studentId}`);
             if (statusCell) {
-                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Sending...</span>`;
+                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700"><i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isSimulate ? 'Simulating...' : 'Sending...'}</span>`;
             }
 
             try {
-                const smtp = getSmtpPayload();
                 const res = await fetch(`${API_BASE}/api/assignment/send-one`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1023,39 +1140,82 @@
                         student_id: studentId,
                         email: cand.email,
                         smtp: smtp,
-                        trainer_notes: ""
+                        trainer_notes: "",
+                        dry_run: isSimulate,
+                        simulate: isSimulate
                     })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    cand.status = "sent";
+                    cand.status = isSimulate ? "simulated" : "sent";
                     if (statusCell) {
-                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i> Sent</span>`;
+                        if (isSimulate) {
+                            statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200" title="Simulated delivery verified"><i class="fa-solid fa-flask mr-1"></i> Simulated</span>`;
+                        } else {
+                            statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i> Sent</span>`;
+                        }
                     }
                     updateMetricCounters();
-                    alert(`Report sent successfully to ${cand.student_name} (${cand.email})!`);
+                    if (isSimulate) {
+                        showNotificationToast(`[Simulation Mode] Report card verified for ${cand.student_name}!`, "success");
+                    } else {
+                        showNotificationToast(`Report delivered successfully to ${cand.student_name} (${cand.email})!`, "success");
+                    }
+                } else if (data.requires_smtp || (data.error && data.error.includes("SMTP Setup required"))) {
+                    // Reset status cell back to pending
+                    if (statusCell) {
+                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
+                    }
+                    showSmtpRequiredModal(cand);
                 } else {
                     cand.status = "failed";
                     if (statusCell) {
                         statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Failed</span>`;
                     }
-                    alert("Send failed: " + data.error);
+                    showNotificationToast("Send failed: " + data.error, "error");
                 }
             } catch (err) {
-                alert("Error sending report: " + err.message);
+                // If offline / GitHub Pages
+                if (!localServerOnline) {
+                    cand.status = "simulated";
+                    if (statusCell) {
+                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200"><i class="fa-solid fa-flask mr-1"></i> Simulated</span>`;
+                    }
+                    updateMetricCounters();
+                    showNotificationToast(`[Web Standalone] Report generated for ${cand.student_name}. View via Preview!`, "info");
+                } else {
+                    alert("Error sending report: " + err.message);
+                }
             }
         }
 
         // Batch Send All Pending Reports
         async function sendBatchReports() {
-            const pendingList = filteredCandidates.filter(c => c.status !== 'sent');
+            const pendingList = filteredCandidates.filter(c => c.status !== 'sent' && c.status !== 'simulated');
             if (pendingList.length === 0) {
                 alert("There are no pending candidates in the current filter.");
                 return;
             }
 
+            const smtp = getSmtpPayload();
+            let isSimulate = false;
+
+            if ((!smtp.username || !smtp.password) && !hasBackendPassword) {
+                const choice = confirm(
+                    `SMTP credentials are not configured yet.\n\n` +
+                    `• Click OK to run batch dispatch in Simulation Mode (Dry Run) for ${pendingList.length} candidates.\n` +
+                    `• Click Cancel to open SMTP Setup and enter your Gmail credentials.`
+                );
+                if (choice) {
+                    isSimulate = true;
+                } else {
+                    openSmtpSettingsModal();
+                    return;
+                }
+            }
+
             const missingEmailCount = pendingList.filter(c => !c.email).length;
-            let confirmMsg = `Ready to send assignment reports to ${pendingList.length} candidate(s)?`;
+            let confirmMsg = `Ready to ${isSimulate ? 'simulate dispatch of' : 'send'} assignment reports to ${pendingList.length} candidate(s)?`;
             if (missingEmailCount > 0) {
                 confirmMsg += `\n\nNote: ${missingEmailCount} candidates do not have an email address yet and will be skipped.`;
             }
@@ -1064,7 +1224,7 @@
 
             const btn = document.getElementById("btnSendAllPending");
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Dispatching Batch...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isSimulate ? 'Simulating Batch...' : 'Dispatching Batch...'}`;
 
             try {
                 const res = await fetch(`${API_BASE}/api/assignment/send-batch`, {
@@ -1072,8 +1232,10 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         student_ids: pendingList.map(c => c.student_id),
-                        smtp: getSmtpPayload(),
-                        delay_seconds: 1.0
+                        smtp: smtp,
+                        delay_seconds: 0.5,
+                        dry_run: isSimulate,
+                        simulate: isSimulate
                     })
                 });
                 const data = await res.json();
@@ -1609,30 +1771,58 @@
             alert("Settings saved!");
         }
 
+        let hasBackendPassword = false;
+
+        function prefillSajidEmail() {
+            const userEl = document.getElementById("smtpUsername");
+            const nameEl = document.getElementById("smtpSenderName");
+            if (userEl) userEl.value = "skabdulsajid8144@gmail.com";
+            if (nameEl) nameEl.value = "SK Sajid | DV Analytics Mentorship Team";
+            applyPreset('gmail');
+            const passEl = document.getElementById("smtpPassword");
+            if (passEl) passEl.focus();
+        }
+
         function applyPreset(provider) {
             const hostInput = document.getElementById("smtpHost");
             const portInput = document.getElementById("smtpPort");
+            const gmailBox = document.getElementById("gmailGuideBox");
+
+            ['gmail', 'office365', 'custom'].forEach(p => {
+                const btn = document.getElementById(`presetBtn-${p}`);
+                if (btn) {
+                    if (p === provider) {
+                        btn.className = "px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 font-bold rounded-lg shadow-2xs text-[11px]";
+                    } else {
+                        btn.className = "px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[11px]";
+                    }
+                }
+            });
+
             if (provider === "gmail") {
                 hostInput.value = "smtp.gmail.com";
                 portInput.value = "587";
+                if (gmailBox) gmailBox.classList.remove("hidden");
             } else if (provider === "office365") {
                 hostInput.value = "smtp.office365.com";
                 portInput.value = "587";
+                if (gmailBox) gmailBox.classList.add("hidden");
             } else if (provider === "custom") {
                 hostInput.value = "";
                 portInput.value = "587";
+                if (gmailBox) gmailBox.classList.add("hidden");
                 hostInput.focus();
             }
         }
 
         function getSmtpPayload() {
             return {
-                host: document.getElementById("smtpHost").value.trim(),
-                port: parseInt(document.getElementById("smtpPort").value) || 587,
-                username: document.getElementById("smtpUsername").value.trim(),
-                password: document.getElementById("smtpPassword").value.trim(),
+                host: (document.getElementById("smtpHost")?.value || "").trim(),
+                port: parseInt(document.getElementById("smtpPort")?.value) || 587,
+                username: (document.getElementById("smtpUsername")?.value || "").trim(),
+                password: (document.getElementById("smtpPassword")?.value || "").trim(),
                 use_ssl: false,
-                sender_name: document.getElementById("smtpSenderName").value.trim()
+                sender_name: (document.getElementById("smtpSenderName")?.value || "").trim()
             };
         }
 
@@ -1663,16 +1853,31 @@
         }
 
         function saveConfig() {
+            const chkRemember = document.getElementById("chkRememberPassword");
+            const rememberPass = chkRemember ? chkRemember.checked : true;
             const cfg = {
                 smtpHost: document.getElementById("smtpHost").value,
                 smtpPort: document.getElementById("smtpPort").value,
                 smtpUsername: document.getElementById("smtpUsername").value,
-                smtpSenderName: document.getElementById("smtpSenderName").value
+                smtpSenderName: document.getElementById("smtpSenderName").value,
+                rememberPass: rememberPass
             };
+            if (rememberPass) {
+                cfg.smtpPassword = document.getElementById("smtpPassword").value;
+            }
             localStorage.setItem("bulk_email_cfg", JSON.stringify(cfg));
+
+            // Sync to backend engine if online
+            if (localServerOnline) {
+                fetch(`${API_BASE}/api/save-smtp`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(getSmtpPayload())
+                }).catch(() => {});
+            }
         }
 
-        function loadSavedConfig() {
+        async function loadSavedConfig() {
             try {
                 const saved = localStorage.getItem("bulk_email_cfg");
                 if (saved) {
@@ -1681,8 +1886,59 @@
                     if (cfg.smtpPort) document.getElementById("smtpPort").value = cfg.smtpPort;
                     if (cfg.smtpUsername) document.getElementById("smtpUsername").value = cfg.smtpUsername;
                     if (cfg.smtpSenderName) document.getElementById("smtpSenderName").value = cfg.smtpSenderName;
+                    if (cfg.smtpPassword && document.getElementById("smtpPassword")) {
+                        document.getElementById("smtpPassword").value = cfg.smtpPassword;
+                    }
+                    if (cfg.rememberPass !== undefined && document.getElementById("chkRememberPassword")) {
+                        document.getElementById("chkRememberPassword").checked = cfg.rememberPass;
+                    }
+                } else {
+                    // Pre-fill defaults for quick start
+                    if (document.getElementById("smtpHost")) document.getElementById("smtpHost").value = "smtp.gmail.com";
+                    if (document.getElementById("smtpPort")) document.getElementById("smtpPort").value = "587";
+                    if (document.getElementById("smtpSenderName")) document.getElementById("smtpSenderName").value = "SK Sajid | DV Analytics Mentorship Team";
+                }
+
+                // Check backend server config if connected
+                if (localServerOnline) {
+                    try {
+                        const res = await fetch(`${API_BASE}/api/get-smtp`);
+                        const data = await res.json();
+                        if (data.success && data.config) {
+                            hasBackendPassword = data.config.has_password;
+                            const userEl = document.getElementById("smtpUsername");
+                            if (userEl && !userEl.value && data.config.username) {
+                                userEl.value = data.config.username;
+                            }
+                        }
+                    } catch (e) {}
                 }
             } catch (e) {}
+        }
+
+        function showNotificationToast(msg, type = "info") {
+            let container = document.getElementById("appToastContainer");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "appToastContainer";
+                container.className = "fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none";
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement("div");
+            toast.className = `px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center space-x-2 transition-all transform duration-300 pointer-events-auto max-w-sm ${
+                type === 'success' ? 'bg-slate-900 text-emerald-400 border border-emerald-500/30' :
+                type === 'error' ? 'bg-rose-900 text-rose-100 border border-rose-500/30' :
+                'bg-slate-900 text-slate-100 border border-slate-700'
+            }`;
+            const icon = type === 'success' ? 'fa-circle-check text-emerald-400' :
+                         type === 'error' ? 'fa-circle-exclamation text-rose-400' :
+                         'fa-circle-info text-indigo-400';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${escapeHtml(msg)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "translate-y-2");
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
         // Helpers

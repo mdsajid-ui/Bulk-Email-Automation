@@ -123,3 +123,39 @@ def test_assignment_api_endpoints():
     s_data = res_send.get_json()
     assert s_data["success"] is True
 
+    # 6. Verify missing SMTP credentials returns requires_smtp flag without crashing
+    res_no_smtp = client.post("/api/assignment/send-one", json={
+        "student_id": sajid_cand["student_id"],
+        "email": "skabdulsajid8144@gmail.com",
+        "dry_run": False,
+        "smtp": {}
+    })
+    assert res_no_smtp.status_code == 400
+    no_smtp_data = res_no_smtp.get_json()
+    assert no_smtp_data["success"] is False
+    assert no_smtp_data.get("requires_smtp") is True
+
+    # 7. Verify Simulation mode succeeds without requiring SMTP credentials
+    res_sim = client.post("/api/assignment/send-one", json={
+        "student_id": sajid_cand["student_id"],
+        "email": "skabdulsajid8144@gmail.com",
+        "simulate": True
+    })
+    assert res_sim.status_code == 200
+    sim_data = res_sim.get_json()
+    assert sim_data["success"] is True
+    assert sim_data.get("simulated") is True
+
+    # 8. Test /api/get-smtp and /api/save-smtp
+    res_save = client.post("/api/save-smtp", json={
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "username": "skabdulsajid8144@gmail.com",
+        "sender_name": "SK Sajid | DV Analytics"
+    })
+    assert res_save.status_code == 200
+    res_get = client.get("/api/get-smtp")
+    assert res_get.status_code == 200
+    get_data = res_get.get_json()
+    assert get_data["config"]["username"] == "skabdulsajid8144@gmail.com"
+

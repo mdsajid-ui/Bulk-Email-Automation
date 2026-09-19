@@ -36,22 +36,62 @@ active_task: BulkEmailTask = None
 task_lock = threading.Lock()
 current_attachments: List[Dict[str, Any]] = []
 
+def load_env_file():
+    env_path = os.path.join(BASE_DIR, ".env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+load_env_file()
+
 def get_saved_smtp_config():
+    cfg = {}
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                cfg = json.load(f) or {}
         except Exception:
             pass
-    return {}
+    return cfg
 
 def save_smtp_config(data: dict):
-    # Save config without sensitive app password by default, or with password if requested
     try:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"Failed to save SMTP config: {e}")
+
+def resolve_smtp_config(smtp_data: dict) -> SMTPConfig:
+    saved = get_saved_smtp_config()
+    host = (smtp_data.get("host") or "").strip() or saved.get("host") or os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    raw_port = smtp_data.get("port") or saved.get("port") or os.environ.get("SMTP_PORT", 587)
+    try:
+        port = int(raw_port)
+    except Exception:
+        port = 587
+    username = (smtp_data.get("username") or "").strip() or saved.get("username") or os.environ.get("SMTP_USER", "")
+    password = (smtp_data.get("password") or "").strip() or saved.get("password") or os.environ.get("SMTP_PASS", "")
+    sender_name = (smtp_data.get("sender_name") or "").strip() or saved.get("sender_name") or os.environ.get("SMTP_SENDER_NAME", "DV Analytics Assignment Team")
+    reply_to = (smtp_data.get("reply_to") or "").strip() or saved.get("reply_to") or os.environ.get("SMTP_REPLY_TO", "")
+    use_ssl = bool(smtp_data.get("use_ssl", False) or saved.get("use_ssl", False))
+    return SMTPConfig(
+        host=host,
+        port=port,
+        username=username,
+        password=password,
+        use_ssl=use_ssl,
+        sender_name=sender_name,
+        reply_to=reply_to
+    )
 
 @app.route("/")
 def index():
@@ -244,39 +284,57 @@ def format_size(size_bytes: int) -> str:
 @app.route("/api/test-smtp", methods=["POST"])
 def test_smtp():
     data = request.json or {}
-    cfg = SMTPConfig(
-        host=data.get("host"),
-        port=data.get("port", 587),
-        username=data.get("username"),
-        password=data.get("password"),
-        use_ssl=data.get("use_ssl", False),
-        sender_name=data.get("sender_name", ""),
-        reply_to=data.get("reply_to", "")
-    )
+    cfg = resolve_smtp_config(data)
     success, msg = cfg.test_connection()
     if success and data.get("save_settings"):
-        # Save host, port, username, sender_name, etc.
-        save_smtp_config({
+        saved_dict = {
             "host": cfg.host,
             "port": cfg.port,
             "username": cfg.username,
             "sender_name": cfg.sender_name,
             "reply_to": cfg.reply_to,
             "use_ssl": cfg.use_ssl
-        })
+        }
+        if cfg.password:
+            saved_dict["password"] = cfg.password
+        save_smtp_config(saved_dict)
     return jsonify({"success": success, "message": msg})
+
+@app.route("/api/get-smtp", methods=["GET"])
+def get_smtp():
+    saved = get_saved_smtp_config()
+    has_pass = bool(saved.get("password") or os.environ.get("SMTP_PASS"))
+    return jsonify({
+        "success": True,
+        "config": {
+            "host": saved.get("host") or os.environ.get("SMTP_HOST", "smtp.gmail.com"),
+            "port": saved.get("port") or int(os.environ.get("SMTP_PORT", 587)),
+            "username": saved.get("username") or os.environ.get("SMTP_USER", ""),
+            "sender_name": saved.get("sender_name") or os.environ.get("SMTP_SENDER_NAME", "DV Analytics Assignment Team"),
+            "reply_to": saved.get("reply_to") or os.environ.get("SMTP_REPLY_TO", ""),
+            "use_ssl": bool(saved.get("use_ssl", False)),
+            "has_password": has_pass
+        }
+    })
 
 @app.route("/api/save-smtp", methods=["POST"])
 def save_smtp():
     data = request.json or {}
-    save_smtp_config({
-        "host": data.get("host", "smtp.gmail.com"),
-        "port": data.get("port", 587),
-        "username": data.get("username", ""),
-        "sender_name": data.get("sender_name", ""),
-        "reply_to": data.get("reply_to", ""),
-        "use_ssl": data.get("use_ssl", False)
-    })
+    existing = get_saved_smtp_config()
+    saved_dict = {
+        "host": data.get("host", existing.get("host", "smtp.gmail.com")),
+        "port": int(data.get("port", existing.get("port", 587))),
+        "username": data.get("username", existing.get("username", "")),
+        "sender_name": data.get("sender_name", existing.get("sender_name", "DV Analytics Assignment Team")),
+        "reply_to": data.get("reply_to", existing.get("reply_to", "")),
+        "use_ssl": bool(data.get("use_ssl", existing.get("use_ssl", False)))
+    }
+    if data.get("password"):
+        saved_dict["password"] = data.get("password")
+    elif existing.get("password"):
+        saved_dict["password"] = existing.get("password")
+
+    save_smtp_config(saved_dict)
     return jsonify({"success": True, "message": "Settings saved successfully."})
 
 @app.route("/api/send-bulk", methods=["POST"])
@@ -301,23 +359,19 @@ def send_bulk():
 
         is_html = data.get("is_html", False)
         delay_seconds = data.get("delay_seconds", 1.0)
-        dry_run = data.get("dry_run", False)
+        dry_run = data.get("dry_run", False) or data.get("simulate", False)
 
         smtp_data = data.get("smtp", {})
-        config = SMTPConfig(
-            host=smtp_data.get("host"),
-            port=smtp_data.get("port", 587),
-            username=smtp_data.get("username"),
-            password=smtp_data.get("password"),
-            use_ssl=smtp_data.get("use_ssl", False),
-            sender_name=smtp_data.get("sender_name", ""),
-            reply_to=smtp_data.get("reply_to", "")
-        )
+        config = resolve_smtp_config(smtp_data)
 
         if not dry_run:
             valid, err_msg = config.validate()
             if not valid:
-                return jsonify({"success": False, "error": err_msg}), 400
+                return jsonify({
+                    "success": False,
+                    "error": f"SMTP Setup required: {err_msg}",
+                    "requires_smtp": True
+                }), 400
 
         # Attachment file paths
         att_paths = [att["path"] for att in current_attachments if os.path.exists(att["path"])]
@@ -563,29 +617,27 @@ def assignment_send_one():
         cand["email"] = data["email"].strip()
         student_directory.update_email(sid, cand["email"], student_name=cand.get("student_name"), batch=cand.get("batch"))
 
-    dry_run = data.get("dry_run", False)
+    dry_run = data.get("dry_run", False) or data.get("simulate", False)
     trainer_notes = data.get("trainer_notes", "")
     smtp_data = data.get("smtp", {})
-
-    smtp_cfg = SMTPConfig(
-        host=smtp_data.get("host"),
-        port=smtp_data.get("port", 587),
-        username=smtp_data.get("username"),
-        password=smtp_data.get("password"),
-        use_ssl=smtp_data.get("use_ssl", False),
-        sender_name=smtp_data.get("sender_name", "DV Analytics Assignment Team"),
-        reply_to=smtp_data.get("reply_to", "")
-    )
+    smtp_cfg = resolve_smtp_config(smtp_data)
 
     if not dry_run:
         valid, err = smtp_cfg.validate()
         if not valid:
-            return jsonify({"success": False, "error": f"SMTP Setup required: {err}"}), 400
+            return jsonify({
+                "success": False,
+                "error": f"SMTP Setup required: {err}",
+                "requires_smtp": True,
+                "missing": err
+            }), 400
 
     result = assignment_processor.send_candidate_report(cand, smtp_cfg, trainer_notes=trainer_notes, dry_run=dry_run)
     if result["success"]:
-        cand["status"] = "sent"
+        cand["status"] = "simulated" if dry_run else "sent"
         cand["last_sent_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        if dry_run:
+            result["simulated"] = True
     else:
         cand["status"] = "failed"
         cand["last_error"] = result.get("error")
@@ -612,25 +664,21 @@ def assignment_send_batch():
         if not candidates_to_send:
             return jsonify({"success": False, "error": "No candidates to send reports to."}), 400
 
-        dry_run = data.get("dry_run", False)
+        dry_run = data.get("dry_run", False) or data.get("simulate", False)
         trainer_notes = data.get("trainer_notes", "")
         delay_seconds = float(data.get("delay_seconds", 1.0))
         smtp_data = data.get("smtp", {})
-
-        smtp_cfg = SMTPConfig(
-            host=smtp_data.get("host"),
-            port=smtp_data.get("port", 587),
-            username=smtp_data.get("username"),
-            password=smtp_data.get("password"),
-            use_ssl=smtp_data.get("use_ssl", False),
-            sender_name=smtp_data.get("sender_name", "DV Analytics Assignment Team"),
-            reply_to=smtp_data.get("reply_to", "")
-        )
+        smtp_cfg = resolve_smtp_config(smtp_data)
 
         if not dry_run:
             valid, err = smtp_cfg.validate()
             if not valid:
-                return jsonify({"success": False, "error": err}), 400
+                return jsonify({
+                    "success": False,
+                    "error": f"SMTP Setup required: {err}",
+                    "requires_smtp": True,
+                    "missing": err
+                }), 400
 
         # Initialize batch state
         assignment_batch_state = {
@@ -658,13 +706,13 @@ def assignment_send_batch():
                     time_str = time.strftime("%H:%M:%S")
                     if res["success"]:
                         assignment_batch_state["sent"] += 1
-                        cand["status"] = "sent"
+                        cand["status"] = "simulated" if dry_run else "sent"
                         assignment_batch_state["logs"].append({
                             "student": cand.get("student_name"),
                             "email": cand.get("email"),
-                            "status": "sent",
+                            "status": "simulated" if dry_run else "sent",
                             "timestamp": time_str,
-                            "message": "Report delivered successfully"
+                            "message": "[Simulation Mode] Report prepared and verified" if dry_run else "Report delivered successfully"
                         })
                     else:
                         assignment_batch_state["failed"] += 1
