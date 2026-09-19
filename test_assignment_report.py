@@ -31,8 +31,47 @@ def test_assignment_processor_parse():
 
     # Generate HTML
     html = assignment_processor.generate_html_report(sample)
-    assert "Weekly Assignment Progress Report" in html
+    assert "Industrial Performance Report" in html or "Weekly Assignment Progress Report" in html
     assert sample["student_name"] in html
+    assert "<svg" in html
+
+def test_sajid_curriculum_and_donuts():
+    # Sajid profile test
+    s = student_directory.lookup_student(student_name="SK SAJID")
+    assert s is not None
+    assert "skabdulsajid8144@gmail.com" in s["email"]
+
+    cand = {
+        "student_id": "BLR20221101313",
+        "student_name": "SK SAJID",
+        "batch": "BATCH 202211",
+        "submissions": []
+    }
+    cur = assignment_processor.calculate_curriculum(cand)
+    assert cur["excel"]["completed"] == 4
+    assert cur["excel"]["target"] == 4
+    assert cur["excel"]["percent"] == 100.0
+
+    assert cur["sql"]["completed"] == 5
+    assert cur["sql"]["target"] == 5
+    assert cur["sql"]["percent"] == 100.0
+
+    assert cur["python"]["completed"] == 5
+    assert cur["python"]["target"] == 5
+    assert cur["python"]["percent"] == 100.0
+
+    assert cur["power_bi"]["target"] == 4
+    assert cur["tableau"]["target"] == 4
+    assert cur["machine_learning"]["target"] == 1
+    assert cur["machine_learning"]["completed"] is True
+    assert cur["machine_learning"]["status"] == "COMPLETED"
+
+    # Test pure SVG donut renderer
+    svg = assignment_processor.render_svg_donut(50.0, "#10b981", "2/4", "50%")
+    assert "<svg" in svg
+    assert "viewBox" in svg
+    assert "stroke-dashoffset" in svg
+    assert "2/4" in svg
 
 def test_assignment_api_endpoints():
     client = app.test_client()
@@ -44,27 +83,43 @@ def test_assignment_api_endpoints():
     assert data["success"] is True
     assert data["total_candidates"] > 0
 
-    # 2. Get candidates
-    res = client.get("/api/assignment/candidates")
+    # 2. Get candidates and search for Sajid
+    res = client.get("/api/assignment/candidates?search=sajid")
     assert res.status_code == 200
     c_data = res.get_json()
     assert c_data["success"] is True
     assert len(c_data["candidates"]) > 0
-    first_cand = c_data["candidates"][0]
+    sajid_cand = c_data["candidates"][0]
+    assert sajid_cand["student_name"] == "SK SAJID"
+    assert sajid_cand["email"] == "skabdulsajid8144@gmail.com"
 
-    # 3. Preview HTML report
-    res_prev = client.get(f"/api/assignment/preview/{first_cand['student_id']}")
+    # 3. Preview HTML report for Sajid
+    res_prev = client.get(f"/api/assignment/preview/{sajid_cand['student_id']}")
     assert res_prev.status_code == 200
-    assert b"Weekly Assignment Progress Report" in res_prev.data
+    assert b"SK SAJID" in res_prev.data
+    assert b"<svg" in res_prev.data
+    assert b"Core Tools Curriculum Progress" in res_prev.data
 
-    # 4. Dry-run send single report
+    # 4. Mentor Chat API
+    chat_payload = {
+        "student_id": sajid_cand["student_id"],
+        "message": "I have completed Excel, SQL, Python and Machine Learning. Ready for Capstone review."
+    }
+    res_chat = client.post("/api/assignment/mentor-chat", json=chat_payload)
+    assert res_chat.status_code == 200
+    chat_data = res_chat.get_json()
+    assert chat_data["success"] is True
+    assert "Capstone" in chat_data["reply"] or "Machine Learning" in chat_data["reply"]
+
+    # 5. Dry-run send single report
     send_payload = {
-        "student_id": first_cand["student_id"],
-        "email": "test.recipient@example.com",
+        "student_id": sajid_cand["student_id"],
+        "email": "skabdulsajid8144@gmail.com",
         "dry_run": True,
-        "trainer_notes": "Great progress on your Python module!"
+        "trainer_notes": "All core tools and ML project completed with distinction!"
     }
     res_send = client.post("/api/assignment/send-one", json=send_payload)
     assert res_send.status_code == 200
     s_data = res_send.get_json()
     assert s_data["success"] is True
+

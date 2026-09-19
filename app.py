@@ -711,6 +711,101 @@ def assignment_batch_stop():
             return jsonify({"success": True, "message": "Stop signal sent."})
         return jsonify({"success": False, "error": "No batch currently running."}), 400
 
+@app.route("/api/assignment/update-curriculum", methods=["POST"])
+def assignment_update_curriculum():
+    data = request.json or {}
+    sid = data.get("student_id", "").strip()
+    cand = next((c for c in assignment_processor.cached_candidates if c.get("student_id") == sid), None)
+    name = data.get("student_name", "") or (cand.get("student_name") if cand else "")
+    
+    excel = int(data.get("excel", 0))
+    sql = int(data.get("sql", 0))
+    python = int(data.get("python", 0))
+    power_bi = int(data.get("power_bi", 0))
+    tableau = int(data.get("tableau", 0))
+    ml_project = 1 if data.get("ml_project") else 0
+    notes = data.get("notes", "")
+
+    student_directory.save_student_curriculum(sid, name, excel, sql, python, power_bi, tableau, ml_project, notes)
+
+    if cand:
+        cand["curriculum"] = assignment_processor.calculate_curriculum(cand)
+        return jsonify({"success": True, "curriculum": cand["curriculum"]})
+    return jsonify({"success": True})
+
+@app.route("/api/assignment/upload-submission", methods=["POST"])
+def assignment_upload_submission():
+    file = request.files.get("file")
+    sid = request.form.get("student_id", "").strip()
+    tool = request.form.get("tool", "excel").strip().lower()
+    desc = request.form.get("description", "").strip()
+
+    cand = next((c for c in assignment_processor.cached_candidates if c.get("student_id") == sid), None)
+    if not cand:
+        return jsonify({"success": False, "error": f"Candidate with ID {sid} not found."}), 404
+
+    filename = file.filename if file else "Manual_Submission"
+    date_str = time.strftime("%d-%m-%Y")
+    
+    if file and file.filename:
+        save_folder = os.path.join(BASE_DIR, "uploads", sid)
+        os.makedirs(save_folder, exist_ok=True)
+        file.save(os.path.join(save_folder, filename))
+
+    tool_app_map = {
+        "excel": "EXCEL BASE AND ADVANCED",
+        "sql": "SQL SERVER",
+        "python": "PYTHON PROGRAMMING",
+        "power_bi": "POWER BI",
+        "tableau": "TABLEAU",
+        "ml": "MACHINE LEARNING CAPSTONE",
+        "machine_learning": "MACHINE LEARNING CAPSTONE"
+    }
+    app_name = tool_app_map.get(tool, tool.upper())
+    submission_desc = desc or f"Verified Submission: {filename}"
+
+    cand["submissions"].insert(0, {
+        "date": date_str,
+        "application": app_name,
+        "description": submission_desc
+    })
+    cand["submissions_count"] = len(cand["submissions"])
+    cand["latest_date"] = date_str
+    cand["latest_submission"] = submission_desc
+
+    cand["curriculum"] = assignment_processor.calculate_curriculum(cand)
+    return jsonify({
+        "success": True,
+        "message": f"Successfully uploaded {filename} for {cand['student_name']}!",
+        "curriculum": cand["curriculum"],
+        "submissions_count": cand["submissions_count"]
+    })
+
+@app.route("/api/assignment/mentor-chat", methods=["POST"])
+def assignment_mentor_chat():
+    data = request.json or {}
+    sid = data.get("student_id", "").strip()
+    user_msg = data.get("message", "").strip()
+    cand = next((c for c in assignment_processor.cached_candidates if c.get("student_id") == sid), None)
+    student_name = cand.get("student_name", "Student") if cand else "Student"
+
+    u_lower = user_msg.lower()
+    if "project" in u_lower or "capstone" in u_lower or "ml" in u_lower or "machine learning" in u_lower:
+        reply = f"Hello {student_name}! Your Machine Learning Capstone Project requirements have been reviewed. Sajid and the academic committee will verify your deployment repository and schedule your project defense viva."
+    elif "sql" in u_lower or "python" in u_lower or "excel" in u_lower:
+        reply = f"Great question regarding the curriculum modules, {student_name}. Mrs. Lakshmi (Mentorship Lead: +91 7907991738) has been tagged and will assist you with sample datasets and query optimization."
+    elif "interview" in u_lower or "placement" in u_lower or "job" in u_lower:
+        reply = f"Congratulations on your progress, {student_name}! Since your tool completion metrics are high, Mr. Ajith (+91 9916000655) will initiate your placement screening and schedule your corporate mock interview."
+    else:
+        reply = f"Thank you for contacting DV Analytics Mentorship, {student_name}. Your message has been logged with Mr. Sajid (+91 8431424165) and Mrs. Lakshmi. We will get back to you shortly!"
+
+    return jsonify({
+        "success": True,
+        "reply": reply,
+        "mentor": "DV Analytics Mentorship Team",
+        "timestamp": time.strftime("%I:%M %p")
+    })
+
 if __name__ == "__main__":
     print("Starting Bulk Email Automation App on http://127.0.0.1:5000")
     app.run(host="0.0.0.0", port=5000, debug=True)

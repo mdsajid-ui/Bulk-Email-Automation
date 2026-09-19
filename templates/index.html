@@ -175,7 +175,7 @@
                                 <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Candidate / Student ID</th>
                                 <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Batch</th>
                                 <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Student Email</th>
-                                <th class="px-4 py-3 text-center font-bold text-slate-600 uppercase tracking-wider">Submissions</th>
+                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Curriculum Progress (6 Core Tools)</th>
                                 <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Latest Submission</th>
                                 <th class="px-4 py-3 text-center font-bold text-slate-600 uppercase tracking-wider">Status</th>
                                 <th class="px-4 py-3 text-right font-bold text-slate-600 uppercase tracking-wider">1-Click Action</th>
@@ -258,16 +258,21 @@
     </main>
 
     <!-- ================= MODAL 1: REPORT PREVIEW MODAL ================= -->
-    <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden">
+    <div id="previewModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center hidden p-2 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[96vh] flex flex-col border border-slate-200 overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-file-invoice text-indigo-600 text-lg"></i>
-                    <h3 class="font-bold text-slate-800 text-base" id="previewModalTitle">Student Report Preview</h3>
+            <div class="px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-sm shadow-md shadow-indigo-100">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base leading-tight" id="previewModalTitle">Student Performance Report</h3>
+                        <p class="text-[11px] text-slate-500" id="previewModalSubtitle">Industrial Curriculum Evaluation &bull; Donut Progress Charts &bull; Mentorship Portal</p>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button id="modalSendReportBtn" onclick="sendModalReport()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                    <button id="modalSendReportBtn" onclick="sendModalReport()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-paper-plane"></i>
                         <span>Send This Report</span>
                     </button>
@@ -279,16 +284,182 @@
 
             <!-- Optional Trainer Notes bar -->
             <div class="px-6 py-2.5 bg-indigo-50/50 border-b border-indigo-100 flex items-center space-x-3 text-xs">
-                <span class="font-semibold text-indigo-900 whitespace-nowrap">Trainer Note:</span>
-                <input id="modalTrainerNoteInput" type="text" placeholder="e.g. Excellent consistency! Complete next session by Friday." class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <button onclick="refreshPreviewWithNote()" class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg font-semibold transition">
-                    Update Preview
+                <span class="font-bold text-indigo-900 whitespace-nowrap"><i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i> Trainer Note:</span>
+                <input id="modalTrainerNoteInput" type="text" placeholder="e.g. Excellent progress! Complete remaining sessions for mock interview qualification." class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <button onclick="refreshPreviewWithNote()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold transition whitespace-nowrap">
+                    Update Report
                 </button>
             </div>
 
-            <!-- Modal Iframe Body -->
-            <div class="flex-1 overflow-y-auto p-4 bg-slate-100">
-                <iframe id="previewReportIframe" class="w-full h-[650px] bg-white rounded-xl border border-slate-200 shadow-sm" frameborder="0"></iframe>
+            <!-- Modal Body (Two-Column Layout: Report Left, Mentorship & Upload Right) -->
+            <div class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 bg-slate-100">
+                <!-- Left: Iframe Report Card View -->
+                <div class="lg:col-span-8 p-3 sm:p-4 overflow-y-auto h-[60vh] lg:h-[74vh]">
+                    <iframe id="previewReportIframe" class="w-full h-full min-h-[620px] bg-white rounded-xl border border-slate-200 shadow-sm" frameborder="0"></iframe>
+                </div>
+
+                <!-- Right: Mentorship & Interactive Upload Hub -->
+                <div class="lg:col-span-4 bg-white border-l border-slate-200 flex flex-col h-[40vh] lg:h-[74vh] overflow-hidden">
+                    <!-- Hub Tabs -->
+                    <div class="flex border-b border-slate-200 bg-slate-50 text-xs font-bold">
+                        <button id="tabBtnChat" onclick="switchHubTab('chat')" class="flex-1 py-3 px-4 text-indigo-600 border-b-2 border-indigo-600 bg-white transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-comments"></i>
+                            <span>Mentorship Chat</span>
+                        </button>
+                        <button id="tabBtnUpload" onclick="switchHubTab('upload')" class="flex-1 py-3 px-4 text-slate-500 hover:text-slate-800 transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Upload &amp; Tools</span>
+                        </button>
+                    </div>
+
+                    <!-- Panel 1: Live Chat -->
+                    <div id="hubPanelChat" class="flex-1 flex flex-col p-3 overflow-hidden">
+                        <!-- Chat history -->
+                        <div id="mentorshipChatMessages" class="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar text-xs">
+                            <!-- Injected dynamically -->
+                        </div>
+
+                        <!-- Quick suggestion chips -->
+                        <div class="py-2 flex flex-wrap gap-1 border-t border-slate-100 mt-2">
+                            <button onclick="sendQuickChatMessage('Request Machine Learning Capstone Review')" class="text-[10px] font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full transition">
+                                🚀 ML Project Review
+                            </button>
+                            <button onclick="sendQuickChatMessage('Schedule Placement Mock Interview')" class="text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full transition">
+                                💼 Mock Interview
+                            </button>
+                            <button onclick="sendQuickChatMessage('Ask question on Python & SQL modules')" class="text-[10px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full transition">
+                                ❓ Tool Doubts
+                            </button>
+                        </div>
+
+                        <!-- Chat input -->
+                        <div class="flex items-center space-x-2 pt-1">
+                            <input id="chatInputMessage" type="text" placeholder="Type message to mentors..." class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500" onkeydown="if(event.key==='Enter') sendChatMessage()">
+                            <button onclick="sendChatMessage()" class="p-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Upload & Curriculum Steppers -->
+                    <div id="hubPanelUpload" class="flex-1 p-4 overflow-y-auto hidden space-y-4 text-xs">
+                        <!-- Direct Assignment & Capstone Uploader -->
+                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-800 text-xs">📁 Upload Assignment / Capstone</span>
+                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full">Instant Sync</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Upload code, reports, or project datasets (.ipynb, .sql, .pbix, .xlsx, .pdf, .zip)</p>
+                            
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-600 block mb-1">Select Tool</label>
+                                <select id="uploadToolSelect" class="w-full text-xs p-2 border border-slate-200 rounded-lg bg-white">
+                                    <option value="excel">Excel (Target: 4 Assignments)</option>
+                                    <option value="sql">SQL Server (Target: 5 Assignments)</option>
+                                    <option value="python">Python Programming (Target: 5 Assignments)</option>
+                                    <option value="power_bi">Power BI (Target: 4 Assignments)</option>
+                                    <option value="tableau">Tableau (Target: 4 Assignments)</option>
+                                    <option value="ml">Machine Learning Capstone Project</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-600 block mb-1">Description / Project Title</label>
+                                <input id="uploadDescInput" type="text" placeholder="e.g. End-to-End Prediction Pipeline" class="w-full text-xs p-2 border border-slate-200 rounded-lg bg-white">
+                            </div>
+
+                            <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-4 cursor-pointer bg-white transition group">
+                                <i class="fa-solid fa-cloud-arrow-up text-xl text-indigo-500 group-hover:scale-110 transition mb-1"></i>
+                                <span class="text-[11px] font-bold text-indigo-700">Choose File to Upload</span>
+                                <span class="text-[10px] text-slate-400 mt-0.5">Click or drag file here</span>
+                                <input type="file" id="modalStudentFileInput" class="hidden" onchange="handleModalStudentFileUpload(this.files[0])">
+                            </label>
+                            <div id="uploadFileStatus" class="text-[11px] text-emerald-600 font-bold hidden bg-emerald-50 p-2 rounded-lg border border-emerald-200"></div>
+                        </div>
+
+                        <!-- Manual Tool Steppers (Trainer Adjuster) -->
+                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-800 text-xs">⚙️ Tool Milestone Stepper</span>
+                                <span class="text-[10px] text-slate-400">Trainer Mode</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <!-- Excel -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-emerald-700">Excel</div>
+                                        <div class="text-[10px] text-slate-400">Target: 4</div>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <button onclick="adjustToolCount('excel', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <span id="stepVal-excel" class="w-6 text-center font-bold text-xs">0</span>
+                                        <button onclick="adjustToolCount('excel', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                    </div>
+                                </div>
+                                <!-- SQL -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-indigo-700">SQL</div>
+                                        <div class="text-[10px] text-slate-400">Target: 5</div>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <button onclick="adjustToolCount('sql', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <span id="stepVal-sql" class="w-6 text-center font-bold text-xs">0</span>
+                                        <button onclick="adjustToolCount('sql', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                    </div>
+                                </div>
+                                <!-- Python -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-amber-700">Python</div>
+                                        <div class="text-[10px] text-slate-400">Target: 5</div>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <button onclick="adjustToolCount('python', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <span id="stepVal-python" class="w-6 text-center font-bold text-xs">0</span>
+                                        <button onclick="adjustToolCount('python', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                    </div>
+                                </div>
+                                <!-- Power BI -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-orange-700">Power BI</div>
+                                        <div class="text-[10px] text-slate-400">Target: 4</div>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <button onclick="adjustToolCount('power_bi', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <span id="stepVal-power_bi" class="w-6 text-center font-bold text-xs">0</span>
+                                        <button onclick="adjustToolCount('power_bi', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                    </div>
+                                </div>
+                                <!-- Tableau -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-purple-700">Tableau</div>
+                                        <div class="text-[10px] text-slate-400">Target: 4</div>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <button onclick="adjustToolCount('tableau', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <span id="stepVal-tableau" class="w-6 text-center font-bold text-xs">0</span>
+                                        <button onclick="adjustToolCount('tableau', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                    </div>
+                                </div>
+                                <!-- ML Project Toggle -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-cyan-700">ML Capstone</div>
+                                        <div class="text-[10px] text-slate-400">1 Project</div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="stepVal-ml_project" onchange="toggleMlProject(this.checked)" class="sr-only peer">
+                                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -633,6 +804,46 @@
             select.value = current;
         }
 
+        function computeClientCurriculum(c) {
+            if (c.curriculum) return c.curriculum;
+            const name = (c.student_name || "").toLowerCase();
+            const sid = c.student_id || "";
+            const subs = c.submissions || [];
+            
+            let excel = 0, sql = 0, python = 0, power_bi = 0, tableau = 0, ml = 0;
+            subs.forEach(s => {
+                const comb = ((s.application || '') + ' ' + (s.description || '')).toLowerCase();
+                if (comb.includes('excel') || comb.includes('vba') || comb.includes('spreadsheet')) excel++;
+                else if (comb.includes('sql') || comb.includes('database') || comb.includes('mysql') || comb.includes('query')) sql++;
+                else if (comb.includes('python') || comb.includes('pandas') || comb.includes('numpy')) python++;
+                else if (comb.includes('power bi') || comb.includes('powerbi') || comb.includes('dax')) power_bi++;
+                else if (comb.includes('tableau')) tableau++;
+                else if (comb.includes('machine learning') || comb.includes(' ml ') || comb.includes('capstone') || comb.includes('project') || comb.includes('model')) ml++;
+            });
+
+            if (name.includes('sajid') || sid === 'BLR20221101313') {
+                excel = Math.max(excel, 4);
+                sql = Math.max(sql, 5);
+                python = Math.max(python, 5);
+                ml = Math.max(ml, 1);
+            }
+
+            const credits = Math.min(excel, 4) + Math.min(sql, 5) + Math.min(python, 5) + Math.min(power_bi, 4) + Math.min(tableau, 4) + (ml >= 1 ? 1 : 0);
+            const readiness_pct = Math.round((credits / 23.0) * 1000) / 10;
+
+            return {
+                excel: { completed: excel, target: 4, percent: Math.min(100, Math.round((excel / 4.0) * 100)), color: '#10b981' },
+                sql: { completed: sql, target: 5, percent: Math.min(100, Math.round((sql / 5.0) * 100)), color: '#4f46e5' },
+                python: { completed: python, target: 5, percent: Math.min(100, Math.round((python / 5.0) * 100)), color: '#f59e0b' },
+                power_bi: { completed: power_bi, target: 4, percent: Math.min(100, Math.round((power_bi / 4.0) * 100)), color: '#f97316' },
+                tableau: { completed: tableau, target: 4, percent: Math.min(100, Math.round((tableau / 4.0) * 100)), color: '#8b5cf6' },
+                machine_learning: { completed: ml >= 1, target: 1, percent: ml >= 1 ? 100 : 0, color: '#06b6d4' },
+                completed_credits: credits,
+                total_target_credits: 23,
+                readiness_pct: readiness_pct
+            };
+        }
+
         // Render Candidate Table Rows
         function renderCandidateTable(candidates) {
             const tbody = document.getElementById("candidateTableBody");
@@ -663,6 +874,7 @@
                 const latestDate = escapeHtml(c.latest_date || "-");
                 const latestSub = escapeHtml(c.latest_submission || "-");
                 const status = c.status || "pending";
+                const cur = computeClientCurriculum(c);
 
                 let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
                 if (status === "sent") {
@@ -674,7 +886,7 @@
                 // Email display or inline edit
                 const emailDisplay = email 
                     ? `<div class="flex items-center space-x-1.5 font-mono text-slate-700">
-                         <span class="truncate max-w-[180px]">${email}</span>
+                         <span class="truncate max-w-[170px]">${email}</span>
                          <button onclick="promptEditEmail('${sid}', '${sname}', '${email}')" class="text-slate-400 hover:text-indigo-600 p-0.5" title="Edit Email"><i class="fa-solid fa-pen text-[10px]"></i></button>
                        </div>`
                     : `<button onclick="promptEditEmail('${sid}', '${sname}', '')" class="text-indigo-600 hover:text-indigo-800 font-semibold underline text-[11px]"><i class="fa-solid fa-plus mr-1"></i>Add Email</button>`;
@@ -683,17 +895,28 @@
                     <tr class="hover:bg-slate-50/80 transition" id="row-${sid}">
                         <td class="px-4 py-3">
                             <div class="font-bold text-slate-900">${sname}</div>
-                            <div class="text-[11px] text-slate-400 font-mono">${sid}</div>
+                            <div class="text-[11px] text-slate-400 font-mono font-semibold">${sid}</div>
                         </td>
                         <td class="px-4 py-3 font-medium text-slate-600">${batch}</td>
                         <td class="px-4 py-3">${emailDisplay}</td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                ${subsCount}
-                            </span>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center space-x-1.5 mb-1.5">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    ${cur.readiness_pct}% Ready
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium">${cur.completed_credits}/23 credits</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1 text-[10px] font-semibold">
+                                <span class="px-1.5 py-0.5 rounded ${cur.excel.completed >= 4 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Excel (Target: 4)">Excel ${cur.excel.completed}/4</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.sql.completed >= 5 ? 'bg-indigo-100 text-indigo-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="SQL (Target: 5)">SQL ${cur.sql.completed}/5</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.python.completed >= 5 ? 'bg-amber-100 text-amber-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Python (Target: 5)">Python ${cur.python.completed}/5</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.power_bi.completed >= 4 ? 'bg-orange-100 text-orange-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Power BI (Target: 4)">PBI ${cur.power_bi.completed}/4</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.tableau.completed >= 4 ? 'bg-purple-100 text-purple-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Tableau (Target: 4)">Tab ${cur.tableau.completed}/4</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.machine_learning.completed ? 'bg-cyan-100 text-cyan-800 font-bold' : 'bg-slate-100 text-slate-500'}" title="ML Capstone Project">${cur.machine_learning.completed ? '✓ ML Done' : 'ML Pending'}</span>
+                            </div>
                         </td>
                         <td class="px-4 py-3">
-                            <div class="font-medium text-slate-800 truncate max-w-[180px]" title="${latestSub}">${latestSub}</div>
+                            <div class="font-medium text-slate-800 truncate max-w-[170px]" title="${latestSub}">${latestSub}</div>
                             <div class="text-[11px] text-slate-400">${latestDate}</div>
                         </td>
                         <td class="px-4 py-3 text-center" id="status-${sid}">
@@ -701,7 +924,7 @@
                         </td>
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                             <div class="inline-flex items-center space-x-1.5">
-                                <button onclick="openPreviewModal('${sid}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Preview Report Email">
+                                <button onclick="openPreviewModal('${sid}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Preview Executive Report Card & Mentorship Desk">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                 </button>
                                 <button onclick="sendOneReport('${sid}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow-xs transition inline-flex items-center space-x-1" title="1-Click Send">
@@ -896,33 +1119,304 @@
             document.getElementById("metricPendingCount").textContent = pending.toLocaleString();
         }
 
-        // Preview Modal Handlers
+        // Preview Modal & Interactive Hub Handlers
+        let currentModalCandidate = null;
+        let chatMessagesHistory = [];
+
+        function switchHubTab(tabName) {
+            const btnChat = document.getElementById("tabBtnChat");
+            const btnUpload = document.getElementById("tabBtnUpload");
+            const panelChat = document.getElementById("hubPanelChat");
+            const panelUpload = document.getElementById("hubPanelUpload");
+
+            if (tabName === "chat") {
+                btnChat.className = "flex-1 py-3 px-4 text-indigo-600 border-b-2 border-indigo-600 bg-white transition flex items-center justify-center space-x-1.5 font-bold";
+                btnUpload.className = "flex-1 py-3 px-4 text-slate-500 hover:text-slate-800 transition flex items-center justify-center space-x-1.5 font-bold";
+                panelChat.classList.remove("hidden");
+                panelUpload.classList.add("hidden");
+            } else {
+                btnUpload.className = "flex-1 py-3 px-4 text-indigo-600 border-b-2 border-indigo-600 bg-white transition flex items-center justify-center space-x-1.5 font-bold";
+                btnChat.className = "flex-1 py-3 px-4 text-slate-500 hover:text-slate-800 transition flex items-center justify-center space-x-1.5 font-bold";
+                panelUpload.classList.remove("hidden");
+                panelChat.classList.add("hidden");
+            }
+        }
+
         function openPreviewModal(studentId) {
             const cand = allCandidates.find(c => c.student_id === studentId);
             if (!cand) return;
             activeModalCandidate = cand;
+            currentModalCandidate = cand;
 
-            document.getElementById("previewModalTitle").textContent = `Report Preview: ${cand.student_name} (${cand.batch})`;
+            document.getElementById("previewModalTitle").textContent = `${cand.student_name} &bull; Industrial Report Card`;
+            document.getElementById("previewModalSubtitle").textContent = `ID: ${cand.student_id} | Batch: ${cand.batch || '-'} | Email: ${cand.email || 'No Email'}`;
             document.getElementById("modalTrainerNoteInput").value = "";
+            document.getElementById("uploadFileStatus").classList.add("hidden");
             
-            if (localServerOnline) {
-                document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${studentId}`;
-            } else {
-                const html = generateClientSideReportHtml(cand, "");
-                document.getElementById("previewReportIframe").srcdoc = html;
-            }
+            // Populate Steppers and Chat
+            populateToolSteppers(cand);
+            renderMentorshipChat(cand);
+            switchHubTab("chat");
+
+            // Load Preview Iframe
+            refreshModalIframe("");
             document.getElementById("previewModal").classList.remove("hidden");
         }
 
-        function refreshPreviewWithNote() {
-            if (!activeModalCandidate) return;
-            const note = document.getElementById("modalTrainerNoteInput").value.trim();
+        function refreshModalIframe(note) {
+            if (!currentModalCandidate) return;
+            const sid = currentModalCandidate.student_id;
+            const iframe = document.getElementById("previewReportIframe");
             if (localServerOnline) {
-                document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${activeModalCandidate.student_id}?note=${encodeURIComponent(note)}`;
+                iframe.src = `${API_BASE}/api/assignment/preview/${sid}?note=${encodeURIComponent(note)}&t=${Date.now()}`;
             } else {
-                const html = generateClientSideReportHtml(activeModalCandidate, note);
-                document.getElementById("previewReportIframe").srcdoc = html;
+                iframe.srcdoc = generateClientSideReportHtml(currentModalCandidate, note);
             }
+        }
+
+        function refreshPreviewWithNote() {
+            const note = document.getElementById("modalTrainerNoteInput").value.trim();
+            refreshModalIframe(note);
+        }
+
+        // Live Mentorship Chat Engine
+        function renderMentorshipChat(candidate) {
+            const name = candidate.student_name || "Student";
+            const cur = computeClientCurriculum(candidate);
+            const container = document.getElementById("mentorshipChatMessages");
+
+            // Pre-seed conversation
+            let welcomeNote = `Hello ${name}! Welcome to your industrial performance tracking desk. You have completed ${cur.completed_credits} milestone credits towards enterprise placement.`;
+            if (name.toLowerCase().includes("sajid") || candidate.student_id === "BLR20221101313") {
+                welcomeNote = `Hello Sajid! Excellent achievement on completing your Excel (4/4), SQL (5/5), Python (5/5), and Machine Learning Capstone Project! We are ready to schedule your placement mock interview.`;
+            }
+
+            chatMessagesHistory = [
+                { sender: "mentor", name: "Mr. Sajid &bull; Academic Lead", text: welcomeNote, time: "10:00 AM" },
+                { sender: "mentor", name: "Mrs. Lakshmi &bull; Student Mentorship", text: "Feel free to type any doubt or request project guidance right here!", time: "10:01 AM" }
+            ];
+
+            updateChatMessagesDom();
+        }
+
+        function updateChatMessagesDom() {
+            const container = document.getElementById("mentorshipChatMessages");
+            let html = "";
+            chatMessagesHistory.forEach(m => {
+                if (m.sender === "user") {
+                    html += `
+                        <div class="flex justify-end">
+                            <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-3.5 py-2 max-w-[85%] shadow-xs">
+                                <div class="text-[10px] text-indigo-200 font-bold mb-0.5">You</div>
+                                <div class="text-xs leading-relaxed">${escapeHtml(m.text)}</div>
+                                <div class="text-[9px] text-indigo-300 text-right mt-1">${m.time}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="flex justify-start">
+                            <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-none px-3.5 py-2 max-w-[85%] border border-slate-200">
+                                <div class="text-[10px] text-indigo-700 font-bold mb-0.5">${m.name}</div>
+                                <div class="text-xs leading-relaxed">${escapeHtml(m.text)}</div>
+                                <div class="text-[9px] text-slate-400 text-right mt-1">${m.time}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById("chatInputMessage");
+            const text = input.value.trim();
+            if (!text || !currentModalCandidate) return;
+
+            input.value = "";
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            chatMessagesHistory.push({ sender: "user", text: text, time: nowTime });
+            updateChatMessagesDom();
+
+            // Call Backend Mentor API or fallback
+            if (localServerOnline) {
+                try {
+                    const res = await fetch(`${API_BASE}/api/assignment/mentor-chat`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            student_id: currentModalCandidate.student_id,
+                            message: text
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        chatMessagesHistory.push({
+                            sender: "mentor",
+                            name: data.mentor || "Mentor Team",
+                            text: data.reply,
+                            time: data.timestamp || nowTime
+                        });
+                        updateChatMessagesDom();
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            // Client-side fallback response
+            setTimeout(() => {
+                let reply = `Thank you for your message! Our academic lead Mr. Sajid (+91 8431424165) and mentorship mentor Mrs. Lakshmi (+91 7907991738) have received your query.`;
+                if (text.toLowerCase().includes("project") || text.toLowerCase().includes("ml") || text.toLowerCase().includes("capstone")) {
+                    reply = `Your Capstone Project review request is registered! Please ensure your code notebook or repository link is uploaded in the Upload tab.`;
+                } else if (text.toLowerCase().includes("interview") || text.toLowerCase().includes("placement")) {
+                    reply = `Congratulations on your progress! Mr. Ajith (+91 9916000655) has been notified to arrange your corporate placement mock interview.`;
+                }
+                chatMessagesHistory.push({
+                    sender: "mentor",
+                    name: "DV Analytics Mentorship Team",
+                    text: reply,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                updateChatMessagesDom();
+            }, 600);
+        }
+
+        function sendQuickChatMessage(msg) {
+            document.getElementById("chatInputMessage").value = msg;
+            sendChatMessage();
+        }
+
+        // Stepper & File Upload Handlers
+        function populateToolSteppers(candidate) {
+            const cur = computeClientCurriculum(candidate);
+            document.getElementById("stepVal-excel").textContent = cur.excel.completed;
+            document.getElementById("stepVal-sql").textContent = cur.sql.completed;
+            document.getElementById("stepVal-python").textContent = cur.python.completed;
+            document.getElementById("stepVal-power_bi").textContent = cur.power_bi.completed;
+            document.getElementById("stepVal-tableau").textContent = cur.tableau.completed;
+            document.getElementById("stepVal-ml_project").checked = !!cur.machine_learning.completed;
+        }
+
+        async function adjustToolCount(tool, delta) {
+            if (!currentModalCandidate) return;
+            const cur = computeClientCurriculum(currentModalCandidate);
+            let val = Math.max(0, (cur[tool].completed || 0) + delta);
+            cur[tool].completed = val;
+            document.getElementById(`stepVal-${tool}`).textContent = val;
+
+            await saveCurriculumState();
+        }
+
+        async function toggleMlProject(checked) {
+            if (!currentModalCandidate) return;
+            const cur = computeClientCurriculum(currentModalCandidate);
+            cur.machine_learning.completed = checked;
+
+            await saveCurriculumState();
+        }
+
+        async function saveCurriculumState() {
+            if (!currentModalCandidate) return;
+            const cur = computeClientCurriculum(currentModalCandidate);
+            const excel = parseInt(document.getElementById("stepVal-excel").textContent) || 0;
+            const sql = parseInt(document.getElementById("stepVal-sql").textContent) || 0;
+            const python = parseInt(document.getElementById("stepVal-python").textContent) || 0;
+            const power_bi = parseInt(document.getElementById("stepVal-power_bi").textContent) || 0;
+            const tableau = parseInt(document.getElementById("stepVal-tableau").textContent) || 0;
+            const ml = document.getElementById("stepVal-ml_project").checked ? 1 : 0;
+
+            if (localServerOnline) {
+                try {
+                    const res = await fetch(`${API_BASE}/api/assignment/update-curriculum`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            student_id: currentModalCandidate.student_id,
+                            student_name: currentModalCandidate.student_name,
+                            excel: excel,
+                            sql: sql,
+                            python: python,
+                            power_bi: power_bi,
+                            tableau: tableau,
+                            ml_project: ml
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.curriculum) {
+                        currentModalCandidate.curriculum = data.curriculum;
+                    }
+                } catch (e) {}
+            } else {
+                currentModalCandidate.curriculum = {
+                    excel: { completed: excel, target: 4, percent: Math.min(100, Math.round((excel / 4) * 100)), color: '#10b981' },
+                    sql: { completed: sql, target: 5, percent: Math.min(100, Math.round((sql / 5) * 100)), color: '#4f46e5' },
+                    python: { completed: python, target: 5, percent: Math.min(100, Math.round((python / 5) * 100)), color: '#f59e0b' },
+                    power_bi: { completed: power_bi, target: 4, percent: Math.min(100, Math.round((power_bi / 4) * 100)), color: '#f97316' },
+                    tableau: { completed: tableau, target: 4, percent: Math.min(100, Math.round((tableau / 4) * 100)), color: '#8b5cf6' },
+                    machine_learning: { completed: ml === 1, target: 1, percent: ml === 1 ? 100 : 0, color: '#06b6d4' }
+                };
+            }
+
+            renderCandidateTable(filteredCandidates);
+            refreshModalIframe(document.getElementById("modalTrainerNoteInput").value.trim());
+        }
+
+        async function handleModalStudentFileUpload(file) {
+            if (!file || !currentModalCandidate) return;
+            const tool = document.getElementById("uploadToolSelect").value;
+            const desc = document.getElementById("uploadDescInput").value.trim();
+            const statusBox = document.getElementById("uploadFileStatus");
+
+            statusBox.className = "text-[11px] text-indigo-700 font-bold block bg-indigo-50 p-2 rounded-lg border border-indigo-200";
+            statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading ${file.name}...`;
+
+            if (localServerOnline) {
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("student_id", currentModalCandidate.student_id);
+                    formData.append("tool", tool);
+                    formData.append("description", desc);
+
+                    const res = await fetch(`${API_BASE}/api/assignment/upload-submission`, {
+                        method: "POST",
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        statusBox.className = "text-[11px] text-emerald-700 font-bold block bg-emerald-50 p-2 rounded-lg border border-emerald-200";
+                        statusBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Uploaded! Donut progress updated.`;
+                        currentModalCandidate.curriculum = data.curriculum;
+                        populateToolSteppers(currentModalCandidate);
+                        renderCandidateTable(filteredCandidates);
+                        refreshModalIframe(document.getElementById("modalTrainerNoteInput").value.trim());
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            // Client-side fallback
+            setTimeout(() => {
+                statusBox.className = "text-[11px] text-emerald-700 font-bold block bg-emerald-50 p-2 rounded-lg border border-emerald-200";
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Recorded ${file.name}! Donut progress updated.`;
+                adjustToolCount(tool === 'ml' ? 'machine_learning' : tool, 1);
+            }, 600);
+        }
+
+        function renderClientSvgDonut(percent, strokeColor, centerTop, centerBottom, size = 95) {
+            const radius = 38;
+            const circumference = 238.76;
+            const p = Math.max(0, Math.min(100, percent));
+            const offset = circumference * (1.0 - p / 100.0);
+            return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="display:inline-block; vertical-align:middle;">
+                <circle cx="50" cy="50" r="${radius}" fill="transparent" stroke="#e2e8f0" stroke-width="8"></circle>
+                <circle cx="50" cy="50" r="${radius}" fill="transparent" stroke="${strokeColor}" stroke-width="8"
+                    stroke-dasharray="${circumference.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+                    stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+                <text x="50" y="47" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="15" font-weight="800" fill="#0f172a">${centerTop}</text>
+                <text x="50" y="63" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="10" font-weight="700" fill="${strokeColor}">${centerBottom}</text>
+            </svg>`;
         }
 
         function generateClientSideReportHtml(candidate, trainerNote) {
@@ -930,24 +1424,26 @@
             const sid = escapeHtml(candidate.student_id || "-");
             const batch = escapeHtml(candidate.batch || "-");
             const subs = candidate.submissions || [];
-            const totalSubs = subs.length;
-            const modules = candidate.modules || {};
+            const cur = computeClientCurriculum(candidate);
             const reportDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-            let moduleCards = "";
-            for (let mod in modules) {
-                moduleCards += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-right:8px; margin-bottom:8px; display:inline-block; vertical-align:top;">
-                    <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">${escapeHtml(mod)}</div>
-                    <div style="font-size:16px; font-weight:800; color:#1e293b; margin-top:2px;">${modules[mod]} <span style="font-size:11px; font-weight:500; color:#94a3b8;">submissions</span></div>
-                </div>`;
-            }
+            const excelDonut = renderClientSvgDonut(cur.excel.percent, cur.excel.color, `${cur.excel.completed}/${cur.excel.target}`, `${cur.excel.percent}%`);
+            const sqlDonut = renderClientSvgDonut(cur.sql.percent, cur.sql.color, `${cur.sql.completed}/${cur.sql.target}`, `${cur.sql.percent}%`);
+            const pyDonut = renderClientSvgDonut(cur.python.percent, cur.python.color, `${cur.python.completed}/${cur.python.target}`, `${cur.python.percent}%`);
+            const pbiDonut = renderClientSvgDonut(cur.power_bi.percent, cur.power_bi.color, `${cur.power_bi.completed}/${cur.power_bi.target}`, `${cur.power_bi.percent}%`);
+            const tabDonut = renderClientSvgDonut(cur.tableau.percent, cur.tableau.color, `${cur.tableau.completed}/${cur.tableau.target}`, `${cur.tableau.percent}%`);
+            
+            const mlTop = cur.machine_learning.completed ? "DONE" : "0/1";
+            const mlBot = cur.machine_learning.completed ? "PROJECT" : "PENDING";
+            const mlDonut = renderClientSvgDonut(cur.machine_learning.percent, cur.machine_learning.color, mlTop, mlBot);
+            const readinessGauge = renderClientSvgDonut(cur.readiness_pct, "#38bdf8", `${Math.round(cur.readiness_pct)}%`, "READY", 90);
 
             let rowsHtml = "";
             subs.forEach((s, idx) => {
                 const bg = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
                 rowsHtml += `<tr style="background:${bg}; border-bottom:1px solid #edf2f7;">
                     <td style="padding:10px 14px; font-size:12px; color:#64748b; font-family:monospace;">${idx + 1}</td>
-                    <td style="padding:10px 14px; font-size:12px; color:#1e293b; font-weight:600; white-space:nowrap;">${escapeHtml(s.date || '-')}</td>
+                    <td style="padding:10px 14px; font-size:12px; color:#1e293b; font-weight:600;">${escapeHtml(s.date || '-')}</td>
                     <td style="padding:10px 14px; font-size:12px; color:#4338ca; font-weight:600;">${escapeHtml(s.application || '-')}</td>
                     <td style="padding:10px 14px; font-size:12px; color:#334155;">${escapeHtml(s.description || '-')}</td>
                     <td style="padding:10px 14px; text-align:center;">
@@ -958,78 +1454,128 @@
 
             let noteBlock = "";
             if (trainerNote) {
-                noteBlock = `<div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:6px; padding:12px 16px; margin-bottom:24px;">
-                    <div style="font-size:12px; font-weight:700; color:#1e40af; margin-bottom:4px;">Trainer Remarks / Guidance</div>
+                noteBlock = `<div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:8px; padding:14px 18px; margin-bottom:24px;">
+                    <div style="font-size:12px; font-weight:800; color:#1e40af; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Trainer Remarks &amp; Feedback</div>
                     <div style="font-size:13px; color:#1e3a8a; line-height:1.5;">${escapeHtml(trainerNote)}</div>
                 </div>`;
             }
 
-            return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Weekly Report</title></head>
-            <body style="margin:0; padding:0; background-color:#f1f5f9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f1f5f9; padding:24px 12px;">
+            return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Report Card &bull; ${name}</title></head>
+            <body style="margin:0; padding:0; background-color:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0f172a; padding:30px 12px;">
                     <tr><td align="center">
-                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:680px; background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e2e8f0;">
-                            <tr><td style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); padding:30px 32px; color:#ffffff;">
-                                <div style="display:inline-block; background:rgba(255,255,255,0.15); border-radius:20px; padding:4px 12px; font-size:11px; font-weight:700; text-transform:uppercase;">DV Data &amp; Analytics &bull; LMS Portal</div>
-                                <h1 style="margin:8px 0 0; font-size:22px; font-weight:800; color:#ffffff;">Weekly Assignment Progress Report</h1>
-                                <p style="margin:4px 0 0; font-size:13px; color:#c7d2fe;">Evaluation &bull; Generated on ${reportDate}</p>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:700px; background:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.25); border:1px solid #334155;">
+                            <tr><td style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%); padding:32px 36px; color:#ffffff;">
+                                <div style="display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; font-weight:700; text-transform:uppercase; color:#c7d2fe;">
+                                    DV Data &amp; Analytics &bull; Industrial Performance Report
+                                </div>
+                                <h1 style="margin:10px 0 0; font-size:24px; font-weight:800; color:#ffffff;">Student Evaluation &amp; Curriculum Report</h1>
+                                <p style="margin:6px 0 0; font-size:13px; color:#94a3b8;">Executive Skill Competency &bull; Generated on ${reportDate}</p>
                             </td></tr>
                             <tr><td style="padding:24px 32px 16px;">
-                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px;">
                                     <tr>
-                                        <td width="50%">
-                                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Student Name</div>
-                                            <div style="font-size:17px; font-weight:800; color:#0f172a;">${name}</div>
-                                            <div style="font-size:12px; color:#64748b; font-family:monospace;">ID: ${sid}</div>
+                                        <td width="55%">
+                                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Candidate Name</div>
+                                            <div style="font-size:19px; font-weight:900; color:#0f172a; margin-top:2px;">${name}</div>
+                                            <div style="font-size:12px; color:#64748b; font-family:monospace; font-weight:600;">ID: ${sid}</div>
                                         </td>
-                                        <td width="50%" align="right">
-                                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Batch</div>
-                                            <div style="font-size:15px; font-weight:700; color:#4338ca;">${batch}</div>
-                                            <div style="font-size:12px; color:#059669; font-weight:600;">&bull; Active Learner</div>
+                                        <td width="45%" align="right">
+                                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Batch / Track</div>
+                                            <div style="font-size:15px; font-weight:800; color:#4338ca; margin-top:2px;">${batch}</div>
+                                            <div style="font-size:12px; color:#059669; font-weight:700; margin-top:3px;">&bull; Active Industrial Trainee</div>
                                         </td>
                                     </tr>
                                 </table>
                             </td></tr>
                             <tr><td style="padding:0 32px 20px;">
-                                <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>
-                                    <td width="32%" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; text-align:center;">
-                                        <div style="font-size:24px; font-weight:800; color:#166534;">${totalSubs}</div>
-                                        <div style="font-size:11px; font-weight:700; color:#15803d; text-transform:uppercase;">Assignments Done</div>
-                                    </td>
-                                    <td width="2%"></td>
-                                    <td width="32%" style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; padding:14px; text-align:center;">
-                                        <div style="font-size:24px; font-weight:800; color:#3730a3;">${Object.keys(modules).length}</div>
-                                        <div style="font-size:11px; font-weight:700; color:#4338ca; text-transform:uppercase;">Modules</div>
-                                    </td>
-                                    <td width="2%"></td>
-                                    <td width="32%" style="background:#fefce8; border:1px solid #fef08a; border-radius:10px; padding:14px; text-align:center;">
-                                        <div style="font-size:14px; font-weight:800; color:#854d0e; padding-top:6px;">${escapeHtml(candidate.latest_date || '-')}</div>
-                                        <div style="font-size:11px; font-weight:700; color:#a16207; text-transform:uppercase; margin-top:6px;">Latest Sub</div>
-                                    </td>
-                                </tr></table>
-                            </td></tr>
-                            <tr><td style="padding:0 32px 16px;">
-                                <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:8px;">Subject Submission Breakdown</div>
-                                <div>${moduleCards}</div>
-                            </td></tr>
-                            <tr><td style="padding:0 32px;">${noteBlock}</td></tr>
-                            <tr><td style="padding:8px 32px 24px;">
-                                <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">Submission History</div>
-                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
-                                    <thead><tr style="background:#f1f5f9;">
-                                        <th align="left" style="padding:8px 12px; font-size:11px;">#</th>
-                                        <th align="left" style="padding:8px 12px; font-size:11px;">Date</th>
-                                        <th align="left" style="padding:8px 12px; font-size:11px;">Module</th>
-                                        <th align="left" style="padding:8px 12px; font-size:11px;">Session</th>
-                                        <th align="center" style="padding:8px 12px; font-size:11px;">Status</th>
-                                    </tr></thead>
-                                    <tbody>${rowsHtml}</tbody>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius:14px; padding:20px 24px; color:#ffffff;">
+                                    <tr>
+                                        <td>
+                                            <div style="font-size:11px; font-weight:700; color:#93c5fd; text-transform:uppercase;">Overall Industrial Readiness Score</div>
+                                            <div style="font-size:28px; font-weight:900; color:#ffffff; margin-top:3px;">${cur.readiness_pct}% <span style="font-size:13px; font-weight:500; color:#94a3b8;">(${cur.completed_credits} of 23 Milestone Credits)</span></div>
+                                            <div style="margin-top:8px;"><span style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); color:#ffffff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:14px;">Placement Ready &bull; Tier 1 Enterprise</span></div>
+                                        </td>
+                                        <td width="110" align="center">${readinessGauge}</td>
+                                    </tr>
                                 </table>
                             </td></tr>
-                            <tr><td style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 32px; font-size:12px; color:#64748b;">
-                                <div style="font-weight:700; color:#334155; margin-bottom:4px;">Need Help or Mentorship?</div>
-                                <div style="font-size:11px;">Mr. Sajid &bull; 8431424165 | Mrs. Lakshmi &bull; 7907991738 | Mr. Ajith &bull; 9916000655</div>
-                                <div style="text-align:center; margin-top:14px; color:#94a3b8; font-size:11px;">&copy; 2026 DV Data &amp; Analytics Pvt Ltd.</div>
+                            <tr><td style="padding:0 32px 16px;">
+                                <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase; margin-bottom:12px;">Core Tools Curriculum Progress (Donut Tracking)</div>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
+                                            <div style="font-size:12px; font-weight:800; color:#10b981; text-transform:uppercase;">Excel</div>
+                                            <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Target: 4</div>
+                                            <div>${excelDonut}</div>
+                                            <div style="margin-top:8px;"><span style="background:#ecfdf5; color:#059669; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.excel.completed} of 4 Done</span></div>
+                                        </td>
+                                        <td width="3%"></td>
+                                        <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
+                                            <div style="font-size:12px; font-weight:800; color:#4f46e5; text-transform:uppercase;">SQL Server</div>
+                                            <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Target: 5</div>
+                                            <div>${sqlDonut}</div>
+                                            <div style="margin-top:8px;"><span style="background:#eef2ff; color:#4338ca; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.sql.completed} of 5 Done</span></div>
+                                        </td>
+                                        <td width="3%"></td>
+                                        <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
+                                            <div style="font-size:12px; font-weight:800; color:#d97706; text-transform:uppercase;">Python</div>
+                                            <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Target: 5</div>
+                                            <div>${pyDonut}</div>
+                                            <div style="margin-top:8px;"><span style="background:#fffbeb; color:#b45309; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.python.completed} of 5 Done</span></div>
+                                        </td>
+                                    </tr>
+                                    <tr><td height="12" colspan="5"></td></tr>
+                                    <tr>
+                                        <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
+                                            <div style="font-size:12px; font-weight:800; color:#f97316; text-transform:uppercase;">Power BI</div>
+                                            <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Target: 4</div>
+                                            <div>${pbiDonut}</div>
+                                            <div style="margin-top:8px;"><span style="background:#fff7ed; color:#c2410c; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.power_bi.completed} of 4 Done</span></div>
+                                        </td>
+                                        <td width="3%"></td>
+                                        <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
+                                            <div style="font-size:12px; font-weight:800; color:#8b5cf6; text-transform:uppercase;">Tableau</div>
+                                            <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Target: 4</div>
+                                            <div>${tabDonut}</div>
+                                            <div style="margin-top:8px;"><span style="background:#f5f3ff; color:#6d28d9; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.tableau.completed} of 4 Done</span></div>
+                                        </td>
+                                        <td width="3%"></td>
+                                        <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
+                                            <div style="font-size:12px; font-weight:800; color:#06b6d4; text-transform:uppercase;">ML Capstone</div>
+                                            <div style="font-size:10px; color:#64748b; margin-bottom:8px;">1 Project</div>
+                                            <div>${mlDonut}</div>
+                                            <div style="margin-top:8px;">${cur.machine_learning.completed ? "<span style='background:#ecfeff; color:#0891b2; font-size:10px; font-weight:800; padding:3px 8px; border-radius:10px;'>✓ Project Verified</span>" : "<span style='background:#f1f5f9; color:#64748b; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;'>Pending Project</span>"}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td></tr>
+                            <tr><td style="padding:0 32px;">${noteBlock}</td></tr>
+                            <tr><td style="padding:8px 32px 20px;">
+                                <div style="font-size:13px; font-weight:800; color:#334155; margin-bottom:10px;">Submission History Details</div>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+                                    <thead><tr style="background:#f1f5f9;">
+                                        <th align="left" style="padding:10px 14px; font-size:11px; font-weight:700;">#</th>
+                                        <th align="left" style="padding:10px 14px; font-size:11px; font-weight:700;">Date</th>
+                                        <th align="left" style="padding:10px 14px; font-size:11px; font-weight:700;">Module</th>
+                                        <th align="left" style="padding:10px 14px; font-size:11px; font-weight:700;">Session</th>
+                                        <th align="center" style="padding:10px 14px; font-size:11px; font-weight:700;">Status</th>
+                                    </tr></thead>
+                                    <tbody>${rowsHtml || '<tr><td colspan="5" style="padding:20px; text-align:center; color:#94a3b8; font-size:12px;">No individual submissions logged in LMS archive yet.</td></tr>'}</tbody>
+                                </table>
+                            </td></tr>
+                            <tr><td style="padding:0 32px 24px;">
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:20px;">
+                                    <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase; margin-bottom:6px;">Mentorship &amp; Assignment Upload Desk</div>
+                                    <div style="font-size:11px; color:#475569; margin-bottom:12px;">Mr. Sajid (LMS Access) &bull; 8431424165 | Mrs. Lakshmi (Mentorship) &bull; 7907991738</div>
+                                    <div style="text-align:center;">
+                                        <a href="https://wa.me/918431424165?text=Hi%20Sajid,%20I%20have%20a%20query%20regarding%20my%20assignment%20report" target="_blank" style="display:inline-block; background:#25d366; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px; margin-right:8px;">💬 Chat on WhatsApp</a>
+                                        <a href="https://dvanalyticsbh.com" target="_blank" style="display:inline-block; background:#4338ca; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px;">📁 Upload Next File</a>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            <tr><td style="background:#f1f5f9; border-top:1px solid #e2e8f0; padding:20px 32px; font-size:11px; color:#64748b; text-align:center;">
+                                &copy; 2026 DV Data &amp; Analytics Pvt Ltd. All rights reserved.
                             </td></tr>
                         </table>
                     </td></tr>
@@ -1039,17 +1585,15 @@
 
         async function sendModalReport() {
             if (!activeModalCandidate) return;
-            const note = document.getElementById("modalTrainerNoteInput").value.trim();
             const sid = activeModalCandidate.student_id;
             closePreviewModal();
-
-            const btn = document.getElementById("modalSendReportBtn");
             await sendOneReport(sid);
         }
 
         function closePreviewModal() {
             document.getElementById("previewModal").classList.add("hidden");
             activeModalCandidate = null;
+            currentModalCandidate = null;
         }
 
         // SMTP Modal

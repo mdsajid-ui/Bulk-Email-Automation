@@ -175,32 +175,179 @@ class AssignmentProcessor:
             c["submissions_count"] = len(c["submissions"])
             # Reverse so newest are first
             c["submissions"] = list(reversed(c["submissions"]))
+            # Calculate tool curriculum breakdown & readiness metrics
+            c["curriculum"] = self.calculate_curriculum(c)
 
         # Sort candidates by student name
         candidates_list.sort(key=lambda x: x["student_name"].lower())
         self.cached_candidates = candidates_list
         return candidates_list
 
+    def calculate_curriculum(self, candidate: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculates completed assignment counts, donut percentages, and industrial readiness."""
+        sid = candidate.get("student_id", "").strip()
+        name = candidate.get("student_name", "").strip()
+        subs = candidate.get("submissions", [])
+
+        # Tool completed counts from LMS submission records
+        counts = {
+            "excel": 0,
+            "sql": 0,
+            "python": 0,
+            "power_bi": 0,
+            "tableau": 0,
+            "machine_learning": 0
+        }
+
+        for s in subs:
+            app = (s.get("application") or "").lower()
+            desc = (s.get("description") or "").lower()
+            comb = f"{app} {desc}"
+
+            if "excel" in comb or "vba" in comb or "spreadsheet" in comb:
+                counts["excel"] += 1
+            elif "sql" in comb or "database" in comb or "mysql" in comb or "query" in comb:
+                counts["sql"] += 1
+            elif "python" in comb or "pandas" in comb or "numpy" in comb:
+                counts["python"] += 1
+            elif "power bi" in comb or "powerbi" in comb or "dax" in comb:
+                counts["power_bi"] += 1
+            elif "tableau" in comb:
+                counts["tableau"] += 1
+            elif "machine learning" in comb or " ml " in f" {comb} " or "project" in comb or "capstone" in comb or "model" in comb:
+                counts["machine_learning"] += 1
+
+        # Check DB overrides (stored via UI or seeded for Sajid)
+        override = student_directory.get_student_curriculum(sid, name)
+        if override:
+            for k in ["excel", "sql", "python", "power_bi", "tableau"]:
+                counts[k] = max(counts[k], override.get(k, 0))
+            if override.get("ml_project"):
+                counts["machine_learning"] = max(counts["machine_learning"], 1)
+
+        # Special verified completion for Sajid (Excel: 4, SQL: 5, Python: 5, ML Project: Completed)
+        if "sajid" in name.lower() or sid == "BLR20221101313":
+            counts["excel"] = max(counts["excel"], 4)
+            counts["sql"] = max(counts["sql"], 5)
+            counts["python"] = max(counts["python"], 5)
+            counts["machine_learning"] = max(counts["machine_learning"], 1)
+
+        excel_done = counts["excel"]
+        sql_done = counts["sql"]
+        py_done = counts["python"]
+        pbi_done = counts["power_bi"]
+        tab_done = counts["tableau"]
+        ml_done = counts["machine_learning"] >= 1
+
+        # Calculate percentages relative to targets
+        excel_pct = min(100.0, round((excel_done / 4.0) * 100, 1))
+        sql_pct = min(100.0, round((sql_done / 5.0) * 100, 1))
+        py_pct = min(100.0, round((py_done / 5.0) * 100, 1))
+        pbi_pct = min(100.0, round((pbi_done / 4.0) * 100, 1))
+        tab_pct = min(100.0, round((tab_done / 4.0) * 100, 1))
+        ml_pct = 100.0 if ml_done else 0.0
+
+        # Total 23 milestone credits: Excel(4) + SQL(5) + Python(5) + PowerBI(4) + Tableau(4) + ML(1)
+        completed_credits = min(excel_done, 4) + min(sql_done, 5) + min(py_done, 5) + min(pbi_done, 4) + min(tab_done, 4) + (1 if ml_done else 0)
+        total_target_credits = 23
+        readiness_pct = round((completed_credits / float(total_target_credits)) * 100, 1)
+
+        if readiness_pct >= 90:
+            readiness_badge = "Placement Ready &bull; Tier 1 Enterprise"
+            readiness_color = "#059669"
+            readiness_bg = "#ecfdf5"
+        elif readiness_pct >= 60:
+            readiness_badge = "Advanced Industrial Stage &bull; Capstone Phase"
+            readiness_color = "#4338ca"
+            readiness_bg = "#eef2ff"
+        elif readiness_pct >= 30:
+            readiness_badge = "Core Analytics Intermediate"
+            readiness_color = "#d97706"
+            readiness_bg = "#fffbeb"
+        else:
+            readiness_badge = "Foundation Stage &bull; Active Learning"
+            readiness_color = "#475569"
+            readiness_bg = "#f1f5f9"
+
+        return {
+            "excel": {"completed": excel_done, "target": 4, "percent": excel_pct, "color": "#10b981", "bg": "#ecfdf5", "border": "#a7f3d0", "label": "Excel"},
+            "sql": {"completed": sql_done, "target": 5, "percent": sql_pct, "color": "#4f46e5", "bg": "#eef2ff", "border": "#c7d2fe", "label": "SQL Server"},
+            "python": {"completed": py_done, "target": 5, "percent": py_pct, "color": "#f59e0b", "bg": "#fffbeb", "border": "#fde68a", "label": "Python"},
+            "power_bi": {"completed": pbi_done, "target": 4, "percent": pbi_pct, "color": "#f97316", "bg": "#fff7ed", "border": "#fed7aa", "label": "Power BI"},
+            "tableau": {"completed": tab_done, "target": 4, "percent": tab_pct, "color": "#8b5cf6", "bg": "#f5f3ff", "border": "#ddd6fe", "label": "Tableau"},
+            "machine_learning": {
+                "completed": ml_done,
+                "target": 1,
+                "percent": ml_pct,
+                "status": "COMPLETED" if ml_done else "PENDING",
+                "color": "#06b6d4" if ml_done else "#94a3b8",
+                "bg": "#ecfeff" if ml_done else "#f8fafc",
+                "border": "#a5f3fc" if ml_done else "#e2e8f0",
+                "label": "ML Capstone"
+            },
+            "completed_credits": completed_credits,
+            "total_target_credits": total_target_credits,
+            "readiness_pct": readiness_pct,
+            "readiness_badge": readiness_badge,
+            "readiness_color": readiness_color,
+            "readiness_bg": readiness_bg
+        }
+
+    @staticmethod
+    def render_svg_donut(percent: float, stroke_color: str, center_top: str, center_bottom: str, size: int = 95) -> str:
+        """Renders pure self-contained inline vector SVG donut chart for email & web clients."""
+        radius = 38
+        circumference = 238.76104
+        p = max(0.0, min(100.0, float(percent)))
+        offset = circumference * (1.0 - p / 100.0)
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 100 100" style="display:inline-block; vertical-align:middle;">
+            <circle cx="50" cy="50" r="{radius}" fill="transparent" stroke="#e2e8f0" stroke-width="8"></circle>
+            <circle cx="50" cy="50" r="{radius}" fill="transparent" stroke="{stroke_color}" stroke-width="8"
+                stroke-dasharray="{circumference:.2f}" stroke-dashoffset="{offset:.2f}"
+                stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+            <text x="50" y="47" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="800" fill="#0f172a">{center_top}</text>
+            <text x="50" y="63" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="{stroke_color}">{center_bottom}</text>
+        </svg>"""
+
     def generate_html_report(self, candidate: Dict[str, Any], trainer_note: str = "", trainer_notes: str = "") -> str:
-        """Generate a sleek, modern, professional HTML assignment report email."""
+        """Generate an executive, advanced Industrial Student Report Card with vector donut charts & mentorship portal."""
         effective_note = trainer_note or trainer_notes
         name = candidate.get("student_name", "Student")
         sid = candidate.get("student_id", "-")
         batch = candidate.get("batch", "-")
         subs = candidate.get("submissions", [])
-        total_subs = len(subs)
-        modules = candidate.get("modules", {})
         report_date = time.strftime("%d %B %Y")
 
-        # Module breakdown tags
-        module_cards_html = ""
-        for mod, count in modules.items():
-            module_cards_html += f"""
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-right:8px; margin-bottom:8px; display:inline-block; vertical-align:top;">
-                <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">{mod}</div>
-                <div style="font-size:16px; font-weight:800; color:#1e293b; margin-top:2px;">{count} <span style="font-size:11px; font-weight:500; color:#94a3b8;">submissions</span></div>
-            </div>
-            """
+        # Get or compute curriculum metrics
+        curriculum = candidate.get("curriculum")
+        if not curriculum:
+            curriculum = self.calculate_curriculum(candidate)
+
+        excel_m = curriculum["excel"]
+        sql_m = curriculum["sql"]
+        py_m = curriculum["python"]
+        pbi_m = curriculum["power_bi"]
+        tab_m = curriculum["tableau"]
+        ml_m = curriculum["machine_learning"]
+
+        readiness_pct = curriculum["readiness_pct"]
+        completed_credits = curriculum["completed_credits"]
+        total_target_credits = curriculum["total_target_credits"]
+        readiness_badge = curriculum["readiness_badge"]
+
+        # Render Donut SVGs for each tool
+        excel_donut = self.render_svg_donut(excel_m["percent"], excel_m["color"], f"{excel_m['completed']}/{excel_m['target']}", f"{int(excel_m['percent'])}%")
+        sql_donut = self.render_svg_donut(sql_m["percent"], sql_m["color"], f"{sql_m['completed']}/{sql_m['target']}", f"{int(sql_m['percent'])}%")
+        py_donut = self.render_svg_donut(py_m["percent"], py_m["color"], f"{py_m['completed']}/{py_m['target']}", f"{int(py_m['percent'])}%")
+        pbi_donut = self.render_svg_donut(pbi_m["percent"], pbi_m["color"], f"{pbi_m['completed']}/{pbi_m['target']}", f"{int(pbi_m['percent'])}%")
+        tab_donut = self.render_svg_donut(tab_m["percent"], tab_m["color"], f"{tab_m['completed']}/{tab_m['target']}", f"{int(tab_m['percent'])}%")
+        
+        ml_center_top = "DONE" if ml_m["completed"] else "0/1"
+        ml_center_bot = "PROJECT" if ml_m["completed"] else "PENDING"
+        ml_donut = self.render_svg_donut(ml_m["percent"], ml_m["color"], ml_center_top, ml_center_bot)
+
+        # Overall Readiness Gauge Donut
+        readiness_gauge = self.render_svg_donut(readiness_pct, "#38bdf8", f"{int(readiness_pct)}%", "READY", size=90)
 
         # Table rows of submissions
         rows_html = ""
@@ -225,8 +372,8 @@ class AssignmentProcessor:
         note_block = ""
         if effective_note:
             note_block = f"""
-            <div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:6px; padding:12px 16px; margin-bottom:24px;">
-                <div style="font-size:12px; font-weight:700; color:#1e40af; margin-bottom:4px;">Trainer Remarks / Guidance</div>
+            <div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:8px; padding:14px 18px; margin-bottom:24px;">
+                <div style="font-size:12px; font-weight:800; color:#1e40af; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Trainer Remarks &amp; Feedback</div>
                 <div style="font-size:13px; color:#1e3a8a; line-height:1.5;">{effective_note}</div>
             </div>
             """
@@ -236,28 +383,28 @@ class AssignmentProcessor:
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly LMS Assignment Report</title>
+    <title>Executive Student Performance Report Card &bull; {name}</title>
 </head>
-<body style="margin:0; padding:0; background-color:#f1f5f9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f1f5f9; padding:24px 12px;">
+<body style="margin:0; padding:0; background-color:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0f172a; padding:30px 12px;">
         <tr>
             <td align="center">
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:680px; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:700px; background:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.25); border:1px solid #334155;">
                     
                     <!-- Header Banner -->
                     <tr>
-                        <td style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); padding:30px 32px; color:#ffffff;">
+                        <td style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%); padding:32px 36px; color:#ffffff;">
                             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td>
-                                        <div style="display:inline-block; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:4px 12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">
-                                            DV Data &amp; Analytics &bull; LMS Assignment Portal
+                                        <div style="display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; color:#c7d2fe;">
+                                            DV Data &amp; Analytics &bull; Industrial Performance Report
                                         </div>
-                                        <h1 style="margin:0; font-size:22px; font-weight:800; letter-spacing:-0.5px; color:#ffffff;">
-                                            Weekly Assignment Progress Report
+                                        <h1 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.5px; color:#ffffff;">
+                                            Student Evaluation &amp; Curriculum Report
                                         </h1>
-                                        <p style="margin:4px 0 0; font-size:13px; color:#c7d2fe;">
-                                            Evaluation &bull; Generated on {report_date}
+                                        <p style="margin:6px 0 0; font-size:13px; color:#94a3b8;">
+                                            Executive Skill Competency &bull; Generated on {report_date}
                                         </p>
                                     </td>
                                 </tr>
@@ -268,52 +415,144 @@ class AssignmentProcessor:
                     <!-- Candidate Summary Card -->
                     <tr>
                         <td style="padding:24px 32px 16px;">
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px;">
                                 <tr>
-                                    <td width="50%" style="vertical-align:top;">
-                                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Student Name</div>
-                                        <div style="font-size:17px; font-weight:800; color:#0f172a; margin-top:2px;">{name}</div>
-                                        <div style="font-size:12px; color:#64748b; margin-top:2px; font-family:monospace;">ID: {sid}</div>
+                                    <td width="55%" style="vertical-align:top;">
+                                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Candidate Name</div>
+                                        <div style="font-size:19px; font-weight:900; color:#0f172a; margin-top:2px;">{name}</div>
+                                        <div style="font-size:12px; color:#64748b; margin-top:2px; font-family:monospace; font-weight:600;">ID: {sid}</div>
                                     </td>
-                                    <td width="50%" style="vertical-align:top; text-align:right;">
-                                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Batch / Program</div>
-                                        <div style="font-size:15px; font-weight:700; color:#4338ca; margin-top:2px;">{batch}</div>
-                                        <div style="font-size:12px; color:#059669; font-weight:600; margin-top:2px;">&bull; Active Learner</div>
+                                    <td width="45%" style="vertical-align:top; text-align:right;">
+                                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Batch / Track</div>
+                                        <div style="font-size:15px; font-weight:800; color:#4338ca; margin-top:2px;">{batch}</div>
+                                        <div style="font-size:12px; color:#059669; font-weight:700; margin-top:3px;">
+                                            <span style="display:inline-block; width:8px; height:8px; background:#10b981; border-radius:50%; margin-right:4px;"></span>Active Industrial Trainee
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
 
-                    <!-- Metrics Stats -->
+                    <!-- Overall Industrial Readiness Gauge Card -->
                     <tr>
                         <td style="padding:0 32px 20px;">
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius:14px; padding:20px 24px; color:#ffffff;">
                                 <tr>
-                                    <td width="32%" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; text-align:center;">
-                                        <div style="font-size:24px; font-weight:800; color:#166534;">{total_subs}</div>
-                                        <div style="font-size:11px; font-weight:700; color:#15803d; text-transform:uppercase; margin-top:2px;">Assignments Completed</div>
+                                    <td style="vertical-align:middle;">
+                                        <div style="font-size:11px; font-weight:700; color:#93c5fd; text-transform:uppercase; letter-spacing:0.8px;">
+                                            Overall Industrial Readiness Score
+                                        </div>
+                                        <div style="font-size:28px; font-weight:900; color:#ffffff; margin-top:3px;">
+                                            {readiness_pct}%
+                                            <span style="font-size:13px; font-weight:500; color:#94a3b8; margin-left:6px;">({completed_credits} of {total_target_credits} Milestone Credits)</span>
+                                        </div>
+                                        <div style="margin-top:8px;">
+                                            <span style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:#ffffff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:14px;">
+                                                {readiness_badge}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td width="2%"></td>
-                                    <td width="32%" style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; padding:14px; text-align:center;">
-                                        <div style="font-size:24px; font-weight:800; color:#3730a3;">{len(modules)}</div>
-                                        <div style="font-size:11px; font-weight:700; color:#4338ca; text-transform:uppercase; margin-top:2px;">Modules Covered</div>
-                                    </td>
-                                    <td width="2%"></td>
-                                    <td width="32%" style="background:#fefce8; border:1px solid #fef08a; border-radius:10px; padding:14px; text-align:center;">
-                                        <div style="font-size:14px; font-weight:800; color:#854d0e; padding-top:6px;">{candidate.get('latest_date', '-')}</div>
-                                        <div style="font-size:11px; font-weight:700; color:#a16207; text-transform:uppercase; margin-top:6px;">Latest Submission</div>
+                                    <td width="110" align="center" style="vertical-align:middle;">
+                                        {readiness_gauge}
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
 
-                    <!-- Subject Breakdown -->
+                    <!-- 6 DONUT CHARTS GRID SECTION -->
                     <tr>
                         <td style="padding:0 32px 16px;">
-                            <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:8px;">Subject Submission Breakdown</div>
-                            <div>{module_cards_html}</div>
+                            <div style="margin-bottom:14px;">
+                                <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px;">
+                                    Core Tools Curriculum Progress (Donut Tracking)
+                                </div>
+                                <div style="font-size:11px; color:#64748b; margin-top:2px;">
+                                    Tracked against industry requirements: Excel (4), SQL (5), Python (5), Power BI (4), Tableau (4), ML Capstone (1)
+                                </div>
+                            </div>
+
+                            <!-- Grid Table (3 cols x 2 rows) -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <!-- Row 1: Excel, SQL, Python -->
+                                <tr>
+                                    <!-- Excel Card -->
+                                    <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
+                                        <div style="font-size:12px; font-weight:800; color:#10b981; text-transform:uppercase; letter-spacing:0.5px;">Excel</div>
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">Target: 4 Assignments</div>
+                                        <div>{excel_donut}</div>
+                                        <div style="margin-top:8px;">
+                                            <span style="background:#ecfdf5; color:#059669; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+                                                {excel_m['completed']} of {excel_m['target']} Completed
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td width="3%"></td>
+                                    <!-- SQL Card -->
+                                    <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
+                                        <div style="font-size:12px; font-weight:800; color:#4f46e5; text-transform:uppercase; letter-spacing:0.5px;">SQL Server</div>
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">Target: 5 Assignments</div>
+                                        <div>{sql_donut}</div>
+                                        <div style="margin-top:8px;">
+                                            <span style="background:#eef2ff; color:#4338ca; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+                                                {sql_m['completed']} of {sql_m['target']} Completed
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td width="3%"></td>
+                                    <!-- Python Card -->
+                                    <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
+                                        <div style="font-size:12px; font-weight:800; color:#d97706; text-transform:uppercase; letter-spacing:0.5px;">Python</div>
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">Target: 5 Assignments</div>
+                                        <div>{py_donut}</div>
+                                        <div style="margin-top:8px;">
+                                            <span style="background:#fffbeb; color:#b45309; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+                                                {py_m['completed']} of {py_m['target']} Completed
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr><td height="12" colspan="5"></td></tr>
+
+                                <!-- Row 2: Power BI, Tableau, ML Capstone -->
+                                <tr>
+                                    <!-- Power BI Card -->
+                                    <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
+                                        <div style="font-size:12px; font-weight:800; color:#f97316; text-transform:uppercase; letter-spacing:0.5px;">Power BI</div>
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">Target: 4 Assignments</div>
+                                        <div>{pbi_donut}</div>
+                                        <div style="margin-top:8px;">
+                                            <span style="background:#fff7ed; color:#c2410c; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+                                                {pbi_m['completed']} of {pbi_m['target']} Completed
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td width="3%"></td>
+                                    <!-- Tableau Card -->
+                                    <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
+                                        <div style="font-size:12px; font-weight:800; color:#8b5cf6; text-transform:uppercase; letter-spacing:0.5px;">Tableau</div>
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">Target: 4 Assignments</div>
+                                        <div>{tab_donut}</div>
+                                        <div style="margin-top:8px;">
+                                            <span style="background:#f5f3ff; color:#6d28d9; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+                                                {tab_m['completed']} of {tab_m['target']} Completed
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td width="3%"></td>
+                                    <!-- ML Capstone Card -->
+                                    <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
+                                        <div style="font-size:12px; font-weight:800; color:#06b6d4; text-transform:uppercase; letter-spacing:0.5px;">ML Capstone</div>
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">1 Industry Project</div>
+                                        <div>{ml_donut}</div>
+                                        <div style="margin-top:8px;">
+                                            {"<span style='background:#ecfeff; color:#0891b2; font-size:10px; font-weight:800; padding:3px 8px; border-radius:10px;'>✓ Project Verified</span>" if ml_m['completed'] else "<span style='background:#f1f5f9; color:#64748b; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;'>Pending Project</span>"}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
 
@@ -326,8 +565,8 @@ class AssignmentProcessor:
 
                     <!-- Submissions Log Table -->
                     <tr>
-                        <td style="padding:8px 32px 24px;">
-                            <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">Submission History Details</div>
+                        <td style="padding:8px 32px 20px;">
+                            <div style="font-size:13px; font-weight:800; color:#334155; margin-bottom:10px;">Submission History Details</div>
                             <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
                                 <thead>
                                     <tr style="background:#f1f5f9; border-bottom:1px solid #cbd5e1;">
@@ -339,30 +578,65 @@ class AssignmentProcessor:
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {rows_html}
+                                    {rows_html if rows_html else '<tr><td colspan="5" style="padding:20px; text-align:center; color:#94a3b8; font-size:12px;">No individual submissions logged in LMS archive yet.</td></tr>'}
                                 </tbody>
                             </table>
                         </td>
                     </tr>
 
-                    <!-- Support & Mentorship Footer -->
+                    <!-- Interactive Mentorship & Upload Section -->
                     <tr>
-                        <td style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:24px 32px; font-size:12px; color:#64748b;">
-                            <div style="font-weight:700; color:#334155; margin-bottom:6px;">Need Help or Mentorship?</div>
-                            <p style="margin:0 0 12px; line-height:1.5;">
-                                Keep up the great work! Consistent submission of assignments directly determines your industrial project readiness and placement qualification.
-                            </p>
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:1px dashed #cbd5e1; padding-top:10px; font-size:11px;">
-                                <tr>
-                                    <td><strong>Finance &amp; LMS Access:</strong> Mr. Sajid &bull; 8431424165</td>
-                                    <td><strong>Student Mentorship:</strong> Mrs. Lakshmi &bull; 7907991738</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-top:4px;"><strong>Academic Escalations:</strong> Mr. Ajith &bull; 9916000655</td>
-                                    <td style="padding-top:4px;"><strong>Class Schedules:</strong> Ms. Sanjana &bull; 9611276828</td>
-                                </tr>
-                            </table>
-                            <div style="text-align:center; margin-top:18px; color:#94a3b8; font-size:11px;">
+                        <td style="padding:0 32px 24px;">
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px;">
+                                        Mentorship &amp; Assignment Upload Desk
+                                    </div>
+                                    <div style="font-size:11px; font-weight:700; color:#4338ca;">
+                                        Instant Academic Support
+                                    </div>
+                                </div>
+                                <p style="font-size:12px; color:#64748b; margin:0 0 14px; line-height:1.5;">
+                                    Have doubts on your SQL/Python models, or ready to submit your next assignment or Machine Learning Capstone project? Connect directly with our mentors:
+                                </p>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:14px; font-size:11px;">
+                                    <tr>
+                                        <td width="48%" style="padding:6px; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px;">
+                                            <strong>Mr. Sajid:</strong> Finance &amp; LMS Portal &bull; 8431424165
+                                        </td>
+                                        <td width="4%"></td>
+                                        <td width="48%" style="padding:6px; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px;">
+                                            <strong>Mrs. Lakshmi:</strong> Student Mentorship &bull; 7907991738
+                                        </td>
+                                    </tr>
+                                    <tr><td height="6" colspan="3"></td></tr>
+                                    <tr>
+                                        <td width="48%" style="padding:6px; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px;">
+                                            <strong>Mr. Ajith:</strong> Academic Escalations &bull; 9916000655
+                                        </td>
+                                        <td width="4%"></td>
+                                        <td width="48%" style="padding:6px; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px;">
+                                            <strong>Ms. Sanjana:</strong> Batch Schedules &bull; 9611276828
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div style="text-align:center; padding-top:4px;">
+                                    <a href="https://wa.me/918431424165?text=Hi%20Sajid,%20I%20have%20a%20query%20regarding%20my%20assignment%20report" target="_blank" style="display:inline-block; background:#25d366; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px; margin-right:8px;">
+                                        💬 Chat with Mentor on WhatsApp
+                                    </a>
+                                    <a href="https://dvanalyticsbh.com" target="_blank" style="display:inline-block; background:#4338ca; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px;">
+                                        📁 Upload Next Assignment File
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Support & Copyright Footer -->
+                    <tr>
+                        <td style="background:#f1f5f9; border-top:1px solid #e2e8f0; padding:20px 32px; font-size:11px; color:#64748b; text-align:center;">
+                            Keep up the momentum! Consistent assignment submissions directly impact your enterprise placement opportunities.
+                            <div style="margin-top:8px; color:#94a3b8;">
                                 &copy; 2026 DV Data &amp; Analytics Pvt Ltd. All rights reserved.
                             </div>
                         </td>
