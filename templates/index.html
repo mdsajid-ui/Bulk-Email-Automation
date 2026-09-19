@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulk Email Automator | Send Attachments in 1 Click</title>
+    <title>DV Analytics &bull; LMS Assignment & Email Automator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Client-Side Excel and CSV Parsers -->
+    <!-- Client-Side Excel, CSV & HTML Table Parsers -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- Google Identity Services for Gmail API -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- SMTP.js for direct browser SMTP relay -->
+    <!-- SMTP.js -->
     <script src="https://smtpjs.com/v3/smtp.js"></script>
 
     <script>
@@ -45,1217 +45,823 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-                    <i class="fa-solid fa-paper-plane text-lg"></i>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg text-slate-900 tracking-tight leading-none">Bulk Email Automator</h1>
-                    <p class="text-xs text-slate-500 mt-0.5">Send attachments to 100+ recipients with 1 click</p>
+                    <h1 class="font-bold text-lg text-slate-900 tracking-tight leading-none">Bulk Email &amp; LMS Automator</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Bulk Email Automator &bull; Weekly Student Assignment Reports</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="downloadSampleCsv()" class="inline-flex items-center text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition border border-emerald-200 shadow-xs">
-                    <i class="fa-solid fa-file-csv mr-1.5 text-emerald-600"></i> Sample CSV
+
+            <!-- Main Mode Switcher -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button id="navBtnAssignments" onclick="switchAppMode('assignments')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-white text-indigo-600 shadow-xs">
+                    <i class="fa-solid fa-chart-simple text-indigo-500"></i>
+                    <span>LMS Assignment Reports</span>
+                    <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold">Weekly</span>
                 </button>
-                <button onclick="downloadSampleExcel()" class="inline-flex items-center text-xs font-semibold text-indigo-700 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition border border-indigo-200 shadow-xs">
-                    <i class="fa-solid fa-file-excel mr-1.5 text-indigo-600"></i> Sample Excel
+                <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane text-slate-400"></i>
+                    <span>General Bulk Email</span>
+                </button>
+            </div>
+
+            <!-- Server Status & Settings -->
+            <div class="flex items-center space-x-2">
+                <span id="backendStatusPill" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                    <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span>
+                    <span id="backendStatusLabel">Checking Server...</span>
+                </span>
+                <button onclick="openSmtpSettingsModal()" class="inline-flex items-center text-xs font-semibold text-slate-700 hover:text-indigo-600 bg-white hover:bg-slate-50 px-3 py-1.5 rounded-lg transition border border-slate-200 shadow-xs">
+                    <i class="fa-solid fa-gear mr-1.5 text-slate-400"></i> SMTP Setup
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Workspace Container -->
+    <!-- MAIN APP CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            <!-- LEFT COLUMN: Workflow Steps (Recipients, Message & Attachments, Sender Setup) -->
-            <div class="lg:col-span-7 space-y-6">
+        <!-- ================= VIEW 1: WEEKLY LMS ASSIGNMENT REPORTS ================= -->
+        <div id="viewAssignments" class="space-y-6">
 
-                <!-- STEP 1: Recipients List -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">1</span>
-                            <h2 class="font-semibold text-slate-800">Recipients List</h2>
-                        </div>
-                        <div id="recipientsCountBadge" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
-                            0 Recipients Loaded
-                        </div>
-                    </div>
-
-                    <div class="p-6">
-                        <!-- Tab switcher: File Upload vs Manual Paste -->
-                        <div class="flex border-b border-slate-200 mb-4 text-sm font-medium">
-                            <button id="tabFileBtn" onclick="switchRecipientTab('file')" class="pb-2.5 px-4 border-b-2 border-indigo-600 text-indigo-600 flex items-center space-x-2 font-semibold">
-                                <i class="fa-solid fa-file-spreadsheet"></i>
-                                <span>Upload CSV / Excel</span>
-                            </button>
-                            <button id="tabPasteBtn" onclick="switchRecipientTab('paste')" class="pb-2.5 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2">
-                                <i class="fa-solid fa-paste"></i>
-                                <span>Paste Emails</span>
-                            </button>
-                        </div>
-
-                        <!-- Tab 1: File Dropzone -->
-                        <div id="tabFileContent">
-                            <label for="recipientsFileInput" class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-6 cursor-pointer bg-slate-50/50 hover:bg-indigo-50/30 transition group">
-                                <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:scale-110 transition duration-200">
-                                    <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
-                                </div>
-                                <p class="mt-3 text-sm font-semibold text-slate-700">
-                                    Click or drag & drop recipient spreadsheet here
-                                </p>
-                                <p class="text-xs text-slate-400 mt-1">Supports .xlsx, .xls, .csv</p>
-                                
-                                <div class="mt-3 flex items-center space-x-2 text-xs" onclick="event.stopPropagation()">
-                                    <span class="text-slate-500 font-medium">Download template:</span>
-                                    <button type="button" onclick="downloadSampleCsv()" class="inline-flex items-center text-emerald-700 hover:text-emerald-800 bg-white hover:bg-emerald-50 border border-slate-200 px-2 py-0.5 rounded shadow-xs font-semibold">
-                                        <i class="fa-solid fa-file-csv text-emerald-600 mr-1"></i> Sample CSV
-                                    </button>
-                                    <button type="button" onclick="downloadSampleExcel()" class="inline-flex items-center text-indigo-700 hover:text-indigo-800 bg-white hover:bg-indigo-50 border border-slate-200 px-2 py-0.5 rounded shadow-xs font-semibold">
-                                        <i class="fa-solid fa-file-excel text-indigo-600 mr-1"></i> Sample Excel (.xlsx)
-                                    </button>
-                                </div>
-                                <input id="recipientsFileInput" type="file" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
-                            </label>
-                        </div>
-
-                        <!-- Tab 2: Paste Emails -->
-                        <div id="tabPasteContent" class="hidden">
-                            <textarea id="pasteEmailsInput" rows="4" placeholder="Paste emails separated by commas, semicolons, or newlines...&#10;alice@example.com&#10;bob@example.com&#10;carol@example.com" class="w-full text-sm rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono"></textarea>
-                            <button onclick="handleClientSidePaste()" class="mt-2 w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition flex items-center justify-center space-x-1.5">
-                                <i class="fa-solid fa-check"></i>
-                                <span>Parse & Load Emails</span>
-                            </button>
-                        </div>
-
-                        <!-- Preview Table & Tags -->
-                        <div id="recipientsPreviewSection" class="mt-4 hidden">
-                            <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
-                                <span id="recipientStatsText" class="font-medium">Loaded recipients preview</span>
-                                <div id="availableTagsContainer" class="flex items-center space-x-1"></div>
-                            </div>
-                            <div class="border border-slate-200 rounded-lg max-h-44 overflow-y-auto custom-scrollbar">
-                                <table class="min-w-full divide-y divide-slate-200 text-xs">
-                                    <thead class="bg-slate-50 sticky top-0">
-                                        <tr id="previewTableHeaders">
-                                            <th class="px-3 py-2 text-left font-semibold text-slate-600">#</th>
-                                            <th class="px-3 py-2 text-left font-semibold text-slate-600">Email</th>
-                                            <th class="px-3 py-2 text-left font-semibold text-slate-600">Name / Extra</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="previewTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STEP 2: Message & File Attachments -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-                            <h2 class="font-semibold text-slate-800">Email Message & File Attachments</h2>
-                        </div>
-                        <span class="text-xs text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                            Same attachment sends to all
+            <!-- Top Action Banner -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                            Weekly Automation Workflow
                         </span>
+                        <h2 class="text-xl font-bold text-slate-900 mt-2">Candidate Assignment Reports</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Upload your latest LMS report sheet (<code class="text-indigo-600">.xls</code>, <code class="text-indigo-600">.xlsx</code>, <code class="text-indigo-600">.csv</code>). Click any candidate to send their report instantly!
+                        </p>
                     </div>
-
-                    <div class="p-6 space-y-4">
-                        <!-- Subject Line -->
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-semibold text-slate-700">Subject Line</label>
-                                <span class="text-[11px] text-slate-400">Use <code class="text-indigo-600 font-mono">{{name}}</code> for tags</span>
-                            </div>
-                            <input id="emailSubject" type="text" placeholder="e.g. Important Document: Attached is your file" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                        </div>
-
-                        <!-- Attachments Box (Key Highlight) -->
-                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fa-solid fa-paperclip text-indigo-600"></i>
-                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-700">File Attachments (Sent to everyone)</span>
-                                </div>
-                                <span id="attachmentCountBadge" class="text-xs text-slate-500 font-medium">0 files attached</span>
-                            </div>
-
-                            <!-- Attachment Dropzone -->
-                            <label for="attachmentFileInput" class="flex items-center justify-center p-3.5 border-2 border-dashed border-indigo-200 hover:border-indigo-500 rounded-lg cursor-pointer bg-white hover:bg-indigo-50/20 transition group">
-                                <i class="fa-solid fa-cloud-arrow-up text-indigo-500 mr-2 group-hover:scale-110 transition"></i>
-                                <span class="text-xs font-semibold text-slate-600 group-hover:text-indigo-600">Click to choose files (PDF, Word, Excel, Images, Zip, etc.)</span>
-                                <input id="attachmentFileInput" type="file" multiple class="hidden" onchange="handleClientSideAttachments(this.files)">
-                            </label>
-
-                            <!-- Attachment List -->
-                            <div id="attachmentsList" class="mt-3 space-y-2"></div>
-                        </div>
-
-                        <!-- Email Body -->
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-semibold text-slate-700">Email Body</label>
-                                <div class="flex items-center space-x-2">
-                                    <label class="text-[11px] text-slate-500 flex items-center cursor-pointer">
-                                        <input id="isHtmlCheckbox" type="checkbox" class="rounded text-indigo-600 mr-1" checked> HTML Format
-                                    </label>
-                                </div>
-                            </div>
-                            <textarea id="emailBody" rows="6" placeholder="Hello {{name}},&#10;&#10;Please find the requested file attached with this email. Let us know if you have any questions.&#10;&#10;Best regards,&#10;Team" class="w-full text-sm rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono text-slate-700"></textarea>
-                        </div>
+                    <div class="flex items-center flex-wrap gap-2">
+                        <!-- Quick Load Assignment (10).xls -->
+                        <button onclick="quickLoadDefaultAssignment()" class="px-4 py-2.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 hover:border-indigo-200 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-bolt text-amber-500"></i>
+                            <span>Load "Assignment (10).xls"</span>
+                        </button>
+                        <!-- Upload Any Weekly LMS Report -->
+                        <label for="lmsFileInput" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 cursor-pointer transition flex items-center space-x-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Upload Weekly LMS Report</span>
+                            <input id="lmsFileInput" type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="handleLmsReportUpload(this.files[0])">
+                        </label>
                     </div>
                 </div>
 
-                <!-- STEP 3: Sender & Delivery Setup -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">3</span>
-                            <h2 class="font-semibold text-slate-800">Sender & Delivery Setup</h2>
-                        </div>
-                        <!-- Method tabs -->
-                        <div class="flex items-center bg-slate-200/70 p-0.5 rounded-lg text-xs font-semibold">
-                            <button id="sendMethodSmtpBtn" onclick="switchSendMethod('smtp')" class="px-2.5 py-1 rounded-md bg-white text-slate-800 shadow-xs">SMTP / App Password</button>
-                            <button id="sendMethodGoogleBtn" onclick="switchSendMethod('google')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">Google OAuth (1-Click)</button>
-                        </div>
+                <!-- Metrics Ribbon -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100">
+                    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold uppercase text-slate-400 block">Total Submissions</span>
+                        <span id="metricTotalRows" class="text-2xl font-extrabold text-slate-800">0</span>
                     </div>
-
-                    <div class="p-6 space-y-4">
-                        <!-- METHOD A: SMTP -->
-                        <div id="methodSmtpContent" class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-500 font-medium">Quick Presets:</span>
-                                <div class="flex items-center space-x-1">
-                                    <button type="button" onclick="applyPreset('gmail')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition font-semibold">Gmail</button>
-                                    <button type="button" onclick="applyPreset('office365')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition font-semibold">Outlook/O365</button>
-                                    <button type="button" onclick="applyPreset('custom')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition font-semibold">Custom</button>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-xs font-semibold text-slate-700 block mb-1">SMTP Host</label>
-                                    <input id="smtpHost" type="text" value="smtp.gmail.com" placeholder="smtp.gmail.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-700 block mb-1">Port</label>
-                                        <input id="smtpPort" type="number" value="587" placeholder="587" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-700 block mb-1">Security</label>
-                                        <select id="smtpSecurity" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white">
-                                            <option value="tls" selected>STARTTLS (587)</option>
-                                            <option value="ssl">SSL (465)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-xs font-semibold text-slate-700 block mb-1">Sender Email</label>
-                                    <input id="smtpUsername" type="email" placeholder="your-email@gmail.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="text-xs font-semibold text-slate-700 block mb-1">Password or App Password</label>
-                                    <div class="relative">
-                                        <input id="smtpPassword" type="password" placeholder="16-digit App Password" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 pr-10">
-                                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
-                                            <i id="passwordToggleIcon" class="fa-regular fa-eye text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-xs font-semibold text-slate-700 block mb-1">Sender Display Name (Optional)</label>
-                                    <input id="smtpSenderName" type="text" placeholder="e.g. Sales Operations" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="text-xs font-semibold text-slate-700 block mb-1">Reply-To Email (Optional)</label>
-                                    <input id="smtpReplyTo" type="email" placeholder="reply-here@company.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                </div>
-                            </div>
-
-                            <!-- Backend connection indicator -->
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
-                                <div class="flex items-center space-x-2">
-                                    <span id="backendStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                                    <span id="backendStatusText" class="text-slate-600 font-medium">Checking Local Python Engine...</span>
-                                </div>
-                                <button type="button" onclick="checkLocalBackend()" class="text-indigo-600 hover:text-indigo-800 font-semibold">
-                                    <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- METHOD B: Google OAuth (Client-Side Gmail API) -->
-                        <div id="methodGoogleContent" class="hidden space-y-4">
-                            <div class="p-4 bg-indigo-50/60 border border-indigo-100 rounded-xl text-xs space-y-2">
-                                <div class="flex items-center space-x-2 text-indigo-900 font-bold">
-                                    <i class="fa-brands fa-google text-indigo-600"></i>
-                                    <span>Direct Browser Send via Gmail API</span>
-                                </div>
-                                <p class="text-slate-600">
-                                    Allows sending bulk emails directly from GitHub Pages without running a Python server.
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-xs font-semibold text-slate-700 block mb-1">Google OAuth Client ID</label>
-                                <input id="googleClientId" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 font-mono text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                <p class="text-[11px] text-slate-400 mt-1">
-                                    From Google Cloud Console &rarr; Credentials (Web application). Add <code class="text-indigo-600">https://mdsajid-ui.github.io</code> under Authorized JavaScript origins.
-                                </p>
-                            </div>
-
-                            <div class="flex items-center space-x-3 pt-1">
-                                <button id="btnConnectGoogle" onclick="connectGoogleAccount()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center space-x-2">
-                                    <i class="fa-brands fa-google"></i>
-                                    <span>Connect Google Account</span>
-                                </button>
-                                <span id="googleAuthStatusBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                                    Not Connected
-                                </span>
-                            </div>
-                        </div>
-
+                    <div class="bg-indigo-50/60 rounded-xl p-3.5 border border-indigo-100 text-center">
+                        <span class="text-[11px] font-bold uppercase text-indigo-400 block">Unique Candidates</span>
+                        <span id="metricCandidates" class="text-2xl font-extrabold text-indigo-700">0</span>
+                    </div>
+                    <div class="bg-emerald-50 rounded-xl p-3.5 border border-emerald-100 text-center">
+                        <span class="text-[11px] font-bold uppercase text-emerald-500 block">Reports Sent</span>
+                        <span id="metricSentCount" class="text-2xl font-extrabold text-emerald-700">0</span>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-3.5 border border-amber-100 text-center">
+                        <span class="text-[11px] font-bold uppercase text-amber-500 block">Pending Dispatch</span>
+                        <span id="metricPendingCount" class="text-2xl font-extrabold text-amber-700">0</span>
                     </div>
                 </div>
-
             </div>
 
-            <!-- RIGHT COLUMN: Send Control Center & Live Progress Monitor -->
-            <div class="lg:col-span-5 space-y-6">
+            <!-- Candidate Management Table Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <!-- Search & Filters Header -->
+                <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-slate-50/50">
+                    <div class="flex items-center flex-1 space-x-3">
+                        <!-- Search Box -->
+                        <div class="relative flex-1 max-w-sm">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input id="candidateSearchInput" type="text" oninput="applyCandidateFilters()" placeholder="Search student name, ID (e.g. BBS2026...), or email..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white">
+                        </div>
 
-                <!-- One-Click Send Card -->
-                <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Dispatch Center</span>
-                            <h3 class="text-xl font-bold mt-0.5">One-Click Launch</h3>
-                        </div>
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-                            <i class="fa-solid fa-bolt text-lg"></i>
-                        </div>
+                        <!-- Batch Filter -->
+                        <select id="candidateBatchFilter" onchange="applyCandidateFilters()" class="text-xs py-2 px-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                            <option value="">All Batches</option>
+                        </select>
+
+                        <!-- Status Filter -->
+                        <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs py-2 px-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                            <option value="all">All Status</option>
+                            <option value="pending" selected>Pending Only</option>
+                            <option value="sent">Sent Only</option>
+                        </select>
                     </div>
 
-                    <!-- Pacing interval & Dry Run -->
-                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 mb-5 border border-white/10 space-y-3">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-300 flex items-center">
-                                <i class="fa-regular fa-clock mr-1.5"></i> Interval between sends
-                            </span>
-                            <select id="delayInterval" class="bg-slate-800 text-white rounded-lg px-2.5 py-1 text-xs border border-white/20 focus:outline-none">
-                                <option value="0.5">0.5 seconds</option>
-                                <option value="1.0" selected>1.0 second (Recommended)</option>
-                                <option value="2.0">2.0 seconds</option>
-                                <option value="5.0">5.0 seconds</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center justify-between text-xs pt-1 border-t border-white/10">
-                            <label for="dryRunCheckbox" class="text-slate-300 flex items-center cursor-pointer">
-                                <input id="dryRunCheckbox" type="checkbox" class="rounded mr-2 text-indigo-500 focus:ring-0">
-                                <span>Dry-Run / Test Mode (Simulate without emailing)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Summary Stats before Send -->
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="bg-white/5 rounded-xl p-3 border border-white/10 text-center">
-                            <span class="text-xs text-slate-400 block">Recipients</span>
-                            <span id="cardRecipientCount" class="text-2xl font-bold text-white">0</span>
-                        </div>
-                        <div class="bg-white/5 rounded-xl p-3 border border-white/10 text-center">
-                            <span class="text-xs text-slate-400 block">Attachments</span>
-                            <span id="cardAttachmentCount" class="text-2xl font-bold text-indigo-300">0</span>
-                        </div>
-                    </div>
-
-                    <!-- The Master Action Button -->
-                    <button id="sendBulkBtn" onclick="confirmAndSendBulk()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/40 transition transform active:scale-98 flex items-center justify-center space-x-2 text-base">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span id="sendBulkBtnText">Send Bulk Emails Now</span>
-                    </button>
-
-                    <!-- Emergency Stop Button -->
-                    <button id="stopSendBtn" onclick="stopSending()" class="hidden mt-3 w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-2 shadow">
-                        <i class="fa-solid fa-hand"></i>
-                        <span>Cancel / Stop Sending</span>
-                    </button>
-                </div>
-
-                <!-- Live Progress & Activity Feed -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span id="statusIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-                            <h3 class="font-semibold text-slate-800 text-sm">Delivery Status</h3>
-                        </div>
-                        <button id="exportReportBtn" onclick="downloadDeliveryReportCsv()" disabled class="text-xs font-semibold text-slate-400 disabled:opacity-50 hover:text-indigo-600 flex items-center space-x-1 cursor-pointer">
-                            <i class="fa-solid fa-file-arrow-down"></i>
-                            <span>Download Report</span>
+                    <!-- Batch Send All Pending Button -->
+                    <div class="flex items-center space-x-2">
+                        <button id="btnSendAllPending" onclick="sendBatchReports()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Send All Pending</span>
                         </button>
                     </div>
-
-                    <!-- Progress Bar -->
-                    <div class="space-y-1.5">
-                        <div class="flex justify-between text-xs font-semibold">
-                            <span id="progressStatusLabel" class="text-slate-600">Ready</span>
-                            <span id="progressPercentLabel" class="text-indigo-600">0%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200">
-                            <div id="progressBarFill" class="bg-gradient-to-r from-indigo-500 to-violet-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Metrics Badges -->
-                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2">
-                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Total</span>
-                            <span id="statTotal" class="font-bold text-slate-700 text-sm">0</span>
-                        </div>
-                        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-2 text-emerald-700">
-                            <span class="text-emerald-500 block text-[10px] uppercase font-bold">Sent</span>
-                            <span id="statSent" class="font-bold text-sm">0</span>
-                        </div>
-                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-rose-700">
-                            <span class="text-rose-500 block text-[10px] uppercase font-bold">Failed</span>
-                            <span id="statFailed" class="font-bold text-sm">0</span>
-                        </div>
-                    </div>
-
-                    <!-- Real-time Activity Feed -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-semibold text-slate-600">Live Log</span>
-                            <span id="currentProcessingEmail" class="text-[11px] text-slate-400 truncate max-w-[200px]"></span>
-                        </div>
-                        <div id="liveActivityLog" class="bg-slate-900 text-slate-200 rounded-xl p-3 h-64 overflow-y-auto font-mono text-[11px] space-y-1 custom-scrollbar">
-                            <div class="text-slate-500 italic">[System ready. Load recipients and click Send to begin.]</div>
-                        </div>
-                    </div>
                 </div>
 
+                <!-- Table Container -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-xs">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Candidate / Student ID</th>
+                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Batch</th>
+                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Student Email</th>
+                                <th class="px-4 py-3 text-center font-bold text-slate-600 uppercase tracking-wider">Submissions</th>
+                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Latest Submission</th>
+                                <th class="px-4 py-3 text-center font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-right font-bold text-slate-600 uppercase tracking-wider">1-Click Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidateTableBody" class="divide-y divide-slate-100 bg-white">
+                            <tr>
+                                <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                                    <i class="fa-solid fa-file-excel text-3xl mb-2 text-slate-300 block"></i>
+                                    Click <strong>"Load Assignment (10).xls"</strong> or upload your weekly LMS report to view candidates.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer Pagination/Count -->
+                <div class="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+                    <span id="candidateCountSummary">0 candidates loaded</span>
+                    <span class="text-[11px] text-slate-400">Pre-linked with DV Analytics 6,390 Student Master Directory</span>
+                </div>
             </div>
 
         </div>
+
+        <!-- ================= VIEW 2: GENERAL BULK EMAIL (PREVIOUS WORKFLOW) ================= -->
+        <div id="viewBulkEmail" class="hidden space-y-6">
+            <!-- (Custom Bulk Dispatcher) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 space-y-6">
+                    <!-- Recipients Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-base">1. Custom Recipients</h3>
+                            <div class="flex space-x-2">
+                                <button onclick="downloadSampleCsv()" class="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md font-semibold border border-emerald-200">Sample CSV</button>
+                                <button onclick="downloadSampleExcel()" class="text-xs text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md font-semibold border border-indigo-200">Sample Excel</button>
+                            </div>
+                        </div>
+                        <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-6 cursor-pointer bg-slate-50/50 hover:bg-indigo-50/20 transition">
+                            <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-2"></i>
+                            <span class="text-xs font-semibold text-slate-600">Upload CSV or Excel spreadsheet</span>
+                            <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
+                        </label>
+                        <div id="customRecipientsPreview" class="text-xs text-slate-500 font-medium"></div>
+                    </div>
+
+                    <!-- Message & Attachments -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                        <h3 class="font-bold text-slate-800 text-base">2. Message & Attachments</h3>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Subject</label>
+                            <input id="emailSubject" type="text" placeholder="Important Document" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Attach Files (Sent to all)</label>
+                            <input type="file" multiple onchange="handleClientSideAttachments(this.files)" class="text-xs">
+                            <div id="attachmentsList" class="mt-2 space-y-1"></div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Body</label>
+                            <textarea id="emailBody" rows="5" class="w-full text-sm rounded-xl border border-slate-200 p-3 font-mono"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Launch Side -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl space-y-4">
+                        <h3 class="text-lg font-bold">1-Click Dispatch</h3>
+                        <p class="text-xs text-slate-300">Broadcast custom attachments to all loaded recipients.</p>
+                        <button onclick="confirmAndSendBulk()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl text-sm transition">
+                            Send Bulk Emails Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Confirmation Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
-            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
-                <i class="fa-solid fa-paper-plane"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1">Confirm Bulk Email Blast</h3>
-            <p class="text-sm text-slate-600 mb-4">
-                You are about to launch an email blast with the following configuration:
-            </p>
-            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs space-y-2 mb-6">
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Total Recipients:</span>
-                    <span id="modalRecipientCount" class="font-bold text-slate-800">0</span>
+    <!-- ================= MODAL 1: REPORT PREVIEW MODAL ================= -->
+    <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-file-invoice text-indigo-600 text-lg"></i>
+                    <h3 class="font-bold text-slate-800 text-base" id="previewModalTitle">Student Report Preview</h3>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Attachments:</span>
-                    <span id="modalAttachmentSummary" class="font-bold text-indigo-600">None</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Sender Mode:</span>
-                    <span id="modalSenderEmail" class="font-bold text-slate-800 truncate max-w-[200px]">-</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Mode:</span>
-                    <span id="modalMode" class="font-bold text-emerald-600">Live Send</span>
+                <div class="flex items-center space-x-2">
+                    <button id="modalSendReportBtn" onclick="sendModalReport()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Send This Report</span>
+                    </button>
+                    <button onclick="closePreviewModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="closeConfirmModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
-                    Back to Edit
-                </button>
-                <button onclick="executeBulkSend()" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-md transition">
-                    Yes, Send Now
+
+            <!-- Optional Trainer Notes bar -->
+            <div class="px-6 py-2.5 bg-indigo-50/50 border-b border-indigo-100 flex items-center space-x-3 text-xs">
+                <span class="font-semibold text-indigo-900 whitespace-nowrap">Trainer Note:</span>
+                <input id="modalTrainerNoteInput" type="text" placeholder="e.g. Excellent consistency! Complete next session by Friday." class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <button onclick="refreshPreviewWithNote()" class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg font-semibold transition">
+                    Update Preview
                 </button>
             </div>
+
+            <!-- Modal Iframe Body -->
+            <div class="flex-1 overflow-y-auto p-4 bg-slate-100">
+                <iframe id="previewReportIframe" class="w-full h-[650px] bg-white rounded-xl border border-slate-200 shadow-sm" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: SMTP SETUP MODAL ================= -->
+    <div id="smtpSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-server text-indigo-600"></i>
+                    <h3 class="font-bold text-slate-800 text-base">Email Sender & SMTP Setup</h3>
+                </div>
+                <button onclick="closeSmtpSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Presets -->
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-500 font-semibold">Presets:</span>
+                <div class="flex space-x-1">
+                    <button onclick="applyPreset('gmail')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded">Gmail</button>
+                    <button onclick="applyPreset('office365')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded">Office 365</button>
+                    <button onclick="applyPreset('custom')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded">Custom</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="col-span-2">
+                    <label class="font-semibold text-slate-700 block mb-1">Sender Email</label>
+                    <input id="smtpUsername" type="email" placeholder="e.g. trainer@dvdataanalytics.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20">
+                </div>
+                <div class="col-span-2">
+                    <label class="font-semibold text-slate-700 block mb-1">Password or App Password</label>
+                    <input id="smtpPassword" type="password" placeholder="16-digit App Password" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20">
+                </div>
+                <div>
+                    <label class="font-semibold text-slate-700 block mb-1">SMTP Host</label>
+                    <input id="smtpHost" type="text" value="smtp.office365.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                </div>
+                <div>
+                    <label class="font-semibold text-slate-700 block mb-1">Port</label>
+                    <input id="smtpPort" type="number" value="587" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                </div>
+                <div class="col-span-2">
+                    <label class="font-semibold text-slate-700 block mb-1">Sender Display Name</label>
+                    <input id="smtpSenderName" type="text" value="DV Analytics Assignment Team" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <button onclick="testSmtpConnection()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                    Test Connection
+                </button>
+                <button onclick="saveSmtpConfigAndClose()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                    Save Settings
+                </button>
+            </div>
+            <div id="smtpTestResultBox" class="text-xs hidden p-2.5 rounded-xl"></div>
         </div>
     </div>
 
     <!-- Application Script -->
     <script>
-        // State variables
-        let loadedRecipients = [];
-        let loadedAttachments = []; // { name, size_bytes, size_display, base64, type }
-        let isSendingActive = false;
-        let stopRequested = false;
-        let deliveryLogs = [];
-        let activeSendMethod = 'smtp'; // 'smtp' or 'google'
-        let googleAccessToken = null;
-        let googleTokenClient = null;
-        let localBackendAvailable = false;
-        const LOCAL_API_BASE = 'http://127.0.0.1:5000';
+        let allCandidates = [];
+        let filteredCandidates = [];
+        let activeModalCandidate = null;
+        let localServerOnline = false;
+        const API_BASE = 'http://127.0.0.1:5000';
 
         document.addEventListener("DOMContentLoaded", () => {
             loadSavedConfig();
-            checkLocalBackend();
+            checkServerStatus();
+            // Automatically attempt to load default assignment on startup
+            quickLoadDefaultAssignment();
         });
 
-        // Tab Switching
-        function switchRecipientTab(tab) {
-            const tabFileBtn = document.getElementById("tabFileBtn");
-            const tabPasteBtn = document.getElementById("tabPasteBtn");
-            const tabFileContent = document.getElementById("tabFileContent");
-            const tabPasteContent = document.getElementById("tabPasteContent");
+        // App Mode Switcher
+        function switchAppMode(mode) {
+            const btnAssignments = document.getElementById("navBtnAssignments");
+            const btnBulk = document.getElementById("navBtnBulk");
+            const viewAssignments = document.getElementById("viewAssignments");
+            const viewBulk = document.getElementById("viewBulkEmail");
 
-            if (tab === "file") {
-                tabFileBtn.className = "pb-2.5 px-4 border-b-2 border-indigo-600 text-indigo-600 flex items-center space-x-2 font-semibold";
-                tabPasteBtn.className = "pb-2.5 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2";
-                tabFileContent.classList.remove("hidden");
-                tabPasteContent.classList.add("hidden");
+            if (mode === 'assignments') {
+                btnAssignments.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-white text-indigo-600 shadow-xs";
+                btnBulk.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center space-x-2";
+                viewAssignments.classList.remove("hidden");
+                viewBulk.classList.add("hidden");
             } else {
-                tabPasteBtn.className = "pb-2.5 px-4 border-b-2 border-indigo-600 text-indigo-600 flex items-center space-x-2 font-semibold";
-                tabFileBtn.className = "pb-2.5 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2";
-                tabPasteContent.classList.remove("hidden");
-                tabFileContent.classList.add("hidden");
+                btnBulk.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-white text-indigo-600 shadow-xs";
+                btnAssignments.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center space-x-2";
+                viewBulk.classList.remove("hidden");
+                viewAssignments.classList.add("hidden");
             }
         }
 
-        function switchSendMethod(method) {
-            activeSendMethod = method;
-            const smtpBtn = document.getElementById("sendMethodSmtpBtn");
-            const googleBtn = document.getElementById("sendMethodGoogleBtn");
-            const smtpContent = document.getElementById("methodSmtpContent");
-            const googleContent = document.getElementById("methodGoogleContent");
-
-            if (method === 'smtp') {
-                smtpBtn.className = "px-2.5 py-1 rounded-md bg-white text-slate-800 shadow-xs";
-                googleBtn.className = "px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900";
-                smtpContent.classList.remove("hidden");
-                googleContent.classList.add("hidden");
-            } else {
-                googleBtn.className = "px-2.5 py-1 rounded-md bg-white text-slate-800 shadow-xs";
-                smtpBtn.className = "px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900";
-                googleContent.classList.remove("hidden");
-                smtpContent.classList.add("hidden");
-            }
-        }
-
-        // Check if Local Python Backend is running
-        async function checkLocalBackend() {
+        // Check Server
+        async function checkServerStatus() {
+            const pill = document.getElementById("backendStatusPill");
             const dot = document.getElementById("backendStatusDot");
-            const text = document.getElementById("backendStatusText");
+            const label = document.getElementById("backendStatusLabel");
+
             try {
-                const res = await fetch(`${LOCAL_API_BASE}/api/send-status`, { signal: AbortSignal.timeout(2000) });
+                const res = await fetch(`${API_BASE}/api/send-status`, { signal: AbortSignal.timeout(2000) });
                 if (res.ok) {
-                    localBackendAvailable = true;
-                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
-                    text.textContent = "Local Python Engine Connected (http://127.0.0.1:5000)";
+                    localServerOnline = true;
+                    dot.className = "w-2 h-2 rounded-full bg-emerald-500 mr-1.5";
+                    label.textContent = "Engine Connected (127.0.0.1:5000)";
                     return;
                 }
-            } catch (e) {
-                // Not running locally
+            } catch (e) {}
+
+            localServerOnline = false;
+            dot.className = "w-2 h-2 rounded-full bg-amber-400 mr-1.5";
+            label.textContent = "Web Standalone Mode";
+        }
+
+        // Quick Load Default Assignment (10).xls
+        async function quickLoadDefaultAssignment() {
+            setLoadingCandidateTable("Reading and parsing Assignment (10).xls (13,590 submissions)...");
+            try {
+                const res = await fetch(`${API_BASE}/api/assignment/load-default`, { method: "POST" });
+                const data = await res.json();
+                if (data.success) {
+                    populateBatchesDropdown(data.batches || []);
+                    document.getElementById("metricTotalRows").textContent = (data.total_rows || 0).toLocaleString();
+                    fetchCandidatesList();
+                } else {
+                    renderEmptyTable("Could not automatically load local file. Please click 'Upload Weekly LMS Report' above.");
+                }
+            } catch (err) {
+                renderEmptyTable("Click 'Upload Weekly LMS Report' above to select your report file.");
             }
-            localBackendAvailable = false;
-            dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-            text.textContent = "Web Standalone Mode (Use Google OAuth or run 'run.bat' for local SMTP)";
         }
 
-        // Client-Side CSV & Excel Template Generators
-        function downloadSampleCsv() {
-            const csvContent = "email,name,company\njohn.doe@example.com,John Doe,Acme Corp\njane.smith@example.com,Jane Smith,Global Tech\nalex.innovate@example.com,Alex Johnson,Innovate Labs\n";
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "sample_recipients.csv";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function downloadSampleExcel() {
-            const data = [
-                { email: "john.doe@example.com", name: "John Doe", company: "Acme Corp" },
-                { email: "jane.smith@example.com", name: "Jane Smith", company: "Global Tech" },
-                { email: "alex.innovate@example.com", name: "Alex Johnson", company: "Innovate Labs" }
-            ];
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Recipients");
-            XLSX.writeFile(wb, "sample_recipients.xlsx");
-        }
-
-        // Client-Side Recipient Parsing
-        function handleClientSideRecipientFile(file) {
+        // Upload Weekly LMS Report File
+        async function handleLmsReportUpload(file) {
             if (!file) return;
-            const ext = file.name.split('.').pop().toLowerCase();
+            setLoadingCandidateTable(`Processing ${file.name}...`);
+            const formData = new FormData();
+            formData.append("file", file);
 
-            if (ext === 'csv') {
-                Papa.parse(file, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: function(results) {
-                        processParsedRows(results.data, results.meta.fields || []);
-                    },
-                    error: function(err) {
-                        alert("Error parsing CSV: " + err.message);
-                    }
+            try {
+                const res = await fetch(`${API_BASE}/api/assignment/upload`, {
+                    method: "POST",
+                    body: formData
                 });
-            } else if (ext === 'xlsx' || ext === 'xls') {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const firstSheet = workbook.SheetNames[0];
-                        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
-                        const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
-                        processParsedRows(rows, headers);
-                    } catch (err) {
-                        alert("Error reading Excel file: " + err.message);
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            } else {
-                alert("Unsupported format. Please upload .xlsx, .xls, or .csv");
+                const data = await res.json();
+                if (data.success) {
+                    populateBatchesDropdown(data.batches || []);
+                    document.getElementById("metricTotalRows").textContent = (data.total_rows || 0).toLocaleString();
+                    fetchCandidatesList();
+                } else {
+                    alert("Upload error: " + data.error);
+                }
+            } catch (err) {
+                alert("Upload failed: " + err.message);
             }
         }
 
-        function handleClientSidePaste() {
-            const text = document.getElementById("pasteEmailsInput").value.trim();
-            if (!text) {
-                alert("Please enter or paste at least one email address.");
+        // Fetch Candidate List from API
+        async function fetchCandidatesList() {
+            try {
+                const res = await fetch(`${API_BASE}/api/assignment/candidates`);
+                const data = await res.json();
+                if (data.success) {
+                    allCandidates = data.candidates || [];
+                    document.getElementById("metricCandidates").textContent = (data.metrics.total_candidates || allCandidates.length).toLocaleString();
+                    document.getElementById("metricSentCount").textContent = (data.metrics.sent_count || 0).toLocaleString();
+                    document.getElementById("metricPendingCount").textContent = (data.metrics.pending_count || 0).toLocaleString();
+                    applyCandidateFilters();
+                }
+            } catch (e) {
+                console.error("Failed to fetch candidates", e);
+            }
+        }
+
+        // Filter and Search Logic
+        function applyCandidateFilters() {
+            const query = document.getElementById("candidateSearchInput").value.trim().toLowerCase();
+            const batchVal = document.getElementById("candidateBatchFilter").value;
+            const statusVal = document.getElementById("candidateStatusFilter").value;
+
+            filteredCandidates = allCandidates.filter(c => {
+                if (batchVal && c.batch !== batchVal) return false;
+                if (statusVal === 'pending' && c.status === 'sent') return false;
+                if (statusVal === 'sent' && c.status !== 'sent') return false;
+                if (query) {
+                    const matchName = (c.student_name || "").toLowerCase().includes(query);
+                    const matchId = (c.student_id || "").toLowerCase().includes(query);
+                    const matchEmail = (c.email || "").toLowerCase().includes(query);
+                    if (!matchName && !matchId && !matchEmail) return false;
+                }
+                return true;
+            });
+
+            renderCandidateTable(filteredCandidates);
+        }
+
+        function populateBatchesDropdown(batches) {
+            const select = document.getElementById("candidateBatchFilter");
+            const current = select.value;
+            select.innerHTML = '<option value="">All Batches</option>';
+            batches.forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b;
+                opt.textContent = b;
+                select.appendChild(opt);
+            });
+            select.value = current;
+        }
+
+        // Render Candidate Table Rows
+        function renderCandidateTable(candidates) {
+            const tbody = document.getElementById("candidateTableBody");
+            const summary = document.getElementById("candidateCountSummary");
+            summary.textContent = `Showing ${candidates.length} of ${allCandidates.length} candidates`;
+
+            if (candidates.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-slate-400">
+                            No candidates match the selected search or filter criteria.
+                        </td>
+                    </tr>
+                `;
                 return;
             }
-            const tokens = text.split(/[\r\n,;]+/).map(t => t.trim()).filter(Boolean);
-            const rows = tokens.map(email => ({ email: email }));
-            processParsedRows(rows, ["email"]);
-        }
 
-        function processParsedRows(rows, headers) {
-            // Find email column
-            let emailKey = null;
-            for (let h of headers) {
-                if (h.toLowerCase().includes("email") || h.toLowerCase().includes("mail")) {
-                    emailKey = h;
-                    break;
+            // Render up to first 250 rows for smooth DOM performance
+            const displayList = candidates.slice(0, 250);
+            let html = "";
+
+            displayList.forEach((c, idx) => {
+                const sid = escapeHtml(c.student_id);
+                const sname = escapeHtml(c.student_name);
+                const batch = escapeHtml(c.batch || "-");
+                const email = escapeHtml(c.email || "");
+                const subsCount = c.submissions_count || 0;
+                const latestDate = escapeHtml(c.latest_date || "-");
+                const latestSub = escapeHtml(c.latest_submission || "-");
+                const status = c.status || "pending";
+
+                let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
+                if (status === "sent") {
+                    statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="${c.last_sent_at || ''}"><i class="fa-solid fa-check mr-1"></i> Sent</span>`;
+                } else if (status === "failed") {
+                    statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200" title="${escapeHtml(c.last_error || '')}"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Failed</span>`;
                 }
-            }
-            if (!emailKey && headers.length > 0) {
-                for (let h of headers) {
-                    if (rows.some(r => r[h] && String(r[h]).includes("@"))) {
-                        emailKey = h;
-                        break;
-                    }
-                }
-            }
-            if (!emailKey && headers.length > 0) {
-                emailKey = headers[0];
-            }
 
-            const valid = [];
-            const seen = new Set();
-            let invalidCount = 0;
+                // Email display or inline edit
+                const emailDisplay = email 
+                    ? `<div class="flex items-center space-x-1.5 font-mono text-slate-700">
+                         <span class="truncate max-w-[180px]">${email}</span>
+                         <button onclick="promptEditEmail('${sid}', '${sname}', '${email}')" class="text-slate-400 hover:text-indigo-600 p-0.5" title="Edit Email"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                       </div>`
+                    : `<button onclick="promptEditEmail('${sid}', '${sname}', '')" class="text-indigo-600 hover:text-indigo-800 font-semibold underline text-[11px]"><i class="fa-solid fa-plus mr-1"></i>Add Email</button>`;
 
-            rows.forEach(r => {
-                const email = String(r[emailKey] || r.email || "").trim();
-                if (isValidEmail(email)) {
-                    if (!seen.has(email.toLowerCase())) {
-                        seen.add(email.toLowerCase());
-                        const obj = { email: email };
-                        Object.keys(r).forEach(k => {
-                            obj[k] = String(r[k]).trim();
-                        });
-                        valid.push(obj);
-                    }
-                } else if (email) {
-                    invalidCount++;
-                }
-            });
-
-            loadedRecipients = valid;
-            const count = valid.length;
-
-            updateRecipientCountBadge(`${count} Valid Recipients`, "bg-emerald-100 text-emerald-800 border-emerald-200");
-            document.getElementById("cardRecipientCount").textContent = count;
-            document.getElementById("statTotal").textContent = count;
-
-            // Show preview
-            document.getElementById("recipientsPreviewSection").classList.remove("hidden");
-            document.getElementById("recipientStatsText").textContent = 
-                `Loaded ${count} valid recipients (${invalidCount} invalid/duplicates skipped)`;
-
-            // Render tags
-            const tagsContainer = document.getElementById("availableTagsContainer");
-            tagsContainer.innerHTML = `<span class="text-[11px] text-slate-400 mr-1">Tags:</span>`;
-            headers.forEach(header => {
-                const tag = document.createElement("span");
-                tag.className = "cursor-pointer bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-mono transition";
-                tag.textContent = `{{${header}}}`;
-                tag.title = `Click to copy {{${header}}}`;
-                tag.onclick = () => {
-                    navigator.clipboard.writeText(`{{${header}}}`);
-                    tag.classList.add("bg-indigo-200");
-                    setTimeout(() => tag.classList.remove("bg-indigo-200"), 500);
-                };
-                tagsContainer.appendChild(tag);
-            });
-
-            // Render preview table
-            const tableBody = document.getElementById("previewTableBody");
-            tableBody.innerHTML = "";
-            valid.slice(0, 10).forEach((row, idx) => {
-                const tr = document.createElement("tr");
-                tr.className = "hover:bg-slate-50";
-                const email = row.email || "-";
-                const extra = row.name || row.company || (Object.keys(row).length > 1 ? JSON.stringify(row) : "-");
-                tr.innerHTML = `
-                    <td class="px-3 py-1.5 text-slate-400 font-mono">${idx + 1}</td>
-                    <td class="px-3 py-1.5 font-medium text-slate-800">${escapeHtml(email)}</td>
-                    <td class="px-3 py-1.5 text-slate-500 truncate max-w-[150px]">${escapeHtml(extra)}</td>
+                html += `
+                    <tr class="hover:bg-slate-50/80 transition" id="row-${sid}">
+                        <td class="px-4 py-3">
+                            <div class="font-bold text-slate-900">${sname}</div>
+                            <div class="text-[11px] text-slate-400 font-mono">${sid}</div>
+                        </td>
+                        <td class="px-4 py-3 font-medium text-slate-600">${batch}</td>
+                        <td class="px-4 py-3">${emailDisplay}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                ${subsCount}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="font-medium text-slate-800 truncate max-w-[180px]" title="${latestSub}">${latestSub}</div>
+                            <div class="text-[11px] text-slate-400">${latestDate}</div>
+                        </td>
+                        <td class="px-4 py-3 text-center" id="status-${sid}">
+                            ${statusBadge}
+                        </td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <div class="inline-flex items-center space-x-1.5">
+                                <button onclick="openPreviewModal('${sid}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Preview Report Email">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </button>
+                                <button onclick="sendOneReport('${sid}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow-xs transition inline-flex items-center space-x-1" title="1-Click Send">
+                                    <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                                    <span>Send Report</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
                 `;
-                tableBody.appendChild(tr);
             });
+
+            if (candidates.length > 250) {
+                html += `<tr><td colspan="7" class="px-4 py-3 text-center text-xs text-slate-400 italic">Showing top 250 rows. Use the search box above to find any candidate immediately.</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
         }
 
-        function updateRecipientCountBadge(text, classNames) {
-            const badge = document.getElementById("recipientsCountBadge");
-            badge.textContent = text;
-            badge.className = `text-xs font-semibold px-2.5 py-1 rounded-full border ${classNames}`;
+        function setLoadingCandidateTable(msg) {
+            document.getElementById("candidateTableBody").innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-4 py-12 text-center text-slate-500 font-medium">
+                        <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600 mb-2 block"></i>
+                        ${escapeHtml(msg)}
+                    </td>
+                </tr>
+            `;
         }
 
-        // Attachments Management
-        async function handleClientSideAttachments(files) {
-            if (!files || files.length === 0) return;
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const base64 = await fileToBase64(file);
-                loadedAttachments.push({
-                    id: Math.random().toString(36).substring(2, 9),
-                    name: file.name,
-                    size_bytes: file.size,
-                    size_display: formatBytes(file.size),
-                    type: file.type || "application/octet-stream",
-                    base64: base64
+        function renderEmptyTable(msg) {
+            document.getElementById("candidateTableBody").innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                        ${escapeHtml(msg)}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Inline Email Edit
+        async function promptEditEmail(studentId, studentName, currentEmail) {
+            const newEmail = prompt(`Enter Email Address for ${studentName} (${studentId}):`, currentEmail);
+            if (newEmail === null) return;
+            const clean = newEmail.trim();
+            if (!clean || !isValidEmail(clean)) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/assignment/update-email`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        student_name: studentName,
+                        email: clean
+                    })
                 });
+                const data = await res.json();
+                if (data.success) {
+                    // Update in memory
+                    const c = allCandidates.find(x => x.student_id === studentId);
+                    if (c) c.email = clean;
+                    applyCandidateFilters();
+                } else {
+                    alert("Update error: " + data.error);
+                }
+            } catch (err) {
+                alert("Failed to update: " + err.message);
             }
-            renderAttachmentsList();
-            document.getElementById("attachmentFileInput").value = "";
         }
 
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]); // strip data prefix
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+        // 1-Click Send Report to Candidate
+        async function sendOneReport(studentId) {
+            const cand = allCandidates.find(c => c.student_id === studentId);
+            if (!cand) return;
+
+            if (!cand.email) {
+                await promptEditEmail(studentId, cand.student_name, "");
+                if (!cand.email) return;
+            }
+
+            const statusCell = document.getElementById(`status-${studentId}`);
+            if (statusCell) {
+                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Sending...</span>`;
+            }
+
+            try {
+                const smtp = getSmtpPayload();
+                const res = await fetch(`${API_BASE}/api/assignment/send-one`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        email: cand.email,
+                        smtp: smtp,
+                        trainer_notes: ""
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cand.status = "sent";
+                    if (statusCell) {
+                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i> Sent</span>`;
+                    }
+                    updateMetricCounters();
+                    alert(`Report sent successfully to ${cand.student_name} (${cand.email})!`);
+                } else {
+                    cand.status = "failed";
+                    if (statusCell) {
+                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Failed</span>`;
+                    }
+                    alert("Send failed: " + data.error);
+                }
+            } catch (err) {
+                alert("Error sending report: " + err.message);
+            }
         }
 
-        function removeAttachment(id) {
-            loadedAttachments = loadedAttachments.filter(a => a.id !== id);
-            renderAttachmentsList();
+        // Batch Send All Pending Reports
+        async function sendBatchReports() {
+            const pendingList = filteredCandidates.filter(c => c.status !== 'sent');
+            if (pendingList.length === 0) {
+                alert("There are no pending candidates in the current filter.");
+                return;
+            }
+
+            const missingEmailCount = pendingList.filter(c => !c.email).length;
+            let confirmMsg = `Ready to send assignment reports to ${pendingList.length} candidate(s)?`;
+            if (missingEmailCount > 0) {
+                confirmMsg += `\n\nNote: ${missingEmailCount} candidates do not have an email address yet and will be skipped.`;
+            }
+
+            if (!confirm(confirmMsg)) return;
+
+            const btn = document.getElementById("btnSendAllPending");
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Dispatching Batch...`;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/assignment/send-batch`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_ids: pendingList.map(c => c.student_id),
+                        smtp: getSmtpPayload(),
+                        delay_seconds: 1.0
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    pollBatchProgress();
+                } else {
+                    alert("Could not start batch: " + data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1"></i> Send All Pending`;
+                }
+            } catch (err) {
+                alert("Batch failed: " + err.message);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1"></i> Send All Pending`;
+            }
         }
 
-        function renderAttachmentsList() {
-            const container = document.getElementById("attachmentsList");
-            const countBadge = document.getElementById("attachmentCountBadge");
-            const cardBadge = document.getElementById("cardAttachmentCount");
+        async function pollBatchProgress() {
+            try {
+                const res = await fetch(`${API_BASE}/api/assignment/batch-status`);
+                const data = await res.json();
+                if (data.success && data.batch) {
+                    const b = data.batch;
+                    const btn = document.getElementById("btnSendAllPending");
+                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Sent ${b.sent} of ${b.total}...`;
 
-            container.innerHTML = "";
-            const count = loadedAttachments.length;
-            countBadge.textContent = `${count} ${count === 1 ? 'file' : 'files'} attached`;
-            cardBadge.textContent = count;
-
-            if (count === 0) return;
-
-            loadedAttachments.forEach(att => {
-                const card = document.createElement("div");
-                card.className = "flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200 text-xs shadow-xs hover:border-indigo-300 transition";
-                card.innerHTML = `
-                    <div class="flex items-center space-x-2.5 overflow-hidden">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm flex-shrink-0">
-                            <i class="fa-solid fa-file"></i>
-                        </div>
-                        <div class="overflow-hidden">
-                            <p class="font-semibold text-slate-800 truncate" title="${escapeHtml(att.name)}">${escapeHtml(att.name)}</p>
-                            <p class="text-[11px] text-slate-400">${att.size_display}</p>
-                        </div>
-                    </div>
-                    <button onclick="removeAttachment('${att.id}')" class="text-slate-400 hover:text-rose-500 p-1.5 transition ml-2" title="Remove attachment">
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                `;
-                container.appendChild(card);
-            });
+                    if (b.status === "running") {
+                        setTimeout(pollBatchProgress, 1000);
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1"></i> Send All Pending`;
+                        alert(`Batch Complete! Sent: ${b.sent}, Failed: ${b.failed}`);
+                        fetchCandidatesList();
+                    }
+                }
+            } catch (e) {}
         }
 
-        // Presets & Password Toggle
+        function updateMetricCounters() {
+            const sent = allCandidates.filter(c => c.status === 'sent').length;
+            const pending = allCandidates.length - sent;
+            document.getElementById("metricSentCount").textContent = sent.toLocaleString();
+            document.getElementById("metricPendingCount").textContent = pending.toLocaleString();
+        }
+
+        // Preview Modal Handlers
+        function openPreviewModal(studentId) {
+            const cand = allCandidates.find(c => c.student_id === studentId);
+            if (!cand) return;
+            activeModalCandidate = cand;
+
+            document.getElementById("previewModalTitle").textContent = `Report Preview: ${cand.student_name} (${cand.batch})`;
+            document.getElementById("modalTrainerNoteInput").value = "";
+            document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${studentId}`;
+            document.getElementById("previewModal").classList.remove("hidden");
+        }
+
+        function refreshPreviewWithNote() {
+            if (!activeModalCandidate) return;
+            const note = encodeURIComponent(document.getElementById("modalTrainerNoteInput").value.trim());
+            document.getElementById("previewReportIframe").src = `${API_BASE}/api/assignment/preview/${activeModalCandidate.student_id}?note=${note}`;
+        }
+
+        async function sendModalReport() {
+            if (!activeModalCandidate) return;
+            const note = document.getElementById("modalTrainerNoteInput").value.trim();
+            const sid = activeModalCandidate.student_id;
+            closePreviewModal();
+
+            const btn = document.getElementById("modalSendReportBtn");
+            await sendOneReport(sid);
+        }
+
+        function closePreviewModal() {
+            document.getElementById("previewModal").classList.add("hidden");
+            activeModalCandidate = null;
+        }
+
+        // SMTP Modal
+        function openSmtpSettingsModal() {
+            document.getElementById("smtpSettingsModal").classList.remove("hidden");
+        }
+        function closeSmtpSettingsModal() {
+            document.getElementById("smtpSettingsModal").classList.add("hidden");
+        }
+        function saveSmtpConfigAndClose() {
+            saveConfig();
+            closeSmtpSettingsModal();
+            alert("Settings saved!");
+        }
+
         function applyPreset(provider) {
             const hostInput = document.getElementById("smtpHost");
             const portInput = document.getElementById("smtpPort");
-            const secSelect = document.getElementById("smtpSecurity");
-
             if (provider === "gmail") {
                 hostInput.value = "smtp.gmail.com";
                 portInput.value = "587";
-                secSelect.value = "tls";
             } else if (provider === "office365") {
                 hostInput.value = "smtp.office365.com";
                 portInput.value = "587";
-                secSelect.value = "tls";
             } else if (provider === "custom") {
                 hostInput.value = "";
                 portInput.value = "587";
-                secSelect.value = "tls";
                 hostInput.focus();
             }
         }
 
-        function togglePasswordVisibility() {
-            const pwdInput = document.getElementById("smtpPassword");
-            const icon = document.getElementById("passwordToggleIcon");
-            if (pwdInput.type === "password") {
-                pwdInput.type = "text";
-                icon.className = "fa-regular fa-eye-slash text-xs";
-            } else {
-                pwdInput.type = "password";
-                icon.className = "fa-regular fa-eye text-xs";
-            }
-        }
-
-        // Google OAuth Connection
-        function connectGoogleAccount() {
-            const clientId = document.getElementById("googleClientId").value.trim();
-            if (!clientId) {
-                alert("Please enter your Google OAuth Client ID first.");
-                return;
-            }
-            saveConfig();
-
-            googleTokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: clientId,
-                scope: 'https://www.googleapis.com/auth/gmail.send',
-                callback: (resp) => {
-                    if (resp.error) {
-                        alert("Google Auth failed: " + resp.error);
-                        return;
-                    }
-                    googleAccessToken = resp.access_token;
-                    const badge = document.getElementById("googleAuthStatusBadge");
-                    badge.textContent = "Connected to Google";
-                    badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
-                    appendLiveLog("SYSTEM", "Connected to Google Gmail API successfully.", "text-emerald-400");
-                }
-            });
-            googleTokenClient.requestAccessToken();
-        }
-
-        // Confirmation Modal & Dispatch
-        function confirmAndSendBulk() {
-            if (loadedRecipients.length === 0) {
-                alert("Please load or paste recipients first (Step 1).");
-                return;
-            }
-
-            const subject = document.getElementById("emailSubject").value.trim();
-            if (!subject) {
-                alert("Please provide an email Subject Line (Step 2).");
-                document.getElementById("emailSubject").focus();
-                return;
-            }
-
-            const body = document.getElementById("emailBody").value.trim();
-            if (!body) {
-                alert("Please provide an Email Body message (Step 2).");
-                document.getElementById("emailBody").focus();
-                return;
-            }
-
-            const dryRun = document.getElementById("dryRunCheckbox").checked;
-
-            if (!dryRun) {
-                if (activeSendMethod === 'google' && !googleAccessToken) {
-                    alert("Please click 'Connect Google Account' in Step 3 before sending.");
-                    return;
-                } else if (activeSendMethod === 'smtp') {
-                    const username = document.getElementById("smtpUsername").value.trim();
-                    const password = document.getElementById("smtpPassword").value.trim();
-                    if (!username || !password) {
-                        alert("Please enter your Sender Email and Password / App Password in Step 3.");
-                        return;
-                    }
-                }
-            }
-
-            // Populate modal
-            document.getElementById("modalRecipientCount").textContent = `${loadedRecipients.length} recipients`;
-            const attSummary = loadedAttachments.length > 0 
-                ? `${loadedAttachments.length} file(s) attached` 
-                : "None (Text only)";
-            document.getElementById("modalAttachmentSummary").textContent = attSummary;
-            
-            const senderInfo = activeSendMethod === 'google' 
-                ? "Google Gmail API" 
-                : document.getElementById("smtpUsername").value.trim();
-            document.getElementById("modalSenderEmail").textContent = senderInfo || "(Test)";
-            
-            const modeEl = document.getElementById("modalMode");
-            if (dryRun) {
-                modeEl.textContent = "Dry-Run Simulation";
-                modeEl.className = "font-bold text-amber-600";
-            } else {
-                modeEl.textContent = "Live Send";
-                modeEl.className = "font-bold text-emerald-600";
-            }
-
-            document.getElementById("confirmModal").classList.remove("hidden");
-        }
-
-        function closeConfirmModal() {
-            document.getElementById("confirmModal").classList.add("hidden");
-        }
-
-        // Execution Engine
-        async function executeBulkSend() {
-            closeConfirmModal();
-            isSendingActive = true;
-            stopRequested = false;
-            deliveryLogs = [];
-
-            setSendingUIState(true);
-            resetProgressUI(loadedRecipients.length);
-            saveConfig();
-
-            const subjectTpl = document.getElementById("emailSubject").value.trim();
-            const bodyTpl = document.getElementById("emailBody").value.trim();
-            const isHtml = document.getElementById("isHtmlCheckbox").checked;
-            const delaySec = parseFloat(document.getElementById("delayInterval").value) || 1.0;
-            const dryRun = document.getElementById("dryRunCheckbox").checked;
-
-            appendLiveLog("SYSTEM", `Starting bulk send to ${loadedRecipients.length} recipients...`, "text-indigo-400");
-
-            // Dispatch method
-            if (localBackendAvailable && activeSendMethod === 'smtp' && !dryRun) {
-                // If local Python backend is available, use it for optimal performance
-                try {
-                    await sendViaLocalPythonEngine(subjectTpl, bodyTpl, isHtml, delaySec, dryRun);
-                    return;
-                } catch (e) {
-                    appendLiveLog("SYSTEM", "Local engine dispatch failed, continuing in client mode...", "text-amber-400");
-                }
-            }
-
-            // Direct Browser Dispatch (Gmail API / SMTP.js / Dry Run)
-            let sentCount = 0;
-            let failedCount = 0;
-            const total = loadedRecipients.length;
-
-            for (let i = 0; i < total; i++) {
-                if (stopRequested) {
-                    appendLiveLog("SYSTEM", "Sending was stopped by user.", "text-amber-400");
-                    break;
-                }
-
-                const recipient = loadedRecipients[i];
-                const toEmail = recipient.email;
-                document.getElementById("currentProcessingEmail").textContent = `Active: ${toEmail}`;
-
-                const renderedSubj = renderTemplate(subjectTpl, recipient);
-                const renderedBody = renderTemplate(bodyTpl, recipient);
-
-                try {
-                    if (dryRun) {
-                        await sleep(50);
-                    } else if (activeSendMethod === 'google' && googleAccessToken) {
-                        await sendGmailApiEmail({
-                            to: toEmail,
-                            subject: renderedSubj,
-                            htmlBody: renderedBody,
-                            attachments: loadedAttachments
-                        });
-                    } else if (window.Email && window.Email.send) {
-                        // SMTP.js direct browser send
-                        await sendViaSmtpJs({
-                            to: toEmail,
-                            subject: renderedSubj,
-                            body: renderedBody,
-                            isHtml: isHtml
-                        });
-                    }
-
-                    sentCount++;
-                    const logItem = {
-                        email: toEmail,
-                        status: "sent",
-                        timestamp: new Date().toLocaleTimeString(),
-                        message: "Sent successfully" + (dryRun ? " (Dry Run)" : "")
-                    };
-                    deliveryLogs.push(logItem);
-                    appendLiveLog(toEmail, logItem.message, "text-emerald-400");
-                } catch (err) {
-                    failedCount++;
-                    const logItem = {
-                        email: toEmail,
-                        status: "failed",
-                        timestamp: new Date().toLocaleTimeString(),
-                        message: err.message || "Failed to send"
-                    };
-                    deliveryLogs.push(logItem);
-                    appendLiveLog(toEmail, logItem.message, "text-rose-400");
-                }
-
-                // Update UI metrics
-                const done = sentCount + failedCount;
-                const percent = Math.round((done / total) * 100);
-                document.getElementById("progressBarFill").style.width = `${percent}%`;
-                document.getElementById("progressPercentLabel").textContent = `${percent}%`;
-                document.getElementById("statSent").textContent = sentCount;
-                document.getElementById("statFailed").textContent = failedCount;
-                document.getElementById("progressStatusLabel").textContent = `Sending (${done} of ${total})...`;
-
-                if (delaySec > 0 && i < total - 1 && !stopRequested) {
-                    await sleep(delaySec * 1000);
-                }
-            }
-
-            // Completed
-            isSendingActive = false;
-            setSendingUIState(false);
-            const statusLabel = document.getElementById("progressStatusLabel");
-            const indicator = document.getElementById("statusIndicatorDot");
-
-            if (stopRequested) {
-                statusLabel.textContent = "Stopped by user.";
-                indicator.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
-            } else {
-                statusLabel.textContent = "Finished! All emails processed.";
-                indicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
-            }
-
-            document.getElementById("exportReportBtn").removeAttribute("disabled");
-            document.getElementById("exportReportBtn").classList.remove("text-slate-400");
-            document.getElementById("exportReportBtn").classList.add("text-indigo-600");
-        }
-
-        // Local Python Engine Bridge
-        async function sendViaLocalPythonEngine(subject, body, isHtml, delaySec, dryRun) {
-            // First upload attachments to local server
-            // Then call /api/send-bulk
-            const payload = {
-                recipients: loadedRecipients,
-                subject: subject,
-                body: body,
-                is_html: isHtml,
-                delay_seconds: delaySec,
-                dry_run: dryRun,
-                smtp: {
-                    host: document.getElementById("smtpHost").value.trim(),
-                    port: parseInt(document.getElementById("smtpPort").value) || 587,
-                    username: document.getElementById("smtpUsername").value.trim(),
-                    password: document.getElementById("smtpPassword").value.trim(),
-                    use_ssl: document.getElementById("smtpSecurity").value === "ssl",
-                    sender_name: document.getElementById("smtpSenderName").value.trim(),
-                    reply_to: document.getElementById("smtpReplyTo").value.trim()
-                }
+        function getSmtpPayload() {
+            return {
+                host: document.getElementById("smtpHost").value.trim(),
+                port: parseInt(document.getElementById("smtpPort").value) || 587,
+                username: document.getElementById("smtpUsername").value.trim(),
+                password: document.getElementById("smtpPassword").value.trim(),
+                use_ssl: false,
+                sender_name: document.getElementById("smtpSenderName").value.trim()
             };
-
-            const res = await fetch(`${LOCAL_API_BASE}/api/send-bulk`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error);
-
-            appendLiveLog("SYSTEM", `Local Python task [${data.task_id}] running...`, "text-emerald-400");
-            pollLocalBackend();
         }
 
-        async function pollLocalBackend() {
-            if (!isSendingActive) return;
+        async function testSmtpConnection() {
+            const box = document.getElementById("smtpTestResultBox");
+            box.classList.remove("hidden");
+            box.className = "text-xs p-2.5 rounded-xl bg-slate-100 text-slate-700 block";
+            box.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Testing connection...`;
+
             try {
-                const res = await fetch(`${LOCAL_API_BASE}/api/send-status`);
+                const res = await fetch(`${API_BASE}/api/test-smtp`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(getSmtpPayload())
+                });
                 const data = await res.json();
-                if (data.success && data.has_task) {
-                    const prog = data.progress;
-                    document.getElementById("progressBarFill").style.width = `${prog.progress_percent}%`;
-                    document.getElementById("progressPercentLabel").textContent = `${prog.progress_percent}%`;
-                    document.getElementById("statSent").textContent = prog.sent;
-                    document.getElementById("statFailed").textContent = prog.failed;
-                    
-                    if (prog.logs && prog.logs.length > 0) {
-                        const lastLog = prog.logs[prog.logs.length - 1];
-                        appendLiveLog(lastLog.email, lastLog.message, lastLog.status === "sent" ? "text-emerald-400" : "text-rose-400");
-                    }
-
-                    if (prog.status === "running") {
-                        setTimeout(pollLocalBackend, 1000);
-                    } else {
-                        isSendingActive = false;
-                        setSendingUIState(false);
-                        document.getElementById("progressStatusLabel").textContent = "Finished! All emails sent.";
-                        document.getElementById("exportReportBtn").removeAttribute("disabled");
-                        document.getElementById("exportReportBtn").classList.add("text-indigo-600");
-                    }
+                if (data.success) {
+                    box.className = "text-xs p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+                    box.innerHTML = `<i class="fa-solid fa-check text-emerald-600 mr-1"></i> ${escapeHtml(data.message)}`;
+                } else {
+                    box.className = "text-xs p-2.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 block";
+                    box.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> ${escapeHtml(data.message)}`;
                 }
-            } catch (e) {
-                console.warn(e);
+            } catch (err) {
+                box.className = "text-xs p-2.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 block";
+                box.innerHTML = `Connection test error: ${escapeHtml(err.message)}`;
             }
-        }
-
-        // Gmail API MIME Multipart Builder
-        async function sendGmailApiEmail({ to, subject, htmlBody, attachments }) {
-            const boundary = 'bulk_mail_' + Date.now();
-            let mime = '';
-            mime += `To: ${to}\r\n`;
-            mime += `Subject: ${subject}\r\n`;
-            mime += `MIME-Version: 1.0\r\n`;
-            mime += `Content-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
-
-            mime += `--${boundary}\r\n`;
-            mime += `Content-Type: text/html; charset="UTF-8"\r\n\r\n`;
-            mime += htmlBody + '\r\n\r\n';
-
-            attachments.forEach(a => {
-                if (a.base64) {
-                    mime += `--${boundary}\r\n`;
-                    mime += `Content-Type: ${a.type || 'application/octet-stream'}; name="${a.name}"\r\n`;
-                    mime += `Content-Disposition: attachment; filename="${a.name}"\r\n`;
-                    mime += `Content-Transfer-Encoding: base64\r\n\r\n`;
-                    mime += a.base64 + '\r\n\r\n';
-                }
-            });
-            mime += `--${boundary}--`;
-
-            const raw = btoa(unescape(encodeURIComponent(mime)))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
-
-            const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-                method: 'POST',
-                headers: {
-                    Authorization: 'Bearer ' + googleAccessToken,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ raw })
-            });
-
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(`Gmail API error (${res.status}): ${errText}`);
-            }
-        }
-
-        // SMTP.js Client Send
-        async function sendViaSmtpJs({ to, subject, body, isHtml }) {
-            const host = document.getElementById("smtpHost").value.trim();
-            const username = document.getElementById("smtpUsername").value.trim();
-            const password = document.getElementById("smtpPassword").value.trim();
-            const senderName = document.getElementById("smtpSenderName").value.trim();
-            const from = senderName ? `${senderName} <${username}>` : username;
-
-            const attArray = loadedAttachments.map(a => ({
-                name: a.name,
-                data: "data:" + (a.type || "application/octet-stream") + ";base64," + a.base64
-            }));
-
-            const message = await Email.send({
-                Host: host,
-                Username: username,
-                Password: password,
-                To: to,
-                From: from,
-                Subject: subject,
-                Body: body,
-                Attachments: attArray
-            });
-
-            if (message !== "OK") {
-                throw new Error(message);
-            }
-        }
-
-        // Helpers & UI State
-        function renderTemplate(text, recipient) {
-            if (!text) return "";
-            let rendered = text;
-            for (let key in recipient) {
-                const val = recipient[key] || "";
-                rendered = rendered.replace(new RegExp(`{{${key}}}`, 'g'), val);
-                rendered = rendered.replace(new RegExp(`{${key}}`, 'g'), val);
-            }
-            return rendered;
-        }
-
-        function setSendingUIState(sending) {
-            const sendBtn = document.getElementById("sendBulkBtn");
-            const stopBtn = document.getElementById("stopSendBtn");
-            if (sending) {
-                sendBtn.classList.add("hidden");
-                stopBtn.classList.remove("hidden");
-            } else {
-                sendBtn.classList.remove("hidden");
-                stopBtn.classList.add("hidden");
-            }
-        }
-
-        function stopSending() {
-            if (!confirm("Are you sure you want to stop bulk sending?")) return;
-            stopRequested = true;
-            appendLiveLog("SYSTEM", "Stop requested. Waiting for current message to complete...", "text-amber-400");
-        }
-
-        function resetProgressUI(total) {
-            document.getElementById("progressBarFill").style.width = "0%";
-            document.getElementById("progressPercentLabel").textContent = "0%";
-            document.getElementById("statSent").textContent = "0";
-            document.getElementById("statFailed").textContent = "0";
-            document.getElementById("statTotal").textContent = total;
-            document.getElementById("liveActivityLog").innerHTML = "";
-        }
-
-        function appendLiveLog(email, msg, colorClass = "text-slate-300") {
-            const logBox = document.getElementById("liveActivityLog");
-            const timeStr = new Date().toLocaleTimeString();
-            const div = document.createElement("div");
-            div.className = "flex items-start space-x-2 leading-relaxed";
-            div.innerHTML = `
-                <span class="text-slate-500">[${timeStr}]</span>
-                <span class="${colorClass} font-bold">•</span>
-                <span class="text-slate-200 font-semibold">${escapeHtml(email)}:</span>
-                <span class="${colorClass}">${escapeHtml(msg)}</span>
-            `;
-            logBox.appendChild(div);
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        function downloadDeliveryReportCsv() {
-            if (deliveryLogs.length === 0) {
-                alert("No delivery records to download.");
-                return;
-            }
-            let csv = "Email,Status,Timestamp,Message\n";
-            deliveryLogs.forEach(l => {
-                csv += `"${l.email}","${l.status}","${l.timestamp}","${(l.message || '').replace(/"/g, '""')}"\n`;
-            });
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `bulk_email_delivery_report_${Date.now()}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         function saveConfig() {
@@ -1263,9 +869,7 @@
                 smtpHost: document.getElementById("smtpHost").value,
                 smtpPort: document.getElementById("smtpPort").value,
                 smtpUsername: document.getElementById("smtpUsername").value,
-                smtpSenderName: document.getElementById("smtpSenderName").value,
-                smtpReplyTo: document.getElementById("smtpReplyTo").value,
-                googleClientId: document.getElementById("googleClientId").value
+                smtpSenderName: document.getElementById("smtpSenderName").value
             };
             localStorage.setItem("bulk_email_cfg", JSON.stringify(cfg));
         }
@@ -1279,31 +883,39 @@
                     if (cfg.smtpPort) document.getElementById("smtpPort").value = cfg.smtpPort;
                     if (cfg.smtpUsername) document.getElementById("smtpUsername").value = cfg.smtpUsername;
                     if (cfg.smtpSenderName) document.getElementById("smtpSenderName").value = cfg.smtpSenderName;
-                    if (cfg.smtpReplyTo) document.getElementById("smtpReplyTo").value = cfg.smtpReplyTo;
-                    if (cfg.googleClientId) document.getElementById("googleClientId").value = cfg.googleClientId;
                 }
             } catch (e) {}
+        }
+
+        // Helpers
+        function escapeHtml(s) {
+            if (!s) return "";
+            return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        function escapeHtml(str) {
-            if (!str) return "";
-            return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+        // Download Template samples
+        function downloadSampleCsv() {
+            const csvContent = "email,name,company\njohn.doe@example.com,John Doe,Acme Corp\njane.smith@example.com,Jane Smith,Global Tech\n";
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "sample_recipients.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
-        function formatBytes(bytes) {
-            if (!bytes || bytes === 0) return "0 B";
-            const k = 1024;
-            const sizes = ["B", "KB", "MB", "GB"];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+        function downloadSampleExcel() {
+            const data = [{ email: "john.doe@example.com", name: "John Doe", company: "Acme Corp" }];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Recipients");
+            XLSX.writeFile(wb, "sample_recipients.xlsx");
         }
     </script>
 </body>

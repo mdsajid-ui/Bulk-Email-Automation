@@ -13,6 +13,9 @@ venv/
 # App dynamic runtime data
 uploads/
 smtp_saved_config.json
+data/*.db
+*.db
+
 
 # IDE
 .vscode/

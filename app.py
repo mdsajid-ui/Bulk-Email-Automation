@@ -9,6 +9,9 @@ from typing import Dict, Any, List
 from flask import Flask, render_template, request, jsonify, send_file, Response
 import pandas as pd
 from email_engine import SMTPConfig, BulkEmailTask, is_valid_email
+from assignment_processor import assignment_processor
+from student_directory import student_directory
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
@@ -405,6 +408,308 @@ def export_report():
             as_attachment=True,
             download_name=filename
         )
+
+# ================= LMS WEEKLY ASSIGNMENT REPORT ROUTES =================
+
+assignment_batch_state = {
+    "status": "idle", # idle, running, completed, stopped, error
+    "total": 0,
+    "sent": 0,
+    "failed": 0,
+    "current_student": "",
+    "logs": [],
+    "stop_requested": False
+}
+assignment_batch_lock = threading.Lock()
+
+@app.route("/api/assignment/upload", methods=["POST"])
+def assignment_upload():
+    file = request.files.get("file")
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "No file uploaded."}), 400
+
+    filename = file.filename
+    try:
+        content = file.read()
+        df = assignment_processor.parse_file(content, filename=filename)
+        candidates = assignment_processor.aggregate_candidates(df)
+        batches = sorted(list(set(c["batch"] for c in candidates if c["batch"])))
+
+        return jsonify({
+            "success": True,
+            "filename": filename,
+            "total_rows": len(df),
+            "total_candidates": len(candidates),
+            "batches": batches
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Failed to parse assignment report: {str(e)}"}), 400
+
+@app.route("/api/assignment/load-default", methods=["POST"])
+def assignment_load_default():
+    default_path = r"C:\Users\mdsaj\Downloads\Assignment (10).xls"
+    if not os.path.exists(default_path):
+        return jsonify({"success": False, "error": f"Default file not found at {default_path}"}), 404
+
+    try:
+        df = assignment_processor.parse_file(default_path, filename="Assignment (10).xls")
+        candidates = assignment_processor.aggregate_candidates(df)
+        batches = sorted(list(set(c["batch"] for c in candidates if c["batch"])))
+
+        return jsonify({
+            "success": True,
+            "filename": "Assignment (10).xls",
+            "total_rows": len(df),
+            "total_candidates": len(candidates),
+            "batches": batches
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Failed to load Assignment (10).xls: {str(e)}"}), 400
+
+@app.route("/api/assignment/candidates", methods=["GET"])
+def assignment_get_candidates():
+    if not assignment_processor.cached_candidates and assignment_processor.cached_df is not None:
+        assignment_processor.aggregate_candidates()
+
+    candidates = assignment_processor.cached_candidates or []
+    
+    # Refresh delivery statuses from DB
+    statuses = student_directory.get_delivery_statuses()
+    for c in candidates:
+        sid = c.get("student_id")
+        if sid in statuses:
+            c["status"] = statuses[sid].get("status", "pending")
+            c["last_sent_at"] = statuses[sid].get("last_sent_at")
+            c["last_error"] = statuses[sid].get("last_error")
+
+    # Filters
+    batch_filter = request.args.get("batch", "").strip()
+    status_filter = request.args.get("status", "").strip() # 'pending', 'sent', 'failed'
+    search_query = request.args.get("search", "").strip().lower()
+
+    filtered = candidates
+    if batch_filter:
+        filtered = [c for c in filtered if c.get("batch") == batch_filter]
+    if status_filter and status_filter != "all":
+        filtered = [c for c in filtered if c.get("status") == status_filter]
+    if search_query:
+        filtered = [
+            c for c in filtered 
+            if search_query in c.get("student_name", "").lower()
+            or search_query in c.get("student_id", "").lower()
+            or search_query in c.get("email", "").lower()
+        ]
+
+    # Metrics
+    total = len(candidates)
+    sent_count = sum(1 for c in candidates if c.get("status") == "sent")
+    pending_count = sum(1 for c in candidates if c.get("status") != "sent")
+
+    return jsonify({
+        "success": True,
+        "total_unfiltered": total,
+        "filtered_count": len(filtered),
+        "metrics": {
+            "total_candidates": total,
+            "sent_count": sent_count,
+            "pending_count": pending_count
+        },
+        "candidates": filtered
+    })
+
+@app.route("/api/assignment/preview/<student_id>", methods=["GET"])
+def assignment_preview(student_id):
+    cand = next((c for c in assignment_processor.cached_candidates if c.get("student_id") == student_id), None)
+    if not cand:
+        return "<div style='font-family:sans-serif; padding:20px; color:#ef4444;'>Student candidate not found.</div>", 404
+
+    trainer_note = request.args.get("note", "")
+    html = assignment_processor.generate_html_report(cand, trainer_notes=trainer_note)
+    return html
+
+@app.route("/api/assignment/update-email", methods=["POST"])
+def assignment_update_email():
+    data = request.json or {}
+    sid = data.get("student_id", "").strip()
+    email = data.get("email", "").strip()
+    name = data.get("student_name", "").strip()
+    batch = data.get("batch", "").strip()
+
+    if not sid:
+        return jsonify({"success": False, "error": "student_id is required"}), 400
+    if email and not is_valid_email(email):
+        return jsonify({"success": False, "error": "Invalid email syntax"}), 400
+
+    student_directory.update_email(sid, email, student_name=name, batch=batch)
+
+    # Update in memory cache
+    for c in assignment_processor.cached_candidates:
+        if c.get("student_id") == sid:
+            c["email"] = email
+            break
+
+    return jsonify({"success": True, "message": f"Updated email for {name or sid} to {email}"})
+
+@app.route("/api/assignment/send-one", methods=["POST"])
+def assignment_send_one():
+    data = request.json or {}
+    sid = data.get("student_id", "").strip()
+    cand = next((c for c in assignment_processor.cached_candidates if c.get("student_id") == sid), None)
+    if not cand:
+        return jsonify({"success": False, "error": f"Candidate with ID '{sid}' not found in loaded report."}), 404
+
+    # Allow email override in payload
+    if data.get("email"):
+        cand["email"] = data["email"].strip()
+        student_directory.update_email(sid, cand["email"], student_name=cand.get("student_name"), batch=cand.get("batch"))
+
+    dry_run = data.get("dry_run", False)
+    trainer_notes = data.get("trainer_notes", "")
+    smtp_data = data.get("smtp", {})
+
+    smtp_cfg = SMTPConfig(
+        host=smtp_data.get("host"),
+        port=smtp_data.get("port", 587),
+        username=smtp_data.get("username"),
+        password=smtp_data.get("password"),
+        use_ssl=smtp_data.get("use_ssl", False),
+        sender_name=smtp_data.get("sender_name", "DV Analytics Assignment Team"),
+        reply_to=smtp_data.get("reply_to", "")
+    )
+
+    if not dry_run:
+        valid, err = smtp_cfg.validate()
+        if not valid:
+            return jsonify({"success": False, "error": f"SMTP Setup required: {err}"}), 400
+
+    result = assignment_processor.send_candidate_report(cand, smtp_cfg, trainer_notes=trainer_notes, dry_run=dry_run)
+    if result["success"]:
+        cand["status"] = "sent"
+        cand["last_sent_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        cand["status"] = "failed"
+        cand["last_error"] = result.get("error")
+
+    return jsonify(result)
+
+@app.route("/api/assignment/send-batch", methods=["POST"])
+def assignment_send_batch():
+    global assignment_batch_state
+    with assignment_batch_lock:
+        if assignment_batch_state["status"] == "running":
+            return jsonify({"success": False, "error": "A batch report dispatch is already running."}), 409
+
+        data = request.json or {}
+        student_ids = data.get("student_ids", [])
+        
+        # If student_ids empty, default to all pending candidates
+        if not student_ids:
+            candidates_to_send = [c for c in assignment_processor.cached_candidates if c.get("status") != "sent"]
+        else:
+            id_set = set(student_ids)
+            candidates_to_send = [c for c in assignment_processor.cached_candidates if c.get("student_id") in id_set]
+
+        if not candidates_to_send:
+            return jsonify({"success": False, "error": "No candidates to send reports to."}), 400
+
+        dry_run = data.get("dry_run", False)
+        trainer_notes = data.get("trainer_notes", "")
+        delay_seconds = float(data.get("delay_seconds", 1.0))
+        smtp_data = data.get("smtp", {})
+
+        smtp_cfg = SMTPConfig(
+            host=smtp_data.get("host"),
+            port=smtp_data.get("port", 587),
+            username=smtp_data.get("username"),
+            password=smtp_data.get("password"),
+            use_ssl=smtp_data.get("use_ssl", False),
+            sender_name=smtp_data.get("sender_name", "DV Analytics Assignment Team"),
+            reply_to=smtp_data.get("reply_to", "")
+        )
+
+        if not dry_run:
+            valid, err = smtp_cfg.validate()
+            if not valid:
+                return jsonify({"success": False, "error": err}), 400
+
+        # Initialize batch state
+        assignment_batch_state = {
+            "status": "running",
+            "total": len(candidates_to_send),
+            "sent": 0,
+            "failed": 0,
+            "current_student": "",
+            "logs": [],
+            "stop_requested": False
+        }
+
+        def worker():
+            global assignment_batch_state
+            for i, cand in enumerate(candidates_to_send):
+                with assignment_batch_lock:
+                    if assignment_batch_state["stop_requested"]:
+                        assignment_batch_state["status"] = "stopped"
+                        break
+                    assignment_batch_state["current_student"] = cand.get("student_name", "")
+
+                res = assignment_processor.send_candidate_report(cand, smtp_cfg, trainer_notes=trainer_notes, dry_run=dry_run)
+                
+                with assignment_batch_lock:
+                    time_str = time.strftime("%H:%M:%S")
+                    if res["success"]:
+                        assignment_batch_state["sent"] += 1
+                        cand["status"] = "sent"
+                        assignment_batch_state["logs"].append({
+                            "student": cand.get("student_name"),
+                            "email": cand.get("email"),
+                            "status": "sent",
+                            "timestamp": time_str,
+                            "message": "Report delivered successfully"
+                        })
+                    else:
+                        assignment_batch_state["failed"] += 1
+                        cand["status"] = "failed"
+                        assignment_batch_state["logs"].append({
+                            "student": cand.get("student_name"),
+                            "email": cand.get("email"),
+                            "status": "failed",
+                            "timestamp": time_str,
+                            "message": res.get("error")
+                        })
+
+                if delay_seconds > 0 and i < len(candidates_to_send) - 1:
+                    time.sleep(delay_seconds)
+
+            with assignment_batch_lock:
+                if assignment_batch_state["status"] == "running":
+                    assignment_batch_state["status"] = "completed"
+
+        threading.Thread(target=worker, daemon=True).start()
+
+        return jsonify({
+            "success": True,
+            "message": f"Initiated report batch sending for {len(candidates_to_send)} candidates."
+        })
+
+@app.route("/api/assignment/batch-status", methods=["GET"])
+def assignment_batch_status():
+    with assignment_batch_lock:
+        state = dict(assignment_batch_state)
+        percent = 0
+        if state["total"] > 0:
+            percent = round(((state["sent"] + state["failed"]) / state["total"]) * 100, 1)
+        state["progress_percent"] = percent
+        state["logs"] = state["logs"][-30:] # return last 30
+        return jsonify({"success": True, "batch": state})
+
+@app.route("/api/assignment/batch-stop", methods=["POST"])
+def assignment_batch_stop():
+    global assignment_batch_state
+    with assignment_batch_lock:
+        if assignment_batch_state["status"] == "running":
+            assignment_batch_state["stop_requested"] = True
+            return jsonify({"success": True, "message": "Stop signal sent."})
+        return jsonify({"success": False, "error": "No batch currently running."}), 400
 
 if __name__ == "__main__":
     print("Starting Bulk Email Automation App on http://127.0.0.1:5000")
