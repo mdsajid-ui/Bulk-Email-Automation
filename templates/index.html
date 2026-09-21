@@ -378,21 +378,21 @@
         </div>
     </header>
 
-    <!-- Sub-Navigation Pill Tabs (Matches ARS Portal Tab Bar) -->
+    <!-- Sub-Navigation Pill Tabs (Bulk Email Send as Primary View) -->
     <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-1">
         <div class="flex items-center space-x-2 border-b border-gray-200 pb-3 overflow-x-auto custom-scrollbar">
-            <button id="navBtnAssignments" onclick="switchAppMode('assignments')" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap">
-                <i class="fa-regular fa-id-card"></i>
-                <span>Student Registrations</span>
-                <span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">LMS</span>
+            <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Bulk Email Send</span>
             </button>
             <a href="sample_candidate_report.html" target="_blank" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
                 <i class="fa-regular fa-file-lines text-gray-400"></i>
                 <span>Templates</span>
             </a>
-            <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-paper-plane text-gray-400"></i>
-                <span>Bulk Email Send</span>
+            <button id="navBtnAssignments" onclick="switchAppMode('assignments')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-regular fa-id-card"></i>
+                <span>Student Registrations</span>
+                <span class="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">LMS</span>
             </button>
         </div>
     </div>
@@ -400,7 +400,7 @@
 <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <!-- ================= VIEW 1: WEEKLY LMS ASSIGNMENT REPORTS ================= -->
-        <div id="viewAssignments" class="space-y-6">
+        <div id="viewAssignments" class="hidden space-y-6">
 
             <!-- Card 1: Weekly LMS Report & Registration Feed (ARS Card 1 Style) -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
@@ -453,105 +453,10 @@
                 </div>
             </div>
 
-            <!-- Card 2: Candidate Management & Dispatch Directory (ARS Card 2 Style) -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-                <!-- Card Header Title & Counter (Matches ARS Create Registration Card Header) -->
-                <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div>
-                        <h2 class="text-sm font-bold text-gray-900 flex items-center">
-                            <i class="fa-solid fa-circle-plus text-[#485d8b] mr-2"></i>
-                            Candidate Directory &amp; Evaluation Dispatch
-                        </h2>
-                        <p class="text-xs text-gray-500 mt-0.5">
-                            Admin can view the candidate, evaluate 6-tool milestones, edit student email, and send report cards.
-                        </p>
-                    </div>
-                    <div class="text-left sm:text-right">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Remaining Pending Reports</span>
-                        <span id="cardRemainingCount" class="text-base font-extrabold text-[#3c4d73]">Calculating...</span>
-                    </div>
-                </div>
-
-                <!-- Search & Filters Form Row (Exact ARS Letter Color & Uppercase Labels) -->
-                <div class="px-4 sm:px-5 py-4 border-b border-gray-100 bg-gray-50/40">
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                        <!-- Search Box -->
-                        <div class="md:col-span-5">
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Search Candidate / Student ID / Email</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
-                                <input id="candidateSearchInput" type="text" oninput="applyCandidateFilters()" placeholder="Student name, ID (e.g. BBS2026...), or email..." class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-white text-gray-900 placeholder:text-gray-400 shadow-2xs">
-                            </div>
-                        </div>
-
-                        <!-- Batch Filter -->
-                        <div class="md:col-span-3">
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Batch Track</label>
-                            <select id="candidateBatchFilter" onchange="applyCandidateFilters()" class="w-full text-xs py-2 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] shadow-2xs">
-                                <option value="">All Batches</option>
-                            </select>
-                        </div>
-
-                        <!-- Status Filter -->
-                        <div class="md:col-span-2">
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Status</label>
-                            <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="w-full text-xs py-2 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] shadow-2xs">
-                                <option value="all">All Status</option>
-                                <option value="pending" selected>Pending Only</option>
-                                <option value="sent">Sent Only</option>
-                            </select>
-                        </div>
-
-                        <!-- Batch Action Button -->
-                        <div class="md:col-span-2">
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">1-Click Action</label>
-                            <button id="btnSendAllPending" onclick="sendBatchReports()" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg shadow-xs transition flex items-center justify-center space-x-1.5">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                                <span>Send Pending</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Table Container -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-xs">
-                        <thead class="bg-gray-50/80">
-                            <tr>
-                                <th class="px-3 py-3 text-center w-10">
-                                    <input type="checkbox" id="selectAllCandidates" onchange="toggleSelectAllCandidates(this.checked)" class="w-4 h-4 rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] cursor-pointer" title="Select All Candidates">
-                                </th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">CANDIDATE / STUDENT ID</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">BATCH TRACK</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">STUDENT EMAIL</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">CURRICULUM PROGRESS (6 TOOLS)</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">LATEST SUBMISSION</th>
-                                <th class="px-4 py-3 text-center font-bold text-gray-500 uppercase tracking-wider text-[11px]">STATUS</th>
-                                <th class="px-4 py-3 text-right font-bold text-gray-500 uppercase tracking-wider text-[11px]">1-CLICK ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="candidateTableBody" class="divide-y divide-slate-100 bg-white">
-                            <tr>
-                                <td colspan="8" class="px-4 py-12 text-center text-gray-400">
-                                    <i class="fa-solid fa-file-excel text-3xl mb-2 text-slate-300 block"></i>
-                                    Click <strong>"Load Assignment (10).xls"</strong> or upload your weekly LMS report to view candidates.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Table Footer Pagination/Count -->
-                <div class="px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
-                    <span id="candidateCountSummary">0 candidates loaded</span>
-                    <span class="text-[11px] text-gray-400 font-medium">Pre-linked with DV Analytics 6,390 Student Master Directory</span>
-                </div>
             </div>
 
-        </div>
-
-                <!-- ================= VIEW 2: BULK EMAIL AUTOMATOR (MULTI-PURPOSE CAMPAIGN MANAGER) ================= -->
-        <div id="viewBulkEmail" class="hidden space-y-6">
+        <!-- ================= VIEW 2: BULK EMAIL AUTOMATOR (MULTI-PURPOSE CAMPAIGN MANAGER) ================= -->
+        <div id="viewBulkEmail" class="space-y-6">
             <!-- Header Banner in ARS Card Style -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1892,9 +1797,8 @@
         document.addEventListener("DOMContentLoaded", () => {
             initLampLogin();
             loadSavedConfig();
-            loadClientSideMasterDirectory();
             checkServerStatus();
-            quickLoadDefaultAssignment();
+            switchAppMode('bulk');
         });
 
         // App Mode Switcher
@@ -2154,9 +2058,13 @@
 
         // Filter and Search Logic
         function applyCandidateFilters() {
-            const query = document.getElementById("candidateSearchInput").value.trim().toLowerCase();
-            const batchVal = document.getElementById("candidateBatchFilter").value;
-            const statusVal = document.getElementById("candidateStatusFilter").value;
+            const searchEl = document.getElementById("candidateSearchInput");
+            const batchEl = document.getElementById("candidateBatchFilter");
+            const statusEl = document.getElementById("candidateStatusFilter");
+            if (!searchEl || !batchEl || !statusEl) return;
+            const query = searchEl.value.trim().toLowerCase();
+            const batchVal = batchEl.value;
+            const statusVal = statusEl.value;
 
             filteredCandidates = allCandidates.filter(c => {
                 if (batchVal && c.batch !== batchVal) return false;
@@ -2231,7 +2139,8 @@
         function renderCandidateTable(candidates) {
             const tbody = document.getElementById("candidateTableBody");
             const summary = document.getElementById("candidateCountSummary");
-            summary.textContent = `Showing ${candidates.length} of ${allCandidates.length} candidates`;
+            if (summary) summary.textContent = `Showing ${candidates.length} of ${allCandidates.length} candidates`;
+            if (!tbody) return;
 
             if (candidates.length === 0) {
                 tbody.innerHTML = `
