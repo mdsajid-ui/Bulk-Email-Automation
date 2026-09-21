@@ -452,7 +452,6 @@
                     </div>
                 </div>
             </div>
-            </div>
 
             <!-- Card 2: Candidate Management & Dispatch Directory (ARS Card 2 Style) -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
@@ -551,18 +550,18 @@
 
         </div>
 
-                <!-- ================= VIEW 2: BULK EMAIL AUTOMATOR (INDEPENDENT CAMPAIGN MANAGER) ================= -->
+                <!-- ================= VIEW 2: BULK EMAIL AUTOMATOR (MULTI-PURPOSE CAMPAIGN MANAGER) ================= -->
         <div id="viewBulkEmail" class="hidden space-y-6">
-            <!-- Header Banner -->
+            <!-- Header Banner in ARS Card Style -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                         <h2 class="text-sm font-bold text-gray-900 flex items-center">
-                            <i class="fa-solid fa-paper-plane text-[#485d8b] mr-2"></i>
-                            Bulk Email Automator &amp; Campaign Manager
+                            <i class="fa-solid fa-paper-plane text-[#485d8b] mr-2 text-base"></i>
+                            Bulk Email Automator &amp; Campaign Dispatcher
                         </h2>
                         <p class="text-xs text-gray-500 mt-1">
-                            Broadcast customized email campaigns with file attachments to any recipient audience (.csv, .xlsx, .xls) or pasted email lists. Fully independent campaign manager.
+                            Upload your recipient spreadsheet (.xlsx, .xls, .csv), attach files, narrate your custom message for any purpose, and broadcast in 1 click.
                         </p>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -576,20 +575,51 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Campaign Purpose Quick-Selector Ribbon -->
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Select Campaign Purpose (1-Click Presets):</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="setCampaignPurpose('workshop')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-gray-50 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition flex items-center space-x-1.5 cursor-pointer">
+                            <span>🎓</span>
+                            <span>Workshop &amp; Webinar Invitation</span>
+                        </button>
+                        <button type="button" onclick="setCampaignPurpose('certificate')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-gray-50 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition flex items-center space-x-1.5 cursor-pointer">
+                            <span>📜</span>
+                            <span>Certificate &amp; Documents</span>
+                        </button>
+                        <button type="button" onclick="setCampaignPurpose('announcement')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-gray-50 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition flex items-center space-x-1.5 cursor-pointer">
+                            <span>📢</span>
+                            <span>General Announcement / Circular</span>
+                        </button>
+                        <button type="button" onclick="setCampaignPurpose('course_update')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-gray-50 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-700 transition flex items-center space-x-1.5 cursor-pointer">
+                            <span>💡</span>
+                            <span>Course &amp; Training Update</span>
+                        </button>
+                        <button type="button" onclick="setCampaignPurpose('fee_reminder')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 transition flex items-center space-x-1.5 cursor-pointer">
+                            <span>💳</span>
+                            <span>Fee &amp; Registration Notice</span>
+                        </button>
+                        <button type="button" onclick="setCampaignPurpose('custom')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:bg-gray-100 text-gray-700 transition flex items-center space-x-1.5 cursor-pointer">
+                            <span>✍️</span>
+                            <span>Blank Custom Narration</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Two-Column Layout (ARS Card System) -->
+            <!-- Two-Column Form Layout (ARS Card System) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Left Column: Recipient Audience & Email Composer (7 cols) -->
+                <!-- Left Column: Audience & Narration Composer (7 cols) -->
                 <div class="lg:col-span-7 space-y-6">
                     
-                    <!-- Card 1: Recipient Audience -->
+                    <!-- Card 1: Upload Recipient Spreadsheet -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
                         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                             <h3 class="text-sm font-bold text-gray-900 flex items-center">
                                 <span class="w-5 h-5 rounded-full bg-[#485d8b] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">1</span>
-                                Recipient Audience
+                                Recipient Audience (Upload Excel / CSV)
                             </h3>
                             <span id="bulkRecipientCountPill" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-bold">
                                 0 Recipients Loaded
@@ -598,9 +628,9 @@
 
                         <!-- Dropzone for CSV/Excel -->
                         <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-6 cursor-pointer bg-gray-50/50 hover:bg-[#edf1f7]/30 transition group">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 group-hover:text-[#485d8b] mb-2 transition"></i>
-                            <span class="text-xs font-bold text-gray-700 group-hover:text-[#3c4d73]">Upload Recipient Spreadsheet (.csv, .xlsx, .xls)</span>
-                            <span class="text-[11px] text-gray-400 mt-1">Headers will be auto-detected (e.g. email, name, organization)</span>
+                            <i class="fa-solid fa-file-excel text-3xl text-emerald-600 mb-2 transition group-hover:scale-110"></i>
+                            <span class="text-xs font-bold text-gray-800 group-hover:text-[#3c4d73]">Upload Recipient Excel Spreadsheet (.xlsx, .xls, .csv)</span>
+                            <span class="text-[11px] text-gray-400 mt-1">Columns will be auto-detected: e.g. email, name, course, batch, organization</span>
                             <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
                         </label>
 
@@ -616,6 +646,12 @@
                                     Parse &amp; Load Pasted Emails
                                 </button>
                             </div>
+                        </div>
+
+                        <!-- Dynamic Variable Tags Ribbon -->
+                        <div id="dynamicTagsContainer" class="hidden pt-2 border-t border-gray-100">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Click to insert tag into your message:</span>
+                            <div id="dynamicTagButtons" class="flex flex-wrap gap-1.5"></div>
                         </div>
 
                         <!-- Recipients Preview Table -->
@@ -640,12 +676,12 @@
                         </div>
                     </div>
 
-                    <!-- Card 2: Email Content & Attachments -->
+                    <!-- Card 2: Email Narration & File Attachments -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
                         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                             <h3 class="text-sm font-bold text-gray-900 flex items-center">
                                 <span class="w-5 h-5 rounded-full bg-[#485d8b] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">2</span>
-                                Email Content &amp; Attachments
+                                Email Narration &amp; File Attachments
                             </h3>
                             <span id="attachmentCountBadge" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-bold">
                                 0 Files Attached
@@ -654,7 +690,7 @@
 
                         <div>
                             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Email Subject Line</label>
-                            <input id="bulkEmailSubject" type="text" placeholder="e.g. Important Announcement: Please find your attached documentation" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition">
+                            <input id="bulkEmailSubject" type="text" oninput="updateLiveNarrationPreview()" placeholder="e.g. Official Update: Upcoming Session &amp; Workshop Materials" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition">
                         </div>
 
                         <div>
@@ -669,10 +705,20 @@
 
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
-                                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Email Body Message</label>
-                                <span class="text-[10px] text-gray-400">Supports variables: <code>{{name}}</code>, <code>{{email}}</code></span>
+                                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Message Narration (Email Body)</label>
+                                <span class="text-[10px] text-gray-400">Supports variables like <code>{{name}}</code></span>
                             </div>
-                            <textarea id="bulkEmailBody" rows="6" placeholder="Dear {{name}},&#10;&#10;Please find the attached documentation for your review.&#10;&#10;Best regards,&#10;DV Analytics Team" class="w-full text-xs rounded-lg border border-gray-200 p-3 font-sans focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition"></textarea>
+                            <textarea id="bulkEmailBody" rows="7" oninput="updateLiveNarrationPreview()" placeholder="Dear {{name}},&#10;&#10;[Narrate your email message here for any purpose]&#10;&#10;Best regards,&#10;DV Analytics Mentors Team" class="w-full text-xs rounded-lg border border-gray-200 p-3 font-sans focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition leading-relaxed"></textarea>
+                        </div>
+
+                        <!-- Live Message Narration Preview Drawer -->
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1">
+                                <i class="fa-solid fa-eye text-[#485d8b] mr-1"></i> Live Narration Preview (For First Recipient):
+                            </span>
+                            <div id="liveNarrationPreviewBox" class="text-xs text-gray-700 whitespace-pre-wrap font-sans bg-white p-2.5 rounded border border-gray-200 min-h-[50px]">
+                                <em>Preview will render here when recipients and message are entered...</em>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -687,23 +733,27 @@
                                 <span class="w-5 h-5 rounded-full bg-[#ef5323] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">3</span>
                                 Dispatch Summary &amp; Controls
                             </h3>
-                            <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                                Ready
+                            <span id="bulkSenderEngineBadge" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                Ready to Send
                             </span>
                         </div>
 
                         <div class="space-y-3 text-xs">
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
-                                <span class="text-gray-500">Recipients Count:</span>
+                                <span class="text-gray-500">Recipients Loaded:</span>
                                 <span id="summaryRecipientCount" class="font-bold text-gray-900">0</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
-                                <span class="text-gray-500">Attachments Count:</span>
+                                <span class="text-gray-500">Files Attached:</span>
                                 <span id="summaryAttachmentCount" class="font-bold text-gray-900">0 files</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
-                                <span class="text-gray-500">Sender Engine:</span>
-                                <span id="summarySenderAccount" class="font-bold text-[#485d8b]">Configured via SMTP</span>
+                                <span class="text-gray-500">Campaign Purpose:</span>
+                                <span id="summaryCampaignPurpose" class="font-bold text-[#485d8b]">General / Custom</span>
+                            </div>
+                            <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                <span class="text-gray-500">Dispatch Engine:</span>
+                                <span id="summarySenderAccount" class="font-bold text-emerald-600">SMTP / Gmail API</span>
                             </div>
                         </div>
 
@@ -711,10 +761,10 @@
                         <div class="p-3 bg-amber-50/60 rounded-lg border border-amber-200 text-xs">
                             <label class="flex items-center space-x-2 cursor-pointer text-amber-900 font-semibold">
                                 <input id="chkBulkDryRun" type="checkbox" checked class="rounded border-amber-300 text-[#485d8b] focus:ring-[#485d8b] w-4 h-4">
-                                <span>Dry-Run Simulation Mode (Safe Test Mode)</span>
+                                <span>Dry-Run Simulation Mode (Safe Test Run)</span>
                             </label>
                             <p class="text-[11px] text-amber-700 mt-1 pl-6">
-                                Validates all addresses and tags without emailing real mailboxes.
+                                Validates all addresses and tags without sending live emails. Recommended before final broadcast.
                             </p>
                         </div>
 
@@ -769,17 +819,17 @@
                                 </button>
                             </div>
                             <div id="bulkLiveActivityLog" class="bg-gray-900 text-gray-200 font-mono text-[11px] p-3 rounded-xl h-44 overflow-y-auto space-y-1 custom-scrollbar">
-                                <div class="text-gray-500 italic">[System ready. Load recipients and click Send Bulk Emails to monitor live execution.]</div>
+                                <div class="text-gray-500 italic">[System ready. Upload spreadsheet, narrate message, and click Send Bulk Emails.]</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Quick Guide Card -->
                     <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 text-xs space-y-2 text-gray-600">
-                        <span class="font-bold text-gray-800 block text-xs">💡 Pro Tips</span>
-                        <p>1. Download the <b>Sample CSV</b> or <b>Sample Excel</b> to format your recipient columns.</p>
-                        <p>2. Use <code>{{name}}</code> or <code>{name}</code> anywhere in the subject or body to personalize emails.</p>
-                        <p>3. To send real emails, enter your SMTP details via the <b>SMTP Setup</b> button in the top header.</p>
+                        <span class="font-bold text-gray-800 block text-xs">💡 Quick Tips</span>
+                        <p>1. <b>Multi-Purpose:</b> Use the top preset buttons to instantly configure announcements, invitations, or certificate emails.</p>
+                        <p>2. <b>Dynamic Tags:</b> You can use <code>{{name}}</code>, <code>{{course}}</code>, or any column header from your Excel sheet.</p>
+                        <p>3. <b>Attachments:</b> The attached file(s) will be packaged and sent to every recipient automatically.</p>
                     </div>
 
                 </div>
