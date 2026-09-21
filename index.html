@@ -389,7 +389,7 @@
             <button id="navBtnCounselors" onclick="switchAppMode('counselors')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
                 <i class="fa-solid fa-user-group text-gray-400"></i>
                 <span>Counselor Accounts</span>
-                <span id="navCounselorBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">4</span>
+                <span id="navCounselorBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">3</span>
             </button>
             <a href="sample_candidate_report.html" target="_blank" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
                 <i class="fa-regular fa-file-lines text-gray-400"></i>
@@ -599,7 +599,7 @@
                             Active Counselor Accounts
                         </h3>
                         <span id="counselorCountBadge" class="text-xs bg-[#edf1f7] text-[#3c4d73] px-2.5 py-0.5 rounded-full font-bold">
-                            4 Accounts Active
+                            3 Accounts Active
                         </span>
                     </div>
 
@@ -1269,17 +1269,16 @@
         // USER MANAGEMENT SYSTEM (COUNSELOR ACCOUNTS) - MATCHING ARS SPEC
         // ==============================================================================
         const DEFAULT_COUNSELOR_ACCOUNTS = [
-            { id: "c1", name: "Parth", email: "parth.patel@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
-            { id: "c2", name: "Pushkar Rai", email: "pushkar.rai@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
-            { id: "c3", name: "Anuj", email: "anuj.gupta@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
-            { id: "c4", name: "Akshitha", email: "akshitha.m@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false }
+            { id: "c1", name: "Sanjana", email: "sanjana@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
+            { id: "c2", name: "Aswini", email: "aswini@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
+            { id: "c3", name: "debasis", email: "debasis@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false }
         ];
 
         let counselorAccounts = [];
 
         function loadCounselorAccounts() {
             try {
-                const stored = localStorage.getItem("dva_counselor_accounts");
+                const stored = localStorage.getItem("dva_counselor_accounts_v3");
                 if (stored) {
                     counselorAccounts = JSON.parse(stored);
                 } else {
@@ -1294,7 +1293,7 @@
 
         function saveCounselorAccounts() {
             try {
-                localStorage.setItem("dva_counselor_accounts", JSON.stringify(counselorAccounts));
+                localStorage.setItem("dva_counselor_accounts_v3", JSON.stringify(counselorAccounts));
             } catch(e) {}
             renderCounselorAccounts();
         }
