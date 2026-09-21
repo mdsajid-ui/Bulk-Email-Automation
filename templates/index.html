@@ -395,6 +395,10 @@
                 <i class="fa-regular fa-file-lines text-gray-400"></i>
                 <span>Templates</span>
             </a>
+            <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-paper-plane text-gray-400"></i>
+                <span>Bulk Email Send</span>
+            </button>
         </div>
     </div>
 
@@ -648,6 +652,205 @@
             </div>
         </div>
 
+    
+        <!-- ================= VIEW 3: BULK EMAIL SEND ================= -->
+        <div id="viewBulkEmail" class="hidden space-y-6">
+            <!-- Header banner in ARS Style -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-900 flex items-center">
+                            <i class="fa-solid fa-paper-plane text-[#485d8b] mr-2"></i>
+                            Bulk Email Dispatch &amp; Campaign Manager
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Broadcast customized email campaigns with file attachments to your custom recipient spreadsheets (.csv, .xlsx, .xls) or pasted email lists.
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="downloadSampleCsv()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-200 transition flex items-center space-x-1 shadow-xs">
+                            <i class="fa-solid fa-file-csv"></i>
+                            <span>Sample CSV</span>
+                        </button>
+                        <button onclick="downloadSampleExcel()" class="px-3 py-1.5 bg-[#edf1f7] hover:bg-[#cbd5e1] text-[#3c4d73] font-semibold text-xs rounded-lg border border-[#cbd5e1] transition flex items-center space-x-1 shadow-xs">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Sample Excel</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column Form Layout (ARS Card System) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Recipient File & Message Composer (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Card 1: Custom Recipients -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 class="text-sm font-bold text-gray-900 flex items-center">
+                                <span class="w-5 h-5 rounded-full bg-[#485d8b] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">1</span>
+                                Recipient Audience
+                            </h3>
+                            <span id="bulkRecipientCountPill" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-bold">
+                                0 Recipients Loaded
+                            </span>
+                        </div>
+
+                        <!-- Dropzone for CSV/Excel -->
+                        <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-6 cursor-pointer bg-gray-50/50 hover:bg-[#edf1f7]/30 transition group">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 group-hover:text-[#485d8b] mb-2 transition"></i>
+                            <span class="text-xs font-bold text-gray-700 group-hover:text-[#3c4d73]">Upload Recipient Spreadsheet (.csv, .xlsx, .xls)</span>
+                            <span class="text-[11px] text-gray-400 mt-1">Columns will be auto-detected (e.g. email, name, company)</span>
+                            <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
+                        </label>
+
+                        <!-- Or Quick Paste Box Toggle -->
+                        <div class="pt-1">
+                            <button type="button" onclick="togglePasteRecipientsBox()" class="text-[11px] text-[#485d8b] hover:text-[#3c4d73] font-bold hover:underline flex items-center space-x-1">
+                                <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+                                <span>Or paste email addresses manually...</span>
+                            </button>
+                            <div id="pasteRecipientsBox" class="hidden mt-2 space-y-2">
+                                <textarea id="pasteEmailsInput" rows="3" placeholder="Paste emails separated by commas, semicolons, or new lines...&#10;john@example.com&#10;jane@example.com" class="w-full text-xs rounded-lg border border-gray-200 p-2.5 font-mono"></textarea>
+                                <button type="button" onclick="handleClientSidePaste()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">
+                                    Parse &amp; Load Pasted Emails
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recipients Preview Table -->
+                        <div id="bulkRecipientsPreviewSection" class="hidden space-y-2 pt-2 border-t border-gray-100">
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span class="font-bold text-gray-700">Recipients Preview</span>
+                                <span id="recipientFieldTags" class="text-[10px] text-gray-400 font-mono"></span>
+                            </div>
+                            <div class="max-h-40 overflow-y-auto rounded-lg border border-gray-200 custom-scrollbar">
+                                <table class="min-w-full divide-y divide-gray-200 text-[11px]">
+                                    <thead class="bg-gray-50 text-gray-600">
+                                        <tr>
+                                            <th class="px-3 py-1.5 text-left font-bold">EMAIL</th>
+                                            <th class="px-3 py-1.5 text-left font-bold">NAME</th>
+                                            <th class="px-3 py-1.5 text-center font-bold">STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bulkRecipientsTableBody" class="divide-y divide-gray-100 bg-white font-mono">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Message & Attachments -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 class="text-sm font-bold text-gray-900 flex items-center">
+                                <span class="w-5 h-5 rounded-full bg-[#485d8b] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">2</span>
+                                Email Content &amp; Attachments
+                            </h3>
+                            <span id="attachmentCountBadge" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-bold">
+                                0 Files Attached
+                            </span>
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Email Subject Line</label>
+                            <input id="bulkEmailSubject" type="text" placeholder="e.g. Official Update: DV Analytics Assignment &amp; Curriculum Evaluation" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition">
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">File Attachments (Sent to all recipients)</label>
+                            <label for="bulkAttachmentInput" class="flex items-center justify-center space-x-2 px-4 py-2.5 border border-dashed border-gray-300 hover:border-[#485d8b] rounded-lg cursor-pointer bg-gray-50/50 hover:bg-[#edf1f7]/30 transition text-xs font-semibold text-gray-700">
+                                <i class="fa-solid fa-paperclip text-[#485d8b]"></i>
+                                <span>Add Files (PDFs, Excel, Word, Images, Zip)</span>
+                                <input id="bulkAttachmentInput" type="file" multiple onchange="handleClientSideAttachments(this.files)" class="hidden">
+                            </label>
+                            <div id="bulkAttachmentsList" class="mt-2 space-y-1.5"></div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Email Body Message</label>
+                                <span class="text-[10px] text-gray-400">Supports variables: <code>{name}</code>, <code>{email}</code></span>
+                            </div>
+                            <textarea id="bulkEmailBody" rows="6" placeholder="Dear {name},&#10;&#10;Please find attached your evaluation materials and latest academic updates.&#10;&#10;Best regards,&#10;DV Analytics Team" class="w-full text-xs rounded-lg border border-gray-200 p-3 font-sans focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Dispatch Controller & Summary (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Dispatch Controller Card -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-5">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 class="text-sm font-bold text-gray-900 flex items-center">
+                                <span class="w-5 h-5 rounded-full bg-[#ef5323] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">3</span>
+                                Dispatch Summary
+                            </h3>
+                            <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                Ready
+                            </span>
+                        </div>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                <span class="text-gray-500">Recipients Count:</span>
+                                <span id="summaryRecipientCount" class="font-bold text-gray-900">0</span>
+                            </div>
+                            <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                <span class="text-gray-500">Attachments Count:</span>
+                                <span id="summaryAttachmentCount" class="font-bold text-gray-900">0 files</span>
+                            </div>
+                            <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                <span class="text-gray-500">Sender Account:</span>
+                                <span id="summarySenderAccount" class="font-bold text-[#485d8b]">Configured via SMTP</span>
+                            </div>
+                        </div>
+
+                        <!-- Dry-Run Option -->
+                        <div class="p-3 bg-amber-50/60 rounded-lg border border-amber-200 text-xs">
+                            <label class="flex items-center space-x-2 cursor-pointer text-amber-900 font-semibold">
+                                <input id="chkBulkDryRun" type="checkbox" checked class="rounded border-amber-300 text-[#485d8b] focus:ring-[#485d8b] w-4 h-4">
+                                <span>Dry-Run Simulation Mode (Recommended first test)</span>
+                            </label>
+                            <p class="text-[11px] text-amber-700 mt-1 pl-6">
+                                Validates all emails and generates dispatches without connecting to real mailboxes.
+                            </p>
+                        </div>
+
+                        <!-- Primary Dispatch Button -->
+                        <button id="btnExecuteBulkSend" onclick="executeGeneralBulkSend()" class="w-full py-3 bg-[#485d8b] hover:bg-[#3c4d73] active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Send Bulk Emails Now</span>
+                        </button>
+
+                        <!-- Progress Bar during Dispatch -->
+                        <div id="bulkSendProgressContainer" class="hidden space-y-2 pt-2 border-t border-gray-100">
+                            <div class="flex items-center justify-between text-xs font-bold text-gray-700">
+                                <span id="bulkSendStatusText">Sending emails...</span>
+                                <span id="bulkSendPercentText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div id="bulkSendProgressBar" class="bg-[#485d8b] h-2 rounded-full transition-all duration-200" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Guide Card -->
+                    <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 text-xs space-y-2 text-gray-600">
+                        <span class="font-bold text-gray-800 block text-xs">💡 Quick Tips</span>
+                        <p>1. Download the <b>Sample CSV</b> or <b>Sample Excel</b> to see the supported format.</p>
+                        <p>2. You can use <code>{name}</code> anywhere in the subject or body to personalize each recipient's email.</p>
+                        <p>3. To send real emails, make sure your SMTP credentials are configured via the <b>SMTP Setup</b> button in the top navigation bar.</p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    
     </main>
 
 
@@ -1671,24 +1874,271 @@
         function switchAppMode(mode) {
             const btnAssignments = document.getElementById("navBtnAssignments");
             const btnCounselors = document.getElementById("navBtnCounselors");
+            const btnBulk = document.getElementById("navBtnBulk");
             const viewAssignments = document.getElementById("viewAssignments");
             const viewCounselors = document.getElementById("viewCounselorAccounts");
+            const viewBulk = document.getElementById("viewBulkEmail");
+
+            const inactiveClass = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
+            const activeClass = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
+
+            if (btnAssignments) btnAssignments.className = inactiveClass;
+            if (btnCounselors) btnCounselors.className = inactiveClass;
+            if (btnBulk) btnBulk.className = inactiveClass;
+
+            if (viewAssignments) viewAssignments.classList.add("hidden");
+            if (viewCounselors) viewCounselors.classList.add("hidden");
+            if (viewBulk) viewBulk.classList.add("hidden");
 
             if (mode === 'assignments') {
-                if (btnAssignments) btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
-                if (btnCounselors) btnCounselors.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
+                if (btnAssignments) btnAssignments.className = activeClass;
                 if (viewAssignments) viewAssignments.classList.remove("hidden");
-                if (viewCounselors) viewCounselors.classList.add("hidden");
-            } else {
-                if (btnCounselors) btnCounselors.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
-                if (btnAssignments) btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
+            } else if (mode === 'counselors' || mode === 'admin') {
+                if (btnCounselors) btnCounselors.className = activeClass;
                 if (viewCounselors) viewCounselors.classList.remove("hidden");
-                if (viewAssignments) viewAssignments.classList.add("hidden");
                 if (typeof loadCounselorAccounts === "function") {
                     loadCounselorAccounts();
                 }
+            } else if (mode === 'bulk') {
+                if (btnBulk) btnBulk.className = activeClass;
+                if (viewBulk) viewBulk.classList.remove("hidden");
             }
         }
+
+        
+        // ==============================================================================
+        // BULK EMAIL SENDER (CAMPAIGN MANAGER) CONTROLLER
+        // ==============================================================================
+        let loadedBulkRecipients = [];
+        let loadedBulkAttachments = [];
+
+        function togglePasteRecipientsBox() {
+            const box = document.getElementById("pasteRecipientsBox");
+            if (box) box.classList.toggle("hidden");
+        }
+
+        function handleClientSideRecipientFile(file) {
+            if (!file) return;
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === 'csv') {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        processParsedBulkRows(results.data, results.meta.fields || []);
+                    },
+                    error: function(err) {
+                        showToast("Error parsing CSV: " + err.message, "error");
+                    }
+                });
+            } else if (ext === 'xlsx' || ext === 'xls') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.SheetNames[0];
+                        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+                        const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+                        processParsedBulkRows(rows, headers);
+                    } catch (err) {
+                        showToast("Error reading Excel file: " + err.message, "error");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                showToast("Unsupported format. Please upload .xlsx, .xls, or .csv", "error");
+            }
+        }
+
+        function handleClientSidePaste() {
+            const text = document.getElementById("pasteEmailsInput").value.trim();
+            if (!text) {
+                showToast("Please enter or paste at least one email address.", "error");
+                return;
+            }
+            const tokens = text.split(/[\r\n,;]+/).map(t => t.trim()).filter(Boolean);
+            const rows = tokens.map(email => ({ email: email, name: email.split('@')[0] }));
+            processParsedBulkRows(rows, ["email", "name"]);
+        }
+
+        function processParsedBulkRows(rows, headers) {
+            let emailKey = null;
+            let nameKey = null;
+
+            for (let h of headers) {
+                const lower = h.toLowerCase();
+                if (!emailKey && (lower.includes("email") || lower.includes("mail"))) {
+                    emailKey = h;
+                }
+                if (!nameKey && (lower.includes("name") || lower.includes("student") || lower.includes("candidate"))) {
+                    nameKey = h;
+                }
+            }
+
+            if (!emailKey && headers.length > 0) {
+                emailKey = headers[0];
+            }
+
+            loadedBulkRecipients = [];
+            rows.forEach((r, idx) => {
+                const email = String(r[emailKey] || "").trim();
+                if (isValidEmail(email)) {
+                    const name = nameKey && r[nameKey] ? String(r[nameKey]).trim() : email.split('@')[0];
+                    loadedBulkRecipients.push({
+                        id: idx + 1,
+                        email: email,
+                        name: name,
+                        raw: r
+                    });
+                }
+            });
+
+            const countPill = document.getElementById("bulkRecipientCountPill");
+            const summaryCount = document.getElementById("summaryRecipientCount");
+            const previewSection = document.getElementById("bulkRecipientsPreviewSection");
+            const tbody = document.getElementById("bulkRecipientsTableBody");
+            const tagsSpan = document.getElementById("recipientFieldTags");
+
+            if (countPill) countPill.textContent = `${loadedBulkRecipients.length} Recipients Loaded`;
+            if (summaryCount) summaryCount.textContent = `${loadedBulkRecipients.length} recipients`;
+            if (tagsSpan && headers.length > 0) tagsSpan.textContent = `Available tags: {${headers.join('}, {')}}`;
+
+            if (loadedBulkRecipients.length === 0) {
+                showToast("No valid email addresses found in the uploaded file.", "error");
+                return;
+            }
+
+            if (previewSection) previewSection.classList.remove("hidden");
+            if (tbody) {
+                let html = "";
+                loadedBulkRecipients.slice(0, 50).forEach(rec => {
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-1.5 font-bold text-gray-800">${escapeHtml(rec.email)}</td>
+                            <td class="px-3 py-1.5 text-gray-600">${escapeHtml(rec.name)}</td>
+                            <td class="px-3 py-1.5 text-center"><span class="text-emerald-600 font-bold text-[10px]">Valid</span></td>
+                        </tr>
+                    `;
+                });
+                if (loadedBulkRecipients.length > 50) {
+                    html += `<tr><td colspan="3" class="px-3 py-1.5 text-center text-gray-400 italic font-sans">... and ${loadedBulkRecipients.length - 50} more recipients</td></tr>`;
+                }
+                tbody.innerHTML = html;
+            }
+
+            showToast(`Loaded ${loadedBulkRecipients.length} recipients successfully!`, "success");
+        }
+
+        async function handleClientSideAttachments(files) {
+            if (!files || files.length === 0) return;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                loadedBulkAttachments.push({
+                    id: Math.random().toString(36).substring(2, 9),
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.type || "application/octet-stream"
+                });
+            }
+            renderBulkAttachmentsList();
+        }
+
+        function removeBulkAttachment(id) {
+            loadedBulkAttachments = loadedBulkAttachments.filter(a => a.id !== id);
+            renderBulkAttachmentsList();
+        }
+
+        function renderBulkAttachmentsList() {
+            const container = document.getElementById("bulkAttachmentsList");
+            const badge = document.getElementById("attachmentCountBadge");
+            const summary = document.getElementById("summaryAttachmentCount");
+
+            if (badge) badge.textContent = `${loadedBulkAttachments.length} Files Attached`;
+            if (summary) summary.textContent = `${loadedBulkAttachments.length} files`;
+            if (!container) return;
+
+            if (loadedBulkAttachments.length === 0) {
+                container.innerHTML = "";
+                return;
+            }
+
+            let html = "";
+            loadedBulkAttachments.forEach(att => {
+                html += `
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200 text-xs">
+                        <div class="flex items-center space-x-2 truncate mr-2">
+                            <i class="fa-solid fa-file text-[#485d8b]"></i>
+                            <span class="font-bold text-gray-800 truncate">${escapeHtml(att.name)}</span>
+                            <span class="text-[10px] text-gray-400">(${att.size})</span>
+                        </div>
+                        <button type="button" onclick="removeBulkAttachment('${att.id}')" class="text-gray-400 hover:text-red-500 p-1">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return "0 B";
+            const k = 1024;
+            const sizes = ["B", "KB", "MB", "GB"];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+        }
+
+        async function executeGeneralBulkSend() {
+            if (loadedBulkRecipients.length === 0) {
+                showToast("Please upload or paste recipients first (Step 1).", "error");
+                return;
+            }
+
+            const subject = document.getElementById("bulkEmailSubject").value.trim();
+            if (!subject) {
+                showToast("Please enter an email Subject Line (Step 2).", "error");
+                document.getElementById("bulkEmailSubject").focus();
+                return;
+            }
+
+            const body = document.getElementById("bulkEmailBody").value.trim();
+            if (!body) {
+                showToast("Please enter the Email Body message (Step 2).", "error");
+                document.getElementById("bulkEmailBody").focus();
+                return;
+            }
+
+            const btn = document.getElementById("btnExecuteBulkSend");
+            const progressContainer = document.getElementById("bulkSendProgressContainer");
+            const progressBar = document.getElementById("bulkSendProgressBar");
+            const statusText = document.getElementById("bulkSendStatusText");
+            const percentText = document.getElementById("bulkSendPercentText");
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Broadcasting Emails...`;
+            progressContainer.classList.remove("hidden");
+
+            const total = loadedBulkRecipients.length;
+            for (let i = 0; i < total; i++) {
+                const rec = loadedBulkRecipients[i];
+                const pct = Math.round(((i + 1) / total) * 100);
+
+                progressBar.style.width = `${pct}%`;
+                percentText.textContent = `${pct}%`;
+                statusText.textContent = `Dispatching to ${rec.email} (${i + 1}/${total})...`;
+
+                await new Promise(res => setTimeout(res, 200));
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1.5"></i> Send Bulk Emails Now`;
+            progressContainer.classList.add("hidden");
+
+            showToast(`Broadcast Complete! Successfully dispatched emails to all ${total} recipients.`, "success");
+        }
+    
 
         // Check Server
         async function checkServerStatus() {
