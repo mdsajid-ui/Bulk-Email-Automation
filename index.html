@@ -387,8 +387,8 @@
                 <span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">LMS</span>
             </button>
             <button id="navBtnCounselors" onclick="switchAppMode('counselors')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-user-group text-gray-400"></i>
-                <span>Counselor Accounts</span>
+                <i class="fa-solid fa-user-shield text-gray-400"></i>
+                <span>Admin Accounts</span>
                 <span id="navCounselorBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">3</span>
             </button>
             <a href="sample_candidate_report.html" target="_blank" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
@@ -560,22 +560,22 @@
                 <div class="lg:col-span-4 bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
                     <h3 class="text-sm font-bold text-gray-900 flex items-center">
                         <i class="fa-solid fa-circle-plus text-[#485d8b] mr-2 text-base"></i>
-                        <span>Create Counselor Account</span>
+                        <span>Create Admin Account</span>
                     </h3>
 
                     <form id="createCounselorForm" onsubmit="handleCreateCounselor(event)" class="space-y-4 pt-1">
                         <div>
                             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-                                COUNSELOR NAME
+                                ADMIN NAME
                             </label>
-                            <input type="text" id="newCounselorName" required placeholder="Enter counselor's full name" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-white transition">
+                            <input type="text" id="newCounselorName" required placeholder="Enter admin's full name" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-white transition">
                         </div>
 
                         <div>
                             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
                                 EMAIL ADDRESS
                             </label>
-                            <input type="email" id="newCounselorEmail" required placeholder="admin" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#cbd5e1] focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-[#edf2f9] text-gray-800 transition">
+                            <input type="email" id="newCounselorEmail" required placeholder="admin@dvdataanalytics.com" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#cbd5e1] focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-[#edf2f9] text-gray-800 transition">
                         </div>
 
                         <div>
@@ -587,19 +587,19 @@
                         </div>
 
                         <button type="submit" class="w-full py-2.5 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center space-x-1.5 mt-2">
-                            <span>Create Account</span>
+                            <span>Create Admin Account</span>
                         </button>
                     </form>
                 </div>
 
-                <!-- Right Column: Active Counselor Accounts (Matches Screenshot) -->
+                <!-- Right Column: Active Admin Accounts (Matches Screenshot) -->
                 <div class="lg:col-span-8 bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                         <h3 class="text-sm font-bold text-gray-900">
-                            Active Counselor Accounts
+                            Active Admin Accounts
                         </h3>
                         <span id="counselorCountBadge" class="text-xs bg-[#edf1f7] text-[#3c4d73] px-2.5 py-0.5 rounded-full font-bold">
-                            3 Accounts Active
+                            3 Admin Accounts Active
                         </span>
                     </div>
 
@@ -1168,13 +1168,22 @@
 
             isLampOn = !isLampOn;
 
+            const bulb = document.getElementById("lampBulbEl");
             if (stage) {
                 if (isLampOn) {
                     stage.classList.remove("lamp-off");
+                    if (bulb) {
+                        bulb.setAttribute("fill", "#fef08a");
+                        bulb.style.filter = "drop-shadow(0 0 14px #facc15)";
+                    }
                     if (indicator) indicator.className = "fa-solid fa-lightbulb text-amber-400";
                     if (statusText) statusText.textContent = "Lamp is ON (Click to toggle)";
                 } else {
                     stage.classList.add("lamp-off");
+                    if (bulb) {
+                        bulb.setAttribute("fill", "#334155");
+                        bulb.style.filter = "none";
+                    }
                     if (indicator) indicator.className = "fa-regular fa-lightbulb text-gray-400";
                     if (statusText) statusText.textContent = "Lamp is OFF (Click to toggle)";
                 }
@@ -1311,7 +1320,7 @@
             if (counselorAccounts.length === 0) {
                 container.innerHTML = `
                     <div class="py-8 text-center text-gray-400 text-xs">
-                        No counselor accounts configured. Use the form on the left to add an account.
+                        No admin accounts configured. Use the form on the left to add an account.
                     </div>
                 `;
                 return;
@@ -1408,7 +1417,7 @@
             emailInput.value = "";
             passInput.value = "";
 
-            showToast(`Counselor account for "${name}" created successfully!`, "success");
+            showToast(`Admin account for "${name}" created successfully!`, "success");
         }
 
         function toggleCounselorActive(id) {
@@ -1430,15 +1439,15 @@
         function editCounselorAccount(id) {
             const acc = counselorAccounts.find(c => c.id === id);
             if (!acc) return;
-            const newName = prompt(`Edit Counselor Name:`, acc.name);
+            const newName = prompt(`Edit Admin Name:`, acc.name);
             if (!newName) return;
-            const newEmail = prompt(`Edit Counselor Email:`, acc.email);
+            const newEmail = prompt(`Edit Admin Email:`, acc.email);
             if (!newEmail) return;
 
             acc.name = newName.trim();
             acc.email = newEmail.trim();
             saveCounselorAccounts();
-            showToast(`Updated counselor details for "${acc.name}"`, "success");
+            showToast(`Updated admin details for "${acc.name}"`, "success");
         }
 
         function resetCounselorPassword(id) {
@@ -1456,7 +1465,7 @@
         function removeCounselorAccount(id) {
             const acc = counselorAccounts.find(c => c.id === id);
             if (!acc) return;
-            if (confirm(`Are you sure you want to remove counselor account for "${acc.name}"?`)) {
+            if (confirm(`Are you sure you want to remove admin account for "${acc.name}"?`)) {
                 counselorAccounts = counselorAccounts.filter(c => c.id !== id);
                 saveCounselorAccounts();
                 showToast(`Removed account for "${acc.name}"`, "info");
