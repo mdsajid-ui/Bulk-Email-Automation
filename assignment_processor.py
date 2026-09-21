@@ -271,7 +271,7 @@ class AssignmentProcessor:
 
         return {
             "excel": {"completed": excel_done, "target": 4, "percent": excel_pct, "color": "#10b981", "bg": "#ecfdf5", "border": "#a7f3d0", "label": "Excel"},
-            "sql": {"completed": sql_done, "target": 5, "percent": sql_pct, "color": "#4f46e5", "bg": "#eef2ff", "border": "#c7d2fe", "label": "SQL Server"},
+            "sql": {"completed": sql_done, "target": 5, "percent": sql_pct, "color": "#485d8b", "bg": "#edf1f7", "border": "#cbd5e1", "label": "SQL Server"},
             "python": {"completed": py_done, "target": 5, "percent": py_pct, "color": "#f59e0b", "bg": "#fffbeb", "border": "#fde68a", "label": "Python"},
             "power_bi": {"completed": pbi_done, "target": 4, "percent": pbi_pct, "color": "#f97316", "bg": "#fff7ed", "border": "#fed7aa", "label": "Power BI"},
             "tableau": {"completed": tab_done, "target": 4, "percent": tab_pct, "color": "#8b5cf6", "bg": "#f5f3ff", "border": "#ddd6fe", "label": "Tableau"},
@@ -491,11 +491,11 @@ class AssignmentProcessor:
                                     <td width="3%"></td>
                                     <!-- SQL Card -->
                                     <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.03); vertical-align:top;">
-                                        <div style="font-size:12px; font-weight:800; color:#4f46e5; text-transform:uppercase; letter-spacing:0.5px;">SQL Server</div>
+                                        <div style="font-size:12px; font-weight:800; color:#485d8b; text-transform:uppercase; letter-spacing:0.5px;">SQL Server</div>
                                         <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:8px;">Target: 5 Assignments</div>
                                         <div>{sql_donut}</div>
                                         <div style="margin-top:8px;">
-                                            <span style="background:#eef2ff; color:#4338ca; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+                                            <span style="background:#edf1f7; color:#3c4d73; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
                                                 {sql_m['completed']} of {sql_m['target']} Completed
                                             </span>
                                         </div>

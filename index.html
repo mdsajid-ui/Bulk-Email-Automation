@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Plus Jakarta Sans & Inter font for ARS typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="dv_logo.png">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DV Analytics &bull; LMS Assignment & Email Automator</title>
+    <title>DV Analytics &bull; Academic Control Panel &bull; Candidate Assignment Reports</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,13 +25,28 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
                     colors: {
                         brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
+                            50: '#edf1f7',
+                            100: '#e4e8f0',
+                            200: '#cbd5e1',
+                            300: '#94a3b8',
+                            400: '#5c76a6',
+                            500: '#485d8b',
+                            600: '#3c4d73',
+                            700: '#2c3954',
+                            800: '#25316d',
+                            900: '#1c244b',
+                        },
+                        accent: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ef5323',
+                            600: '#d94719',
+                            700: '#c2410c',
                         }
                     }
                 }
@@ -39,151 +60,197 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="bg-[#f9fafb] text-gray-900 min-h-screen flex flex-col font-sans selection:bg-[#485d8b]/15 selection:text-[#3c4d73]">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <!-- Top Navigation Header (DV Analytics ARS Style) -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-                    <i class="fa-solid fa-graduation-cap text-lg"></i>
-                </div>
+            <!-- Left: DV Analytics Official Logo & Header Title -->
+            <div class="flex items-center space-x-3.5">
+                <a href="index.html" class="flex items-center">
+                    <img src="dv_logo.png" alt="DV Analytics" class="h-9 sm:h-10 w-auto object-contain" onerror="this.src='static/dv_logo.png'">
+                </a>
+                <div class="h-6 w-px bg-gray-200 hidden sm:block"></div>
                 <div>
-                    <h1 class="font-bold text-lg text-slate-900 tracking-tight leading-none">Bulk Email &amp; LMS Automator</h1>
-                    <p class="text-xs text-slate-500 mt-0.5">Bulk Email Automator &bull; Weekly Student Assignment Reports</p>
+                    <h1 class="font-bold text-base sm:text-lg text-gray-900 tracking-tight leading-none">Admin Control Panel</h1>
+                    <p class="text-[11px] text-gray-500 mt-1 hidden sm:block">Candidate Assignment Reports &bull; Bulk Email Automator &bull; Weekly LMS Automation</p>
                 </div>
             </div>
 
-            <!-- Main Mode Switcher -->
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-                <button id="navBtnAssignments" onclick="switchAppMode('assignments')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-white text-indigo-600 shadow-xs">
-                    <i class="fa-solid fa-chart-simple text-indigo-500"></i>
-                    <span>LMS Assignment Reports</span>
-                    <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold">Weekly</span>
-                </button>
-                <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center space-x-2">
-                    <i class="fa-solid fa-paper-plane text-slate-400"></i>
-                    <span>General Bulk Email</span>
-                </button>
-            </div>
+            <!-- Right: System Administrator Profile & Actions (Matches ARS Portal) -->
+            <div class="flex items-center space-x-3">
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs font-bold text-gray-800 leading-tight">System Administrator</div>
+                    <div class="text-[11px] text-gray-400 font-mono">admin@dv.com</div>
+                </div>
 
-            <!-- Server Status & Settings -->
-            <div class="flex items-center space-x-2">
-                <span id="backendStatusPill" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                    <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span>
+                <span id="backendStatusPill" class="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                    <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-gray-400 mr-1.5"></span>
                     <span id="backendStatusLabel">Checking Server...</span>
                 </span>
-                <button onclick="openSmtpSettingsModal()" class="inline-flex items-center text-xs font-semibold text-slate-700 hover:text-indigo-600 bg-white hover:bg-slate-50 px-3 py-1.5 rounded-lg transition border border-slate-200 shadow-xs">
-                    <i class="fa-solid fa-gear mr-1.5 text-slate-400"></i> SMTP Setup
+
+                <button onclick="openSmtpSettingsModal()" class="inline-flex items-center text-xs font-semibold text-gray-700 hover:text-[#485d8b] hover:border-[#485d8b]/50 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition border border-gray-200 shadow-xs">
+                    <i class="fa-solid fa-gear mr-1.5 text-gray-400"></i> SMTP Setup
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- MAIN APP CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Sub-Navigation Pill Tabs (Matches ARS Portal Tab Bar) -->
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-1">
+        <div class="flex items-center space-x-2 border-b border-gray-200 pb-3 overflow-x-auto custom-scrollbar">
+            <button id="navBtnAssignments" onclick="switchAppMode('assignments')" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap">
+                <i class="fa-regular fa-id-card"></i>
+                <span>Student Registrations</span>
+                <span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">LMS</span>
+            </button>
+            <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-user-group text-gray-400"></i>
+                <span>Counselor Accounts &amp; Bulk Email</span>
+            </button>
+            <a href="sample_candidate_report.html" target="_blank" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-regular fa-file-lines text-gray-400"></i>
+                <span>Templates</span>
+            </a>
+        </div>
+    </div>
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <!-- ================= VIEW 1: WEEKLY LMS ASSIGNMENT REPORTS ================= -->
         <div id="viewAssignments" class="space-y-6">
 
-            <!-- Top Action Banner -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <!-- Card 1: Weekly LMS Report & Registration Feed (ARS Card 1 Style) -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
-                            Weekly Automation Workflow
-                        </span>
-                        <h2 class="text-xl font-bold text-slate-900 mt-2">Candidate Assignment Reports</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">
-                            Upload your latest LMS report sheet (<code class="text-indigo-600">.xls</code>, <code class="text-indigo-600">.xlsx</code>, <code class="text-indigo-600">.csv</code>). Click any candidate to send their report instantly!
+                        <h2 class="text-sm font-bold text-gray-900 flex items-center">
+                            <i class="fa-solid fa-indian-rupee-sign text-[#485d8b] mr-2"></i>
+                            Weekly Candidate Assignment Workflow
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Upload your latest LMS report sheet (<code class="text-[#485d8b] font-mono">.xls</code>, <code class="text-[#485d8b] font-mono">.xlsx</code>, <code class="text-[#485d8b] font-mono">.csv</code>). Click any candidate to send their industrial report card instantly!
                         </p>
                     </div>
-                    <div class="flex items-center flex-wrap gap-2">
-                        <!-- Quick Load Assignment (10).xls -->
-                        <button onclick="quickLoadDefaultAssignment()" class="px-4 py-2.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 hover:border-indigo-200 transition flex items-center space-x-2">
-                            <i class="fa-solid fa-bolt text-amber-500"></i>
+                    <div class="flex items-center flex-wrap gap-2.5">
+                        <!-- Quick Load Assignment (10).xls (Save Button Style in ARS) -->
+                        <button onclick="quickLoadDefaultAssignment()" class="px-4 py-2 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-semibold text-xs rounded-lg transition flex items-center space-x-1.5 shadow-xs">
+                            <i class="fa-solid fa-bolt text-amber-300"></i>
                             <span>Load "Assignment (10).xls"</span>
                         </button>
                         <!-- Upload Any Weekly LMS Report -->
-                        <label for="lmsFileInput" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 cursor-pointer transition flex items-center space-x-2">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <label for="lmsFileInput" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-lg border border-gray-200 transition flex items-center space-x-1.5 shadow-xs cursor-pointer">
+                            <i class="fa-solid fa-cloud-arrow-up text-gray-500"></i>
                             <span>Upload Weekly LMS Report</span>
                             <input id="lmsFileInput" type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="handleLmsReportUpload(this.files[0])">
                         </label>
+                        <!-- Reset / Clear Filters (Clear Registrations Style in ARS) -->
+                        <button onclick="resetAllCandidateFilters()" class="px-3.5 py-2 bg-red-50 hover:bg-red-100/80 text-red-600 font-semibold text-xs rounded-lg border border-red-200 transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reset Filters</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Metrics Ribbon -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100">
-                    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold uppercase text-slate-400 block">Total Submissions</span>
-                        <span id="metricTotalRows" class="text-2xl font-extrabold text-slate-800">0</span>
+                <!-- Metrics Ribbon (ARS Clean Stat Cards) -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-5 pt-5 border-t border-gray-100">
+                    <div class="bg-gray-50/70 rounded-lg p-3.5 border border-gray-200 text-center">
+                        <span class="text-[11px] font-bold uppercase text-gray-400 tracking-wider block mb-1">Total Submissions</span>
+                        <span id="metricTotalRows" class="text-2xl font-extrabold text-gray-900">0</span>
                     </div>
-                    <div class="bg-indigo-50/60 rounded-xl p-3.5 border border-indigo-100 text-center">
-                        <span class="text-[11px] font-bold uppercase text-indigo-400 block">Unique Candidates</span>
-                        <span id="metricCandidates" class="text-2xl font-extrabold text-indigo-700">0</span>
+                    <div class="bg-[#edf1f7]/70 rounded-lg p-3.5 border border-[#cbd5e1] text-center">
+                        <span class="text-[11px] font-bold uppercase text-[#485d8b] tracking-wider block mb-1">Unique Candidates</span>
+                        <span id="metricCandidates" class="text-2xl font-extrabold text-[#3c4d73]">0</span>
                     </div>
-                    <div class="bg-emerald-50 rounded-xl p-3.5 border border-emerald-100 text-center">
-                        <span class="text-[11px] font-bold uppercase text-emerald-500 block">Reports Sent</span>
+                    <div class="bg-emerald-50/70 rounded-lg p-3.5 border border-emerald-200 text-center">
+                        <span class="text-[11px] font-bold uppercase text-emerald-600 tracking-wider block mb-1">Reports Sent</span>
                         <span id="metricSentCount" class="text-2xl font-extrabold text-emerald-700">0</span>
                     </div>
-                    <div class="bg-amber-50 rounded-xl p-3.5 border border-amber-100 text-center">
-                        <span class="text-[11px] font-bold uppercase text-amber-500 block">Pending Dispatch</span>
+                    <div class="bg-amber-50/70 rounded-lg p-3.5 border border-amber-200 text-center">
+                        <span class="text-[11px] font-bold uppercase text-amber-600 tracking-wider block mb-1">Pending Dispatch</span>
                         <span id="metricPendingCount" class="text-2xl font-extrabold text-amber-700">0</span>
                     </div>
                 </div>
             </div>
+            </div>
 
-            <!-- Candidate Management Table Card -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <!-- Search & Filters Header -->
-                <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-slate-50/50">
-                    <div class="flex items-center flex-1 space-x-3">
+            <!-- Card 2: Candidate Management & Dispatch Directory (ARS Card 2 Style) -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+                <!-- Card Header Title & Counter (Matches ARS Create Registration Card Header) -->
+                <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-900 flex items-center">
+                            <i class="fa-solid fa-circle-plus text-[#485d8b] mr-2"></i>
+                            Candidate Directory &amp; Evaluation Dispatch
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            Admin can view the candidate, evaluate 6-tool milestones, edit student email, and send report cards.
+                        </p>
+                    </div>
+                    <div class="text-left sm:text-right">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Remaining Pending Reports</span>
+                        <span id="cardRemainingCount" class="text-base font-extrabold text-[#3c4d73]">Calculating...</span>
+                    </div>
+                </div>
+
+                <!-- Search & Filters Form Row (Exact ARS Letter Color & Uppercase Labels) -->
+                <div class="px-4 sm:px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                         <!-- Search Box -->
-                        <div class="relative flex-1 max-w-sm">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                            <input id="candidateSearchInput" type="text" oninput="applyCandidateFilters()" placeholder="Search student name, ID (e.g. BBS2026...), or email..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white">
+                        <div class="md:col-span-5">
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Search Candidate / Student ID / Email</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
+                                <input id="candidateSearchInput" type="text" oninput="applyCandidateFilters()" placeholder="Student name, ID (e.g. BBS2026...), or email..." class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-white text-gray-900 placeholder:text-gray-400 shadow-2xs">
+                            </div>
                         </div>
 
                         <!-- Batch Filter -->
-                        <select id="candidateBatchFilter" onchange="applyCandidateFilters()" class="text-xs py-2 px-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                            <option value="">All Batches</option>
-                        </select>
+                        <div class="md:col-span-3">
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Batch Track</label>
+                            <select id="candidateBatchFilter" onchange="applyCandidateFilters()" class="w-full text-xs py-2 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] shadow-2xs">
+                                <option value="">All Batches</option>
+                            </select>
+                        </div>
 
                         <!-- Status Filter -->
-                        <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs py-2 px-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                            <option value="all">All Status</option>
-                            <option value="pending" selected>Pending Only</option>
-                            <option value="sent">Sent Only</option>
-                        </select>
-                    </div>
+                        <div class="md:col-span-2">
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Status</label>
+                            <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="w-full text-xs py-2 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] shadow-2xs">
+                                <option value="all">All Status</option>
+                                <option value="pending" selected>Pending Only</option>
+                                <option value="sent">Sent Only</option>
+                            </select>
+                        </div>
 
-                    <!-- Batch Send All Pending Button -->
-                    <div class="flex items-center space-x-2">
-                        <button id="btnSendAllPending" onclick="sendBatchReports()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span>Send All Pending</span>
-                        </button>
+                        <!-- Batch Action Button -->
+                        <div class="md:col-span-2">
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">1-Click Action</label>
+                            <button id="btnSendAllPending" onclick="sendBatchReports()" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg shadow-xs transition flex items-center justify-center space-x-1.5">
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                                <span>Send Pending</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Table Container -->
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-xs">
-                        <thead class="bg-slate-50">
+                    <table class="min-w-full divide-y divide-gray-200 text-xs">
+                        <thead class="bg-gray-50/80">
                             <tr>
-                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Candidate / Student ID</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Batch</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Student Email</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Curriculum Progress (6 Core Tools)</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-600 uppercase tracking-wider">Latest Submission</th>
-                                <th class="px-4 py-3 text-center font-bold text-slate-600 uppercase tracking-wider">Status</th>
-                                <th class="px-4 py-3 text-right font-bold text-slate-600 uppercase tracking-wider">1-Click Action</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">CANDIDATE / STUDENT ID</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">BATCH TRACK</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">STUDENT EMAIL</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">CURRICULUM PROGRESS (6 TOOLS)</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">LATEST SUBMISSION</th>
+                                <th class="px-4 py-3 text-center font-bold text-gray-500 uppercase tracking-wider text-[11px]">STATUS</th>
+                                <th class="px-4 py-3 text-right font-bold text-gray-500 uppercase tracking-wider text-[11px]">1-CLICK ACTION</th>
                             </tr>
                         </thead>
                         <tbody id="candidateTableBody" class="divide-y divide-slate-100 bg-white">
                             <tr>
-                                <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                                <td colspan="7" class="px-4 py-12 text-center text-gray-400">
                                     <i class="fa-solid fa-file-excel text-3xl mb-2 text-slate-300 block"></i>
                                     Click <strong>"Load Assignment (10).xls"</strong> or upload your weekly LMS report to view candidates.
                                 </td>
@@ -193,9 +260,9 @@
                 </div>
 
                 <!-- Table Footer Pagination/Count -->
-                <div class="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+                <div class="px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
                     <span id="candidateCountSummary">0 candidates loaded</span>
-                    <span class="text-[11px] text-slate-400">Pre-linked with DV Analytics 6,390 Student Master Directory</span>
+                    <span class="text-[11px] text-gray-400 font-medium">Pre-linked with DV Analytics 6,390 Student Master Directory</span>
                 </div>
             </div>
 
@@ -207,47 +274,47 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-7 space-y-6">
                     <!-- Recipients Card -->
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-slate-800 text-base">1. Custom Recipients</h3>
+                            <h3 class="font-bold text-gray-900 text-base">1. Custom Recipients</h3>
                             <div class="flex space-x-2">
                                 <button onclick="downloadSampleCsv()" class="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md font-semibold border border-emerald-200">Sample CSV</button>
-                                <button onclick="downloadSampleExcel()" class="text-xs text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md font-semibold border border-indigo-200">Sample Excel</button>
+                                <button onclick="downloadSampleExcel()" class="text-xs text-[#3c4d73] bg-[#edf1f7] px-2.5 py-1 rounded-md font-semibold border border-[#cbd5e1]">Sample Excel</button>
                             </div>
                         </div>
-                        <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-6 cursor-pointer bg-slate-50/50 hover:bg-indigo-50/20 transition">
-                            <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-2"></i>
-                            <span class="text-xs font-semibold text-slate-600">Upload CSV or Excel spreadsheet</span>
+                        <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-6 cursor-pointer bg-gray-50/50 hover:bg-[#edf1f7]/40 transition">
+                            <i class="fa-solid fa-cloud-arrow-up text-xl text-gray-400 mb-2"></i>
+                            <span class="text-xs font-semibold text-gray-600">Upload CSV or Excel spreadsheet</span>
                             <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
                         </label>
-                        <div id="customRecipientsPreview" class="text-xs text-slate-500 font-medium"></div>
+                        <div id="customRecipientsPreview" class="text-xs text-gray-500 font-medium"></div>
                     </div>
 
                     <!-- Message & Attachments -->
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-                        <h3 class="font-bold text-slate-800 text-base">2. Message & Attachments</h3>
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                        <h3 class="font-bold text-gray-900 text-base">2. Message & Attachments</h3>
                         <div>
-                            <label class="text-xs font-semibold text-slate-700 block mb-1">Subject</label>
-                            <input id="emailSubject" type="text" placeholder="Important Document" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20">
+                            <label class="text-xs font-semibold text-gray-700 block mb-1">Subject</label>
+                            <input id="emailSubject" type="text" placeholder="Important Document" class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#485d8b]/20">
                         </div>
                         <div>
-                            <label class="text-xs font-semibold text-slate-700 block mb-1">Attach Files (Sent to all)</label>
+                            <label class="text-xs font-semibold text-gray-700 block mb-1">Attach Files (Sent to all)</label>
                             <input type="file" multiple onchange="handleClientSideAttachments(this.files)" class="text-xs">
                             <div id="attachmentsList" class="mt-2 space-y-1"></div>
                         </div>
                         <div>
-                            <label class="text-xs font-semibold text-slate-700 block mb-1">Body</label>
-                            <textarea id="emailBody" rows="5" class="w-full text-sm rounded-xl border border-slate-200 p-3 font-mono"></textarea>
+                            <label class="text-xs font-semibold text-gray-700 block mb-1">Body</label>
+                            <textarea id="emailBody" rows="5" class="w-full text-sm rounded-xl border border-gray-200 p-3 font-mono"></textarea>
                         </div>
                     </div>
                 </div>
 
                 <!-- Launch Side -->
                 <div class="lg:col-span-5 space-y-6">
-                    <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl space-y-4">
+                    <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-xl space-y-4">
                         <h3 class="text-lg font-bold">1-Click Dispatch</h3>
                         <p class="text-xs text-slate-300">Broadcast custom attachments to all loaded recipients.</p>
-                        <button onclick="confirmAndSendBulk()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl text-sm transition">
+                        <button onclick="confirmAndSendBulk()" class="w-full py-3.5 bg-[#485d8b] hover:bg-[#3c4d73] font-bold rounded-xl text-sm transition">
                             Send Bulk Emails Now
                         </button>
                     </div>
@@ -257,56 +324,57 @@
 
     </main>
 
+
     <!-- ================= MODAL 1: REPORT PREVIEW MODAL ================= -->
-    <div id="previewModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center hidden p-2 sm:p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[96vh] flex flex-col border border-slate-200 overflow-hidden">
+    <div id="previewModal" class="fixed inset-0 bg-gray-900/70 backdrop-blur-xs z-50 flex items-center justify-center hidden p-2 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[96vh] flex flex-col border border-gray-200 overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <div class="px-6 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-sm shadow-md shadow-indigo-100">
+                    <div class="w-9 h-9 rounded-xl bg-[#485d8b] flex items-center justify-center text-white text-sm shadow-md shadow-gray-200">
                         <i class="fa-solid fa-graduation-cap"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base leading-tight" id="previewModalTitle">Student Performance Report</h3>
-                        <p class="text-[11px] text-slate-500" id="previewModalSubtitle">Industrial Curriculum Evaluation &bull; Donut Progress Charts &bull; Mentorship Portal</p>
+                        <h3 class="font-bold text-gray-900 text-base leading-tight" id="previewModalTitle">Student Performance Report</h3>
+                        <p class="text-[11px] text-gray-500" id="previewModalSubtitle">Industrial Curriculum Evaluation &bull; Donut Progress Charts &bull; Mentorship Portal</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button id="modalSendReportBtn" onclick="sendModalReport()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                    <button id="modalSendReportBtn" onclick="sendModalReport()" class="px-4 py-2 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-paper-plane"></i>
                         <span>Send This Report</span>
                     </button>
-                    <button onclick="closePreviewModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition">
+                    <button onclick="closePreviewModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-slate-200 flex items-center justify-center transition">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Optional Trainer Notes bar -->
-            <div class="px-6 py-2.5 bg-indigo-50/50 border-b border-indigo-100 flex items-center space-x-3 text-xs">
-                <span class="font-bold text-indigo-900 whitespace-nowrap"><i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i> Trainer Note:</span>
-                <input id="modalTrainerNoteInput" type="text" placeholder="e.g. Excellent progress! Complete remaining sessions for mock interview qualification." class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <button onclick="refreshPreviewWithNote()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold transition whitespace-nowrap">
+            <div class="px-6 py-2.5 bg-[#edf1f7]/60 border-b border-[#e4e8f0] flex items-center space-x-3 text-xs">
+                <span class="font-bold text-[#25316d] whitespace-nowrap"><i class="fa-solid fa-comment-dots text-[#485d8b] mr-1"></i> Trainer Note:</span>
+                <input id="modalTrainerNoteInput" type="text" placeholder="e.g. Excellent progress! Complete remaining sessions for mock interview qualification." class="w-full px-3 py-1.5 bg-white border border-[#cbd5e1] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#485d8b]">
+                <button onclick="refreshPreviewWithNote()" class="px-3 py-1.5 bg-[#485d8b] hover:bg-[#3c4d73] text-white rounded-lg font-bold transition whitespace-nowrap">
                     Update Report
                 </button>
             </div>
 
             <!-- Modal Body (Two-Column Layout: Report Left, Mentorship & Upload Right) -->
-            <div class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 bg-slate-100">
+            <div class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 bg-gray-100">
                 <!-- Left: Iframe Report Card View -->
                 <div class="lg:col-span-8 p-3 sm:p-4 overflow-y-auto h-[60vh] lg:h-[74vh]">
-                    <iframe id="previewReportIframe" class="w-full h-full min-h-[620px] bg-white rounded-xl border border-slate-200 shadow-sm" frameborder="0"></iframe>
+                    <iframe id="previewReportIframe" class="w-full h-full min-h-[620px] bg-white rounded-xl border border-gray-200 shadow-sm" frameborder="0"></iframe>
                 </div>
 
                 <!-- Right: Mentorship & Interactive Upload Hub -->
-                <div class="lg:col-span-4 bg-white border-l border-slate-200 flex flex-col h-[40vh] lg:h-[74vh] overflow-hidden">
+                <div class="lg:col-span-4 bg-white border-l border-gray-200 flex flex-col h-[40vh] lg:h-[74vh] overflow-hidden">
                     <!-- Hub Tabs -->
-                    <div class="flex border-b border-slate-200 bg-slate-50 text-xs font-bold">
-                        <button id="tabBtnChat" onclick="switchHubTab('chat')" class="flex-1 py-3 px-4 text-indigo-600 border-b-2 border-indigo-600 bg-white transition flex items-center justify-center space-x-1.5">
+                    <div class="flex border-b border-gray-200 bg-gray-50 text-xs font-bold">
+                        <button id="tabBtnChat" onclick="switchHubTab('chat')" class="flex-1 py-3 px-4 text-[#485d8b] border-b-2 border-[#485d8b] bg-white transition flex items-center justify-center space-x-1.5">
                             <i class="fa-solid fa-comments"></i>
                             <span>Mentorship Chat</span>
                         </button>
-                        <button id="tabBtnUpload" onclick="switchHubTab('upload')" class="flex-1 py-3 px-4 text-slate-500 hover:text-slate-800 transition flex items-center justify-center space-x-1.5">
+                        <button id="tabBtnUpload" onclick="switchHubTab('upload')" class="flex-1 py-3 px-4 text-gray-500 hover:text-gray-800 transition flex items-center justify-center space-x-1.5">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                             <span>Upload &amp; Tools</span>
                         </button>
@@ -320,8 +388,8 @@
                         </div>
 
                         <!-- Quick suggestion chips -->
-                        <div class="py-2 flex flex-wrap gap-1 border-t border-slate-100 mt-2">
-                            <button onclick="sendQuickChatMessage('Request Machine Learning Capstone Review')" class="text-[10px] font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full transition">
+                        <div class="py-2 flex flex-wrap gap-1 border-t border-gray-100 mt-2">
+                            <button onclick="sendQuickChatMessage('Request Machine Learning Capstone Review')" class="text-[10px] font-semibold bg-[#edf1f7] hover:bg-[#e4e8f0] text-[#3c4d73] px-2 py-0.5 rounded-full transition">
                                 🚀 ML Project Review
                             </button>
                             <button onclick="sendQuickChatMessage('Schedule Placement Mock Interview')" class="text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full transition">
@@ -334,8 +402,8 @@
 
                         <!-- Chat input -->
                         <div class="flex items-center space-x-2 pt-1">
-                            <input id="chatInputMessage" type="text" placeholder="Type message to mentors..." class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500" onkeydown="if(event.key==='Enter') sendChatMessage()">
-                            <button onclick="sendChatMessage()" class="p-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+                            <input id="chatInputMessage" type="text" placeholder="Type message to mentors..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#485d8b]" onkeydown="if(event.key==='Enter') sendChatMessage()">
+                            <button onclick="sendChatMessage()" class="p-2 px-3 bg-[#485d8b] hover:bg-[#3c4d73] text-white rounded-xl text-xs font-bold transition">
                                 <i class="fa-solid fa-paper-plane"></i>
                             </button>
                         </div>
@@ -344,16 +412,16 @@
                     <!-- Panel 2: Upload & Curriculum Steppers -->
                     <div id="hubPanelUpload" class="flex-1 p-4 overflow-y-auto hidden space-y-4 text-xs">
                         <!-- Direct Assignment & Capstone Uploader -->
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+                        <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200 space-y-2.5">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-800 text-xs">📁 Upload Assignment / Capstone</span>
-                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full">Instant Sync</span>
+                                <span class="font-bold text-gray-800 text-xs">📁 Upload Assignment / Capstone</span>
+                                <span class="text-[10px] text-[#485d8b] font-bold bg-[#edf1f7] px-2 py-0.5 rounded-full">Instant Sync</span>
                             </div>
-                            <p class="text-[11px] text-slate-500">Upload code, reports, or project datasets (.ipynb, .sql, .pbix, .xlsx, .pdf, .zip)</p>
+                            <p class="text-[11px] text-gray-500">Upload code, reports, or project datasets (.ipynb, .sql, .pbix, .xlsx, .pdf, .zip)</p>
                             
                             <div>
-                                <label class="text-[10px] font-bold text-slate-600 block mb-1">Select Tool</label>
-                                <select id="uploadToolSelect" class="w-full text-xs p-2 border border-slate-200 rounded-lg bg-white">
+                                <label class="text-[10px] font-bold text-gray-600 block mb-1">Select Tool</label>
+                                <select id="uploadToolSelect" class="w-full text-xs p-2 border border-gray-200 rounded-lg bg-white">
                                     <option value="excel">Excel (Target: 4 Assignments)</option>
                                     <option value="sql">SQL Server (Target: 5 Assignments)</option>
                                     <option value="python">Python Programming (Target: 5 Assignments)</option>
@@ -364,96 +432,96 @@
                             </div>
 
                             <div>
-                                <label class="text-[10px] font-bold text-slate-600 block mb-1">Description / Project Title</label>
-                                <input id="uploadDescInput" type="text" placeholder="e.g. End-to-End Prediction Pipeline" class="w-full text-xs p-2 border border-slate-200 rounded-lg bg-white">
+                                <label class="text-[10px] font-bold text-gray-600 block mb-1">Description / Project Title</label>
+                                <input id="uploadDescInput" type="text" placeholder="e.g. End-to-End Prediction Pipeline" class="w-full text-xs p-2 border border-gray-200 rounded-lg bg-white">
                             </div>
 
-                            <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-4 cursor-pointer bg-white transition group">
-                                <i class="fa-solid fa-cloud-arrow-up text-xl text-indigo-500 group-hover:scale-110 transition mb-1"></i>
-                                <span class="text-[11px] font-bold text-indigo-700">Choose File to Upload</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">Click or drag file here</span>
+                            <label class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-4 cursor-pointer bg-white transition group">
+                                <i class="fa-solid fa-cloud-arrow-up text-xl text-[#485d8b] group-hover:scale-110 transition mb-1"></i>
+                                <span class="text-[11px] font-bold text-[#3c4d73]">Choose File to Upload</span>
+                                <span class="text-[10px] text-gray-400 mt-0.5">Click or drag file here</span>
                                 <input type="file" id="modalStudentFileInput" class="hidden" onchange="handleModalStudentFileUpload(this.files[0])">
                             </label>
                             <div id="uploadFileStatus" class="text-[11px] text-emerald-600 font-bold hidden bg-emerald-50 p-2 rounded-lg border border-emerald-200"></div>
                         </div>
 
                         <!-- Manual Tool Steppers (Trainer Adjuster) -->
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+                        <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200 space-y-2.5">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-800 text-xs">⚙️ Tool Milestone Stepper</span>
-                                <span class="text-[10px] text-slate-400">Trainer Mode</span>
+                                <span class="font-bold text-gray-800 text-xs">⚙️ Tool Milestone Stepper</span>
+                                <span class="text-[10px] text-gray-400">Trainer Mode</span>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-2 text-xs">
                                 <!-- Excel -->
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-between">
                                     <div>
                                         <div class="font-bold text-emerald-700">Excel</div>
-                                        <div class="text-[10px] text-slate-400">Target: 4</div>
+                                        <div class="text-[10px] text-gray-400">Target: 4</div>
                                     </div>
                                     <div class="flex items-center space-x-1">
-                                        <button onclick="adjustToolCount('excel', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <button onclick="adjustToolCount('excel', -1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">-</button>
                                         <span id="stepVal-excel" class="w-6 text-center font-bold text-xs">0</span>
-                                        <button onclick="adjustToolCount('excel', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                        <button onclick="adjustToolCount('excel', 1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">+</button>
                                     </div>
                                 </div>
                                 <!-- SQL -->
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-between">
                                     <div>
-                                        <div class="font-bold text-indigo-700">SQL</div>
-                                        <div class="text-[10px] text-slate-400">Target: 5</div>
+                                        <div class="font-bold text-[#3c4d73]">SQL</div>
+                                        <div class="text-[10px] text-gray-400">Target: 5</div>
                                     </div>
                                     <div class="flex items-center space-x-1">
-                                        <button onclick="adjustToolCount('sql', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <button onclick="adjustToolCount('sql', -1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">-</button>
                                         <span id="stepVal-sql" class="w-6 text-center font-bold text-xs">0</span>
-                                        <button onclick="adjustToolCount('sql', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                        <button onclick="adjustToolCount('sql', 1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">+</button>
                                     </div>
                                 </div>
                                 <!-- Python -->
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-between">
                                     <div>
                                         <div class="font-bold text-amber-700">Python</div>
-                                        <div class="text-[10px] text-slate-400">Target: 5</div>
+                                        <div class="text-[10px] text-gray-400">Target: 5</div>
                                     </div>
                                     <div class="flex items-center space-x-1">
-                                        <button onclick="adjustToolCount('python', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <button onclick="adjustToolCount('python', -1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">-</button>
                                         <span id="stepVal-python" class="w-6 text-center font-bold text-xs">0</span>
-                                        <button onclick="adjustToolCount('python', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                        <button onclick="adjustToolCount('python', 1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">+</button>
                                     </div>
                                 </div>
                                 <!-- Power BI -->
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-between">
                                     <div>
                                         <div class="font-bold text-orange-700">Power BI</div>
-                                        <div class="text-[10px] text-slate-400">Target: 4</div>
+                                        <div class="text-[10px] text-gray-400">Target: 4</div>
                                     </div>
                                     <div class="flex items-center space-x-1">
-                                        <button onclick="adjustToolCount('power_bi', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <button onclick="adjustToolCount('power_bi', -1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">-</button>
                                         <span id="stepVal-power_bi" class="w-6 text-center font-bold text-xs">0</span>
-                                        <button onclick="adjustToolCount('power_bi', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                        <button onclick="adjustToolCount('power_bi', 1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">+</button>
                                     </div>
                                 </div>
                                 <!-- Tableau -->
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-between">
                                     <div>
                                         <div class="font-bold text-purple-700">Tableau</div>
-                                        <div class="text-[10px] text-slate-400">Target: 4</div>
+                                        <div class="text-[10px] text-gray-400">Target: 4</div>
                                     </div>
                                     <div class="flex items-center space-x-1">
-                                        <button onclick="adjustToolCount('tableau', -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">-</button>
+                                        <button onclick="adjustToolCount('tableau', -1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">-</button>
                                         <span id="stepVal-tableau" class="w-6 text-center font-bold text-xs">0</span>
-                                        <button onclick="adjustToolCount('tableau', 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">+</button>
+                                        <button onclick="adjustToolCount('tableau', 1)" class="w-6 h-6 rounded bg-gray-100 hover:bg-slate-200 text-gray-700 font-bold text-xs">+</button>
                                     </div>
                                 </div>
                                 <!-- ML Project Toggle -->
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-between">
                                     <div>
                                         <div class="font-bold text-cyan-700">ML Capstone</div>
-                                        <div class="text-[10px] text-slate-400">1 Project</div>
+                                        <div class="text-[10px] text-gray-400">1 Project</div>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="stepVal-ml_project" onchange="toggleMlProject(this.checked)" class="sr-only peer">
-                                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+                                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
                                     </label>
                                 </div>
                             </div>
@@ -465,51 +533,51 @@
     </div>
 
     <!-- ================= MODAL 2: SMTP SETUP MODAL ================= -->
-    <div id="smtpSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div id="smtpSettingsModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-gray-200 space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                    <div class="w-8 h-8 rounded-xl bg-[#edf1f7] text-[#485d8b] flex items-center justify-center text-sm font-bold">
                         <i class="fa-solid fa-envelope-open-text"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-800 text-sm">Outgoing Email & SMTP Setup</h3>
-                        <p class="text-[11px] text-slate-400">Configure your email account to send assignment reports to candidates</p>
+                        <h3 class="font-bold text-gray-800 text-sm">Outgoing Email & SMTP Setup</h3>
+                        <p class="text-[11px] text-gray-400">Configure your email account to send assignment reports to candidates</p>
                     </div>
                 </div>
-                <button onclick="closeSmtpSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                <button onclick="closeSmtpSettingsModal()" class="text-gray-400 hover:text-gray-600">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
             <!-- Provider Presets -->
-            <div class="flex items-center justify-between text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
-                <span class="text-slate-600 font-bold text-[11px]">Email Provider:</span>
+            <div class="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-xl border border-gray-100">
+                <span class="text-gray-600 font-bold text-[11px]">Email Provider:</span>
                 <div class="flex space-x-1.5">
-                    <button type="button" onclick="applyPreset('gmail')" id="presetBtn-gmail" class="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 font-bold rounded-lg shadow-2xs text-[11px]">Gmail (Recommended)</button>
-                    <button type="button" onclick="applyPreset('office365')" id="presetBtn-office365" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[11px]">Office 365</button>
-                    <button type="button" onclick="applyPreset('custom')" id="presetBtn-custom" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[11px]">Custom</button>
+                    <button type="button" onclick="applyPreset('gmail')" id="presetBtn-gmail" class="px-2.5 py-1 bg-white border border-[#cbd5e1] text-[#3c4d73] font-bold rounded-lg shadow-2xs text-[11px]">Gmail (Recommended)</button>
+                    <button type="button" onclick="applyPreset('office365')" id="presetBtn-office365" class="px-2.5 py-1 bg-gray-100 hover:bg-slate-200 text-gray-600 font-semibold rounded-lg text-[11px]">Office 365</button>
+                    <button type="button" onclick="applyPreset('custom')" id="presetBtn-custom" class="px-2.5 py-1 bg-gray-100 hover:bg-slate-200 text-gray-600 font-semibold rounded-lg text-[11px]">Custom</button>
                 </div>
             </div>
 
             <!-- Gmail App Password Guide Callout -->
-            <div id="gmailGuideBox" class="p-3 bg-gradient-to-br from-indigo-50/90 to-blue-50/70 border border-indigo-100 rounded-xl text-xs space-y-2 text-indigo-950">
+            <div id="gmailGuideBox" class="p-3 bg-gradient-to-br from-[#edf1f7] to-blue-50/70 border border-[#e4e8f0] rounded-xl text-xs space-y-2 text-gray-900">
                 <div class="flex items-center justify-between">
-                    <div class="font-bold flex items-center text-indigo-900 text-xs">
+                    <div class="font-bold flex items-center text-[#25316d] text-xs">
                         <i class="fa-brands fa-google text-rose-500 mr-1.5"></i>
                         Using Gmail? Follow these 3 easy steps:
                     </div>
-                    <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-[11px] text-indigo-600 font-bold hover:underline inline-flex items-center">
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-[11px] text-[#485d8b] font-bold hover:underline inline-flex items-center">
                         Open Google App Passwords <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i>
                     </a>
                 </div>
-                <ol class="list-decimal list-inside text-[11px] text-slate-600 space-y-0.5">
+                <ol class="list-decimal list-inside text-[11px] text-gray-600 space-y-0.5">
                     <li>Enable <b>2-Step Verification</b> in your Google Account Security.</li>
-                    <li>Open <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-indigo-600 font-bold underline">myaccount.google.com/apppasswords</a>.</li>
+                    <li>Open <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-[#485d8b] font-bold underline">myaccount.google.com/apppasswords</a>.</li>
                     <li>Generate a 16-letter App Password (e.g. name it <i>"Assignment Reports"</i>) and paste below.</li>
                 </ol>
                 <div class="pt-1 flex items-center space-x-2">
-                    <button type="button" onclick="prefillSajidEmail()" class="text-[11px] font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-200 hover:bg-indigo-50 shadow-2xs transition flex items-center space-x-1">
+                    <button type="button" onclick="prefillSajidEmail()" class="text-[11px] font-semibold text-[#3c4d73] bg-white px-2.5 py-1 rounded-lg border border-[#cbd5e1] hover:bg-[#edf1f7] shadow-2xs transition flex items-center space-x-1">
                         <i class="fa-solid fa-bolt text-amber-500"></i>
                         <span>Fill Sajid's Email: skabdulsajid8144@gmail.com</span>
                     </button>
@@ -518,46 +586,46 @@
 
             <div class="grid grid-cols-2 gap-3 text-xs">
                 <div class="col-span-2">
-                    <label class="font-bold text-slate-700 block mb-1">Sender Email Address</label>
-                    <input id="smtpUsername" type="email" placeholder="e.g. skabdulsajid8144@gmail.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                    <label class="font-bold text-gray-700 block mb-1">Sender Email Address</label>
+                    <input id="smtpUsername" type="email" placeholder="e.g. skabdulsajid8144@gmail.com" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-[#485d8b]/20 focus:border-[#485d8b]">
                 </div>
                 <div class="col-span-2">
                     <div class="flex items-center justify-between mb-1">
-                        <label class="font-bold text-slate-700 block">16-Character App Password</label>
-                        <span class="text-[10px] text-slate-400">Never share your password</span>
+                        <label class="font-bold text-gray-700 block">16-Character App Password</label>
+                        <span class="text-[10px] text-gray-400">Never share your password</span>
                     </div>
-                    <input id="smtpPassword" type="password" placeholder="e.g. abcd efgh ijkl mnop" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                    <input id="smtpPassword" type="password" placeholder="e.g. abcd efgh ijkl mnop" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-[#485d8b]/20 focus:border-[#485d8b]">
                 </div>
                 <div class="col-span-2 flex items-center justify-between py-0.5">
-                    <label class="flex items-center space-x-2 cursor-pointer text-[11px] text-slate-600">
-                        <input id="chkRememberPassword" type="checkbox" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5">
+                    <label class="flex items-center space-x-2 cursor-pointer text-[11px] text-gray-600">
+                        <input id="chkRememberPassword" type="checkbox" checked class="rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] w-3.5 h-3.5">
                         <span class="font-medium">Remember credentials on this device (saved in browser local storage)</span>
                     </label>
                 </div>
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">SMTP Host</label>
-                    <input id="smtpHost" type="text" value="smtp.gmail.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs">
+                    <label class="font-bold text-gray-700 block mb-1">SMTP Host</label>
+                    <input id="smtpHost" type="text" value="smtp.gmail.com" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">Port</label>
-                    <input id="smtpPort" type="number" value="587" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs">
+                    <label class="font-bold text-gray-700 block mb-1">Port</label>
+                    <input id="smtpPort" type="number" value="587" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs">
                 </div>
                 <div class="col-span-2">
-                    <label class="font-bold text-slate-700 block mb-1">Sender Display Name</label>
-                    <input id="smtpSenderName" type="text" value="SK Sajid | DV Analytics Assignment Team" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs">
+                    <label class="font-bold text-gray-700 block mb-1">Sender Display Name</label>
+                    <input id="smtpSenderName" type="text" value="SK Sajid | DV Analytics Assignment Team" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs">
                 </div>
             </div>
 
-            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                <button onclick="testSmtpConnection()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center space-x-1.5">
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                <button onclick="testSmtpConnection()" class="px-3.5 py-2 bg-gray-100 hover:bg-slate-200 text-gray-700 text-xs font-bold rounded-xl transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-plug"></i>
                     <span>Test Connection</span>
                 </button>
                 <div class="flex items-center space-x-2">
-                    <button onclick="closeSmtpSettingsModal()" class="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs font-semibold">
+                    <button onclick="closeSmtpSettingsModal()" class="px-3 py-2 text-gray-500 hover:text-gray-700 text-xs font-semibold">
                         Cancel
                     </button>
-                    <button onclick="saveSmtpConfigAndClose()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                    <button onclick="saveSmtpConfigAndClose()" class="px-4 py-2 bg-[#485d8b] hover:bg-[#3c4d73] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span>Save Settings</span>
                     </button>
@@ -568,30 +636,30 @@
     </div>
 
     <!-- ================= MODAL 3: SMTP PROMPT / SIMULATION MODAL ================= -->
-    <div id="smtpPromptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 space-y-4">
-            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mx-auto shadow-inner">
+    <div id="smtpPromptModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 space-y-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-xl mx-auto shadow-inner">
                 <i class="fa-solid fa-envelope-circle-check"></i>
             </div>
             <div class="text-center space-y-1">
-                <h3 class="font-bold text-slate-800 text-base">Outgoing Email Setup Required</h3>
-                <p class="text-xs text-slate-500">
-                    To send the evaluation report to <b id="promptCandName" class="text-slate-800">Candidate</b> (<span id="promptCandEmail" class="text-indigo-600 font-medium"></span>), an email sender account is needed.
+                <h3 class="font-bold text-gray-800 text-base">Outgoing Email Setup Required</h3>
+                <p class="text-xs text-gray-500">
+                    To send the evaluation report to <b id="promptCandName" class="text-gray-800">Candidate</b> (<span id="promptCandEmail" class="text-[#485d8b] font-medium"></span>), an email sender account is needed.
                 </p>
             </div>
 
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
-                <div class="flex items-center text-slate-700 font-semibold">
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-600 space-y-2">
+                <div class="flex items-center text-gray-700 font-semibold">
                     <i class="fa-solid fa-lightbulb text-amber-500 mr-2"></i> Choose how you would like to proceed:
                 </div>
-                <div class="text-[11px] text-slate-600 space-y-1">
+                <div class="text-[11px] text-gray-600 space-y-1">
                     <p>• <b>Real Send</b>: Enter your Gmail & 16-letter App Password to send real emails to students.</p>
                     <p>• <b>Simulation Mode</b>: Instantly test and record report generation without needing any password right now.</p>
                 </div>
             </div>
 
             <div class="space-y-2 pt-2">
-                <button onclick="openSmtpSettingsModal(); closeSmtpPromptModal();" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-600/20 transition flex items-center justify-center space-x-2">
+                <button onclick="openSmtpSettingsModal(); closeSmtpPromptModal();" class="w-full py-2.5 px-4 bg-[#485d8b] hover:bg-[#3c4d73] text-white rounded-xl font-bold text-xs shadow-md shadow-[#485d8b]/20 transition flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-gear"></i>
                     <span>Configure Email & App Password</span>
                 </button>
@@ -599,7 +667,7 @@
                     <i class="fa-solid fa-flask"></i>
                     <span>Send in Simulation Mode (Instant &bull; No Password)</span>
                 </button>
-                <button onclick="closeSmtpPromptModal()" class="w-full py-2 text-slate-400 hover:text-slate-600 text-xs font-semibold transition">
+                <button onclick="closeSmtpPromptModal()" class="w-full py-2 text-gray-400 hover:text-gray-600 text-xs font-semibold transition">
                     Cancel
                 </button>
             </div>
@@ -607,7 +675,8 @@
     </div>
 
 
-    <!-- Application Script -->
+    
+<!-- Application Script -->
     <script>
         let allCandidates = [];
         let filteredCandidates = [];
@@ -647,13 +716,13 @@
             const viewBulk = document.getElementById("viewBulkEmail");
 
             if (mode === 'assignments') {
-                btnAssignments.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-white text-indigo-600 shadow-xs";
-                btnBulk.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center space-x-2";
+                btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
+                btnBulk.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
                 viewAssignments.classList.remove("hidden");
                 viewBulk.classList.add("hidden");
             } else {
-                btnBulk.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-white text-indigo-600 shadow-xs";
-                btnAssignments.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center space-x-2";
+                btnBulk.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
+                btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
                 viewBulk.classList.remove("hidden");
                 viewAssignments.classList.add("hidden");
             }
@@ -868,6 +937,7 @@
             document.getElementById("metricCandidates").textContent = candidates.length.toLocaleString();
             document.getElementById("metricSentCount").textContent = "0";
             document.getElementById("metricPendingCount").textContent = candidates.length.toLocaleString();
+            const remEl = document.getElementById("cardRemainingCount"); if (remEl) remEl.textContent = `${candidates.length.toLocaleString()} Candidates`;
             applyCandidateFilters();
         }
 
@@ -972,7 +1042,7 @@
             if (candidates.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-slate-400">
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-400">
                             No candidates match the selected search or filter criteria.
                         </td>
                     </tr>
@@ -1004,49 +1074,49 @@
 
                 // Email display or inline edit
                 const emailDisplay = email 
-                    ? `<div class="flex items-center space-x-1.5 font-mono text-slate-700">
+                    ? `<div class="flex items-center space-x-1.5 font-mono text-gray-700">
                          <span class="truncate max-w-[170px]">${email}</span>
-                         <button onclick="promptEditEmail('${sid}', '${sname}', '${email}')" class="text-slate-400 hover:text-indigo-600 p-0.5" title="Edit Email"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                         <button onclick="promptEditEmail('${sid}', '${sname}', '${email}')" class="text-gray-400 hover:text-[#485d8b] p-0.5" title="Edit Email"><i class="fa-solid fa-pen text-[10px]"></i></button>
                        </div>`
-                    : `<button onclick="promptEditEmail('${sid}', '${sname}', '')" class="text-indigo-600 hover:text-indigo-800 font-semibold underline text-[11px]"><i class="fa-solid fa-plus mr-1"></i>Add Email</button>`;
+                    : `<button onclick="promptEditEmail('${sid}', '${sname}', '')" class="text-[#485d8b] hover:text-[#3c4d73] font-semibold underline text-[11px]"><i class="fa-solid fa-plus mr-1"></i>Add Email</button>`;
 
                 html += `
-                    <tr class="hover:bg-slate-50/80 transition" id="row-${sid}">
+                    <tr class="hover:bg-gray-50/80 transition" id="row-${sid}">
                         <td class="px-4 py-3">
-                            <div class="font-bold text-slate-900">${sname}</div>
-                            <div class="text-[11px] text-slate-400 font-mono font-semibold">${sid}</div>
+                            <div class="font-bold text-gray-900">${sname}</div>
+                            <div class="text-[11px] text-gray-400 font-mono font-semibold">${sid}</div>
                         </td>
-                        <td class="px-4 py-3 font-medium text-slate-600">${batch}</td>
+                        <td class="px-4 py-3 font-medium text-gray-600">${batch}</td>
                         <td class="px-4 py-3">${emailDisplay}</td>
                         <td class="px-4 py-3">
                             <div class="flex items-center space-x-1.5 mb-1.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-extrabold bg-[#edf1f7] text-[#3c4d73] border border-[#cbd5e1]">
                                     ${cur.readiness_pct}% Ready
                                 </span>
-                                <span class="text-[10px] text-slate-400 font-medium">${cur.completed_credits}/23 credits</span>
+                                <span class="text-[10px] text-gray-400 font-medium">${cur.completed_credits}/23 credits</span>
                             </div>
                             <div class="flex flex-wrap gap-1 text-[10px] font-semibold">
-                                <span class="px-1.5 py-0.5 rounded ${cur.excel.completed >= 4 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Excel (Target: 4)">Excel ${cur.excel.completed}/4</span>
-                                <span class="px-1.5 py-0.5 rounded ${cur.sql.completed >= 5 ? 'bg-indigo-100 text-indigo-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="SQL (Target: 5)">SQL ${cur.sql.completed}/5</span>
-                                <span class="px-1.5 py-0.5 rounded ${cur.python.completed >= 5 ? 'bg-amber-100 text-amber-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Python (Target: 5)">Python ${cur.python.completed}/5</span>
-                                <span class="px-1.5 py-0.5 rounded ${cur.power_bi.completed >= 4 ? 'bg-orange-100 text-orange-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Power BI (Target: 4)">PBI ${cur.power_bi.completed}/4</span>
-                                <span class="px-1.5 py-0.5 rounded ${cur.tableau.completed >= 4 ? 'bg-purple-100 text-purple-800 font-bold' : 'bg-slate-100 text-slate-700'}" title="Tableau (Target: 4)">Tab ${cur.tableau.completed}/4</span>
-                                <span class="px-1.5 py-0.5 rounded ${cur.machine_learning.completed ? 'bg-cyan-100 text-cyan-800 font-bold' : 'bg-slate-100 text-slate-500'}" title="ML Capstone Project">${cur.machine_learning.completed ? '✓ ML Done' : 'ML Pending'}</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.excel.completed >= 4 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-gray-100 text-gray-700'}" title="Excel (Target: 4)">Excel ${cur.excel.completed}/4</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.sql.completed >= 5 ? 'bg-[#edf1f7] text-[#3c4d73] font-bold' : 'bg-gray-100 text-gray-700'}" title="SQL (Target: 5)">SQL ${cur.sql.completed}/5</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.python.completed >= 5 ? 'bg-amber-100 text-amber-800 font-bold' : 'bg-gray-100 text-gray-700'}" title="Python (Target: 5)">Python ${cur.python.completed}/5</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.power_bi.completed >= 4 ? 'bg-orange-100 text-orange-800 font-bold' : 'bg-gray-100 text-gray-700'}" title="Power BI (Target: 4)">PBI ${cur.power_bi.completed}/4</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.tableau.completed >= 4 ? 'bg-purple-100 text-purple-800 font-bold' : 'bg-gray-100 text-gray-700'}" title="Tableau (Target: 4)">Tab ${cur.tableau.completed}/4</span>
+                                <span class="px-1.5 py-0.5 rounded ${cur.machine_learning.completed ? 'bg-cyan-100 text-cyan-800 font-bold' : 'bg-gray-100 text-gray-500'}" title="ML Capstone Project">${cur.machine_learning.completed ? '✓ ML Done' : 'ML Pending'}</span>
                             </div>
                         </td>
                         <td class="px-4 py-3">
-                            <div class="font-medium text-slate-800 truncate max-w-[170px]" title="${latestSub}">${latestSub}</div>
-                            <div class="text-[11px] text-slate-400">${latestDate}</div>
+                            <div class="font-medium text-gray-800 truncate max-w-[170px]" title="${latestSub}">${latestSub}</div>
+                            <div class="text-[11px] text-gray-400">${latestDate}</div>
                         </td>
                         <td class="px-4 py-3 text-center" id="status-${sid}">
                             ${statusBadge}
                         </td>
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                             <div class="inline-flex items-center space-x-1.5">
-                                <button onclick="openPreviewModal('${sid}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Preview Executive Report Card & Mentorship Desk">
+                                <button onclick="openPreviewModal('${sid}')" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition" title="Preview Executive Report Card & Mentorship Desk">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                 </button>
-                                <button onclick="sendOneReport('${sid}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow-xs transition inline-flex items-center space-x-1" title="1-Click Send">
+                                <button onclick="sendOneReport('${sid}')" class="px-2.5 py-1.5 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-semibold text-xs rounded-lg shadow-xs transition inline-flex items-center space-x-1" title="1-Click Send">
                                     <i class="fa-solid fa-paper-plane text-[11px]"></i>
                                     <span>Send Report</span>
                                 </button>
@@ -1057,7 +1127,7 @@
             });
 
             if (candidates.length > 250) {
-                html += `<tr><td colspan="7" class="px-4 py-3 text-center text-xs text-slate-400 italic">Showing top 250 rows. Use the search box above to find any candidate immediately.</td></tr>`;
+                html += `<tr><td colspan="7" class="px-4 py-3 text-center text-xs text-gray-400 italic">Showing top 250 rows. Use the search box above to find any candidate immediately.</td></tr>`;
             }
 
             tbody.innerHTML = html;
@@ -1066,8 +1136,8 @@
         function setLoadingCandidateTable(msg) {
             document.getElementById("candidateTableBody").innerHTML = `
                 <tr>
-                    <td colspan="7" class="px-4 py-12 text-center text-slate-500 font-medium">
-                        <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600 mb-2 block"></i>
+                    <td colspan="7" class="px-4 py-12 text-center text-gray-500 font-medium">
+                        <i class="fa-solid fa-spinner fa-spin text-2xl text-[#485d8b] mb-2 block"></i>
                         ${escapeHtml(msg)}
                     </td>
                 </tr>
@@ -1077,7 +1147,7 @@
         function renderEmptyTable(msg) {
             document.getElementById("candidateTableBody").innerHTML = `
                 <tr>
-                    <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                    <td colspan="7" class="px-4 py-12 text-center text-gray-400">
                         ${escapeHtml(msg)}
                     </td>
                 </tr>
@@ -1163,7 +1233,7 @@
 
             const statusCell = document.getElementById(`status-${studentId}`);
             if (statusCell) {
-                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700"><i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isSimulate ? 'Simulating...' : 'Sending...'}</span>`;
+                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#edf1f7] text-[#485d8b]"><i class="fa-solid fa-spinner fa-spin mr-1"></i> ${isSimulate ? 'Simulating...' : 'Sending...'}</span>`;
             }
 
             try {
@@ -1313,6 +1383,8 @@
             const pending = allCandidates.length - sent;
             document.getElementById("metricSentCount").textContent = sent.toLocaleString();
             document.getElementById("metricPendingCount").textContent = pending.toLocaleString();
+            const cardRemaining = document.getElementById("cardRemainingCount");
+            if (cardRemaining) cardRemaining.textContent = `${pending.toLocaleString()} Candidates`;
         }
 
         // Preview Modal & Interactive Hub Handlers
@@ -1326,13 +1398,13 @@
             const panelUpload = document.getElementById("hubPanelUpload");
 
             if (tabName === "chat") {
-                btnChat.className = "flex-1 py-3 px-4 text-indigo-600 border-b-2 border-indigo-600 bg-white transition flex items-center justify-center space-x-1.5 font-bold";
-                btnUpload.className = "flex-1 py-3 px-4 text-slate-500 hover:text-slate-800 transition flex items-center justify-center space-x-1.5 font-bold";
+                btnChat.className = "flex-1 py-3 px-4 text-[#485d8b] border-b-2 border-[#485d8b] bg-white transition flex items-center justify-center space-x-1.5 font-bold";
+                btnUpload.className = "flex-1 py-3 px-4 text-gray-500 hover:text-gray-800 transition flex items-center justify-center space-x-1.5 font-bold";
                 panelChat.classList.remove("hidden");
                 panelUpload.classList.add("hidden");
             } else {
-                btnUpload.className = "flex-1 py-3 px-4 text-indigo-600 border-b-2 border-indigo-600 bg-white transition flex items-center justify-center space-x-1.5 font-bold";
-                btnChat.className = "flex-1 py-3 px-4 text-slate-500 hover:text-slate-800 transition flex items-center justify-center space-x-1.5 font-bold";
+                btnUpload.className = "flex-1 py-3 px-4 text-[#485d8b] border-b-2 border-[#485d8b] bg-white transition flex items-center justify-center space-x-1.5 font-bold";
+                btnChat.className = "flex-1 py-3 px-4 text-gray-500 hover:text-gray-800 transition flex items-center justify-center space-x-1.5 font-bold";
                 panelUpload.classList.remove("hidden");
                 panelChat.classList.add("hidden");
             }
@@ -1402,20 +1474,20 @@
                 if (m.sender === "user") {
                     html += `
                         <div class="flex justify-end">
-                            <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-3.5 py-2 max-w-[85%] shadow-xs">
-                                <div class="text-[10px] text-indigo-200 font-bold mb-0.5">You</div>
+                            <div class="bg-[#485d8b] text-white rounded-2xl rounded-tr-none px-3.5 py-2 max-w-[85%] shadow-xs">
+                                <div class="text-[10px] text-gray-200 font-bold mb-0.5">You</div>
                                 <div class="text-xs leading-relaxed">${escapeHtml(m.text)}</div>
-                                <div class="text-[9px] text-indigo-300 text-right mt-1">${m.time}</div>
+                                <div class="text-[9px] text-gray-300 text-right mt-1">${m.time}</div>
                             </div>
                         </div>
                     `;
                 } else {
                     html += `
                         <div class="flex justify-start">
-                            <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-none px-3.5 py-2 max-w-[85%] border border-slate-200">
-                                <div class="text-[10px] text-indigo-700 font-bold mb-0.5">${m.name}</div>
+                            <div class="bg-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-3.5 py-2 max-w-[85%] border border-gray-200">
+                                <div class="text-[10px] text-[#3c4d73] font-bold mb-0.5">${m.name}</div>
                                 <div class="text-xs leading-relaxed">${escapeHtml(m.text)}</div>
-                                <div class="text-[9px] text-slate-400 text-right mt-1">${m.time}</div>
+                                <div class="text-[9px] text-gray-400 text-right mt-1">${m.time}</div>
                             </div>
                         </div>
                     `;
@@ -1564,7 +1636,7 @@
             const desc = document.getElementById("uploadDescInput").value.trim();
             const statusBox = document.getElementById("uploadFileStatus");
 
-            statusBox.className = "text-[11px] text-indigo-700 font-bold block bg-indigo-50 p-2 rounded-lg border border-indigo-200";
+            statusBox.className = "text-[11px] text-[#3c4d73] font-bold block bg-[#edf1f7] p-2 rounded-lg border border-[#cbd5e1]";
             statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading ${file.name}...`;
 
             if (localServerOnline) {
@@ -1624,7 +1696,7 @@
             const reportDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
             const excelDonut = renderClientSvgDonut(cur.excel.percent, cur.excel.color, `${cur.excel.completed}/${cur.excel.target}`, `${cur.excel.percent}%`);
-            const sqlDonut = renderClientSvgDonut(cur.sql.percent, cur.sql.color, `${cur.sql.completed}/${cur.sql.target}`, `${cur.sql.percent}%`);
+            const sqlDonut = renderClientSvgDonut(cur.sql.percent, '#485d8b', `${cur.sql.completed}/${cur.sql.target}`, `${cur.sql.percent}%`);
             const pyDonut = renderClientSvgDonut(cur.python.percent, cur.python.color, `${cur.python.completed}/${cur.python.target}`, `${cur.python.percent}%`);
             const pbiDonut = renderClientSvgDonut(cur.power_bi.percent, cur.power_bi.color, `${cur.power_bi.completed}/${cur.power_bi.target}`, `${cur.power_bi.percent}%`);
             const tabDonut = renderClientSvgDonut(cur.tableau.percent, cur.tableau.color, `${cur.tableau.completed}/${cur.tableau.target}`, `${cur.tableau.percent}%`);
@@ -1640,7 +1712,7 @@
                 rowsHtml += `<tr style="background:${bg}; border-bottom:1px solid #edf2f7;">
                     <td style="padding:10px 14px; font-size:12px; color:#64748b; font-family:monospace;">${idx + 1}</td>
                     <td style="padding:10px 14px; font-size:12px; color:#1e293b; font-weight:600;">${escapeHtml(s.date || '-')}</td>
-                    <td style="padding:10px 14px; font-size:12px; color:#4338ca; font-weight:600;">${escapeHtml(s.application || '-')}</td>
+                    <td style="padding:10px 14px; font-size:12px; color:#485d8b; font-weight:600;">${escapeHtml(s.application || '-')}</td>
                     <td style="padding:10px 14px; font-size:12px; color:#334155;">${escapeHtml(s.description || '-')}</td>
                     <td style="padding:10px 14px; text-align:center;">
                         <span style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-size:10px; font-weight:700; padding:3px 8px; border-radius:12px;">Verified</span>
@@ -1661,8 +1733,8 @@
                 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0f172a; padding:30px 12px;">
                     <tr><td align="center">
                         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:700px; background:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.25); border:1px solid #334155;">
-                            <tr><td style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%); padding:32px 36px; color:#ffffff;">
-                                <div style="display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; font-weight:700; text-transform:uppercase; color:#c7d2fe;">
+                            <tr><td style="background:linear-gradient(135deg, #172347 0%, #25316d 50%, #3b4d75 100%); padding:32px 36px; color:#ffffff;">
+                                <div style="display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; font-weight:700; text-transform:uppercase; color:#ffedd5; background:rgba(239,83,35,0.18); border:1px solid rgba(239,83,35,0.4);">
                                     DV Data &amp; Analytics &bull; Industrial Performance Report
                                 </div>
                                 <h1 style="margin:10px 0 0; font-size:24px; font-weight:800; color:#ffffff;">Student Evaluation &amp; Curriculum Report</h1>
@@ -1678,14 +1750,14 @@
                                         </td>
                                         <td width="45%" align="right">
                                             <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Batch / Track</div>
-                                            <div style="font-size:15px; font-weight:800; color:#4338ca; margin-top:2px;">${batch}</div>
+                                            <div style="font-size:15px; font-weight:800; color:#485d8b; margin-top:2px;">${batch}</div>
                                             <div style="font-size:12px; color:#059669; font-weight:700; margin-top:3px;">&bull; Active Industrial Trainee</div>
                                         </td>
                                     </tr>
                                 </table>
                             </td></tr>
                             <tr><td style="padding:0 32px 20px;">
-                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius:14px; padding:20px 24px; color:#ffffff;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:linear-gradient(135deg, #111827 0%, #25316d 100%); border-radius:14px; padding:20px 24px; color:#ffffff;">
                                     <tr>
                                         <td>
                                             <div style="font-size:11px; font-weight:700; color:#93c5fd; text-transform:uppercase;">Overall Industrial Readiness Score</div>
@@ -1711,7 +1783,7 @@
                                             <div style="font-size:12px; font-weight:800; color:#4f46e5; text-transform:uppercase;">SQL Server</div>
                                             <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Target: 5</div>
                                             <div>${sqlDonut}</div>
-                                            <div style="margin-top:8px;"><span style="background:#eef2ff; color:#4338ca; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.sql.completed} of 5 Done</span></div>
+                                            <div style="margin-top:8px;"><span style="background:#eef2ff; color:#485d8b; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">${cur.sql.completed} of 5 Done</span></div>
                                         </td>
                                         <td width="3%"></td>
                                         <td width="31%" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 10px; text-align:center;">
@@ -1766,7 +1838,7 @@
                                     <div style="font-size:11px; color:#475569; margin-bottom:12px;">Mr. Sajid (LMS Access) &bull; 8431424165 | Mrs. Lakshmi (Mentorship) &bull; 7907991738</div>
                                     <div style="text-align:center;">
                                         <a href="https://wa.me/918431424165?text=Hi%20Sajid,%20I%20have%20a%20query%20regarding%20my%20assignment%20report" target="_blank" style="display:inline-block; background:#25d366; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px; margin-right:8px;">💬 Chat on WhatsApp</a>
-                                        <a href="https://dvanalyticsbh.com" target="_blank" style="display:inline-block; background:#4338ca; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px;">📁 Upload Next File</a>
+                                        <a href="https://dvanalyticsbh.com" target="_blank" style="display:inline-block; background:#485d8b; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 16px; border-radius:8px;">📁 Upload Next File</a>
                                     </div>
                                 </div>
                             </td></tr>
@@ -1826,9 +1898,9 @@
                 const btn = document.getElementById(`presetBtn-${p}`);
                 if (btn) {
                     if (p === provider) {
-                        btn.className = "px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 font-bold rounded-lg shadow-2xs text-[11px]";
+                        btn.className = "px-2.5 py-1 bg-white border border-[#485d8b] text-[#485d8b] font-bold rounded-lg shadow-2xs text-[11px]";
                     } else {
-                        btn.className = "px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[11px]";
+                        btn.className = "px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold rounded-lg text-[11px]";
                     }
                 }
             });
@@ -1863,7 +1935,7 @@
         async function testSmtpConnection() {
             const box = document.getElementById("smtpTestResultBox");
             box.classList.remove("hidden");
-            box.className = "text-xs p-2.5 rounded-xl bg-slate-100 text-slate-700 block";
+            box.className = "text-xs p-2.5 rounded-xl bg-gray-100 text-gray-700 block";
             box.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Testing connection...`;
 
             try {
@@ -1983,13 +2055,13 @@
             }
             const toast = document.createElement("div");
             toast.className = `px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center justify-between space-x-3 transition-all transform duration-300 pointer-events-auto max-w-md ${
-                type === 'success' ? 'bg-slate-900 text-emerald-400 border border-emerald-500/30' :
+                type === 'success' ? 'bg-gray-900 text-emerald-400 border border-emerald-500/30' :
                 type === 'error' ? 'bg-rose-950 text-rose-100 border border-rose-500/40' :
-                'bg-slate-900 text-slate-100 border border-slate-700'
+                'bg-gray-900 text-slate-100 border border-gray-700'
             }`;
             const icon = type === 'success' ? 'fa-circle-check text-emerald-400' :
                          type === 'error' ? 'fa-circle-exclamation text-rose-400' :
-                         'fa-circle-info text-indigo-400';
+                         'fa-circle-info text-[#485d8b]';
             
             let fixBtnHtml = "";
             if (type === 'error' && (msg.includes("Authentication") || msg.includes("SMTP") || msg.includes("Password") || msg.includes("535"))) {
