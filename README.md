@@ -126,3 +126,25 @@ All 6 automated tests verify email validation, MIME construction with attachment
 
 ## 📄 License
 Created for DV Data & Analytics Pvt Ltd. All rights reserved.
+
+
+---
+
+## 🚀 Deploy to Vercel (1-Click Hosting)
+
+This project includes a ready-to-deploy [`vercel.json`](vercel.json) configuration for instantaneous hosting on Vercel.
+
+### Method 1: Deploy with Vercel Web Dashboard (Recommended)
+1. Push your changes to your GitHub repository ([`Candidate-Assignment-Reports`](https://github.com/mdsajid-ui/Candidate-Assignment-Reports)).
+2. Go to **[vercel.com](https://vercel.com)** &rarr; Log in &rarr; Click **"Add New Project"**.
+3. Import your **`Candidate-Assignment-Reports`** repository.
+4. Framework Preset: **Other** (Root Directory: `./`).
+5. Click **Deploy** &mdash; Vercel will build and assign you a global live URL (e.g. `https://candidate-assignment-reports.vercel.app`).
+
+### Method 2: Deploy with Vercel CLI
+```bash
+npm i -g vercel
+vercel login
+vercel --prod
+```
+All static reporting data, the interactive Lamp Login, executive report card previews, and client-side processing will work out of the box with zero configuration!

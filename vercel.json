@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "name": "candidate-assignment-reports",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/sample-report",
+      "dest": "/sample_candidate_report.html"
+    },
+    {
+      "src": "/dv_logo.png",
+      "dest": "/dv_logo.png"
+    },
+    {
+      "src": "/assignment_data.json",
+      "dest": "/assignment_data.json"
+    },
+    {
+      "src": "/student_directory.json",
+      "dest": "/student_directory.json"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
