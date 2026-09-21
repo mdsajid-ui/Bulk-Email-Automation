@@ -393,12 +393,15 @@ class AssignmentProcessor:
                     
                     <!-- Header Banner -->
                     <tr>
-                        <td style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%); padding:32px 36px; color:#ffffff;">
+                        <td style="background:linear-gradient(135deg, #0d1322 0%, #172347 50%, #25316d 100%); padding:28px 32px; color:#ffffff;">
                             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td>
-                                        <div style="display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; color:#c7d2fe;">
-                                            DV Data &amp; Analytics &bull; Industrial Performance Report
+                                        <div style="margin-bottom:12px;">
+                                            <img src="https://raw.githubusercontent.com/mdsajid-ui/Candidate-Assignment-Reports/main/dv_logo.png" alt="DV Analytics" style="height:36px; width:auto; display:inline-block; filter:brightness(1.05);">
+                                        </div>
+                                        <div style="display:inline-block; background:rgba(239, 83, 35, 0.15); border:1px solid rgba(239, 83, 35, 0.4); border-radius:20px; padding:3px 12px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; color:#ffedd5;">
+                                            <span style="display:inline-block; width:6px; height:6px; background:#ef5323; border-radius:50%; margin-right:6px;"></span>Certified Industrial Performance Report &bull; LMS Transcript
                                         </div>
                                         <h1 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.5px; color:#ffffff;">
                                             Student Evaluation &amp; Curriculum Report

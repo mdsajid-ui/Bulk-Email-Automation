@@ -380,9 +380,10 @@
                 <span>Student Registrations</span>
                 <span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">LMS</span>
             </button>
-            <button id="navBtnBulk" onclick="switchAppMode('bulk')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
+            <button id="navBtnCounselors" onclick="switchAppMode('counselors')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
                 <i class="fa-solid fa-user-group text-gray-400"></i>
-                <span>Counselor Accounts &amp; Bulk Email</span>
+                <span>Counselor Accounts</span>
+                <span id="navCounselorBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">4</span>
             </button>
             <a href="sample_candidate_report.html" target="_blank" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
                 <i class="fa-regular fa-file-lines text-gray-400"></i>
@@ -404,9 +405,7 @@
                             <i class="fa-solid fa-indian-rupee-sign text-[#485d8b] mr-2"></i>
                             Weekly Candidate Assignment Workflow
                         </h2>
-                        <p class="text-xs text-gray-500 mt-1">
-                            Upload your latest LMS report sheet (<code class="text-[#485d8b] font-mono">.xls</code>, <code class="text-[#485d8b] font-mono">.xlsx</code>, <code class="text-[#485d8b] font-mono">.csv</code>). Click any candidate to send their industrial report card instantly!
-                        </p>
+                        <!-- LMS Upload Subtitle Hidden per User Request -->
                     </div>
                     <div class="flex items-center flex-wrap gap-2.5">
                         <!-- Quick Load Assignment (10).xls (Save Button Style in ARS) -->
@@ -515,6 +514,9 @@
                     <table class="min-w-full divide-y divide-gray-200 text-xs">
                         <thead class="bg-gray-50/80">
                             <tr>
+                                <th class="px-3 py-3 text-center w-10">
+                                    <input type="checkbox" id="selectAllCandidates" onchange="toggleSelectAllCandidates(this.checked)" class="w-4 h-4 rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] cursor-pointer" title="Select All Candidates">
+                                </th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">CANDIDATE / STUDENT ID</th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">BATCH TRACK</th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">STUDENT EMAIL</th>
@@ -526,7 +528,7 @@
                         </thead>
                         <tbody id="candidateTableBody" class="divide-y divide-slate-100 bg-white">
                             <tr>
-                                <td colspan="7" class="px-4 py-12 text-center text-gray-400">
+                                <td colspan="8" class="px-4 py-12 text-center text-gray-400">
                                     <i class="fa-solid fa-file-excel text-3xl mb-2 text-slate-300 block"></i>
                                     Click <strong>"Load Assignment (10).xls"</strong> or upload your weekly LMS report to view candidates.
                                 </td>
@@ -544,55 +546,97 @@
 
         </div>
 
-        <!-- ================= VIEW 2: GENERAL BULK EMAIL (PREVIOUS WORKFLOW) ================= -->
-        <div id="viewBulkEmail" class="hidden space-y-6">
-            <!-- (Custom Bulk Dispatcher) -->
+                <!-- ================= VIEW 2: COUNSELOR ACCOUNTS (USER MANAGEMENT SYSTEM) ================= -->
+        <div id="viewCounselorAccounts" class="hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-7 space-y-6">
-                    <!-- Recipients Card -->
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-gray-900 text-base">1. Custom Recipients</h3>
+                
+                <!-- Left Column: Create Counselor Account Form (ARS Style) -->
+                <div class="lg:col-span-4 bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
+                    <h3 class="text-sm font-bold text-gray-900 flex items-center">
+                        <i class="fa-solid fa-circle-plus text-[#485d8b] mr-2 text-base"></i>
+                        <span>Create Counselor Account</span>
+                    </h3>
+
+                    <form id="createCounselorForm" onsubmit="handleCreateCounselor(event)" class="space-y-4 pt-1">
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
+                                COUNSELOR NAME
+                            </label>
+                            <input type="text" id="newCounselorName" required placeholder="Enter counselor's full name" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-white transition">
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
+                                EMAIL ADDRESS
+                            </label>
+                            <input type="email" id="newCounselorEmail" required placeholder="admin" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#cbd5e1] focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-[#edf2f9] text-gray-800 transition">
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
+                                PASSWORD
+                            </label>
+                            <input type="password" id="newCounselorPassword" required minlength="6" placeholder="•••••••••••••••••" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#cbd5e1] focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-[#edf2f9] text-gray-800 transition">
+                            <span class="text-[11px] text-gray-400 mt-1 block">Minimum 6 characters.</span>
+                        </div>
+
+                        <button type="submit" class="w-full py-2.5 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center space-x-1.5 mt-2">
+                            <span>Create Account</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Column: Active Counselor Accounts (Matches Screenshot) -->
+                <div class="lg:col-span-8 bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <h3 class="text-sm font-bold text-gray-900">
+                            Active Counselor Accounts
+                        </h3>
+                        <span id="counselorCountBadge" class="text-xs bg-[#edf1f7] text-[#3c4d73] px-2.5 py-0.5 rounded-full font-bold">
+                            4 Accounts Active
+                        </span>
+                    </div>
+
+                    <!-- Dynamic Counselor List Container -->
+                    <div id="counselorsContainer" class="divide-y divide-gray-100 space-y-0">
+                        <!-- Populated dynamically by JavaScript -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Optional Collapsible: Custom Bulk Recipient Dispatcher (Secondary Tool) -->
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                <button onclick="toggleGeneralBulkTool()" class="w-full flex items-center justify-between text-xs font-bold text-gray-700 hover:text-gray-900">
+                    <span class="flex items-center space-x-2">
+                        <i class="fa-solid fa-sliders text-[#485d8b]"></i>
+                        <span>Advanced Direct Custom CSV/Excel Email Broadcast Tool</span>
+                    </span>
+                    <i id="generalBulkToolIcon" class="fa-solid fa-chevron-down text-gray-400"></i>
+                </button>
+                <div id="generalBulkToolBody" class="hidden mt-4 pt-4 border-t border-gray-200 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+                            <span class="font-bold text-gray-800 block">Custom Recipient List</span>
                             <div class="flex space-x-2">
                                 <button onclick="downloadSampleCsv()" class="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md font-semibold border border-emerald-200">Sample CSV</button>
                                 <button onclick="downloadSampleExcel()" class="text-xs text-[#3c4d73] bg-[#edf1f7] px-2.5 py-1 rounded-md font-semibold border border-[#cbd5e1]">Sample Excel</button>
                             </div>
+                            <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-4 cursor-pointer bg-gray-50/50 transition">
+                                <i class="fa-solid fa-cloud-arrow-up text-lg text-gray-400 mb-1"></i>
+                                <span class="text-xs font-semibold text-gray-600">Upload CSV or Excel</span>
+                                <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
+                            </label>
+                            <div id="customRecipientsPreview" class="text-xs text-gray-500 font-medium"></div>
                         </div>
-                        <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-6 cursor-pointer bg-gray-50/50 hover:bg-[#edf1f7]/40 transition">
-                            <i class="fa-solid fa-cloud-arrow-up text-xl text-gray-400 mb-2"></i>
-                            <span class="text-xs font-semibold text-gray-600">Upload CSV or Excel spreadsheet</span>
-                            <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
-                        </label>
-                        <div id="customRecipientsPreview" class="text-xs text-gray-500 font-medium"></div>
-                    </div>
-
-                    <!-- Message & Attachments -->
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-                        <h3 class="font-bold text-gray-900 text-base">2. Message & Attachments</h3>
-                        <div>
-                            <label class="text-xs font-semibold text-gray-700 block mb-1">Subject</label>
-                            <input id="emailSubject" type="text" placeholder="Important Document" class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#485d8b]/20">
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+                            <span class="font-bold text-gray-800 block">Subject & Broadcast</span>
+                            <input id="emailSubject" type="text" placeholder="Subject line..." class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200">
+                            <textarea id="emailBody" rows="3" placeholder="Email message..." class="w-full text-xs rounded-lg border border-gray-200 p-2.5 font-mono"></textarea>
+                            <button onclick="confirmAndSendBulk()" class="w-full py-2 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-bold rounded-lg text-xs transition">
+                                Broadcast Email
+                            </button>
                         </div>
-                        <div>
-                            <label class="text-xs font-semibold text-gray-700 block mb-1">Attach Files (Sent to all)</label>
-                            <input type="file" multiple onchange="handleClientSideAttachments(this.files)" class="text-xs">
-                            <div id="attachmentsList" class="mt-2 space-y-1"></div>
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-gray-700 block mb-1">Body</label>
-                            <textarea id="emailBody" rows="5" class="w-full text-sm rounded-xl border border-gray-200 p-3 font-mono"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Launch Side -->
-                <div class="lg:col-span-5 space-y-6">
-                    <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-xl space-y-4">
-                        <h3 class="text-lg font-bold">1-Click Dispatch</h3>
-                        <p class="text-xs text-slate-300">Broadcast custom attachments to all loaded recipients.</p>
-                        <button onclick="confirmAndSendBulk()" class="w-full py-3.5 bg-[#485d8b] hover:bg-[#3c4d73] font-bold rounded-xl text-sm transition">
-                            Send Bulk Emails Now
-                        </button>
                     </div>
                 </div>
             </div>
@@ -600,6 +644,114 @@
 
     </main>
 
+
+    
+    <!-- ================= FLOATING MANAGEMENT BULK ACTION BAR ================= -->
+    <div id="bulkActionBar" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#18233c] text-white px-5 py-3 rounded-2xl shadow-2xl z-40 border border-slate-700 flex items-center space-x-4 animate-bounce-short">
+        <div class="flex items-center space-x-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="bulkSelectedCount" class="text-xs font-bold">0 Selected</span>
+            <span class="text-[11px] text-slate-300 hidden sm:inline">&bull; Ready for feedback dispatch</span>
+        </div>
+        <div class="h-4 w-px bg-slate-600"></div>
+        <button onclick="openBulkFeedbackModal()" class="px-4 py-2 bg-[#ef5323] hover:bg-[#d94719] text-white font-bold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-md">
+            <i class="fa-solid fa-bullhorn text-xs"></i>
+            <span>Send Feedback &amp; Reports</span>
+        </button>
+        <button onclick="clearCandidateSelection()" class="text-xs text-gray-300 hover:text-white px-2 py-1 rounded transition">
+            Clear
+        </button>
+    </div>
+
+    <!-- ================= MANAGEMENT BULK FEEDBACK MODAL ================= -->
+    <div id="bulkFeedbackModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-3 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[94vh] flex flex-col border border-gray-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#485d8b] flex items-center justify-center text-white text-sm shadow-md">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-tight">Management Feedback &amp; Bulk Report Dispatch</h3>
+                        <p class="text-[11px] text-gray-500">Attach personalized counselor evaluations and accredited industrial transcripts</p>
+                    </div>
+                </div>
+                <button onclick="closeBulkFeedbackModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-slate-200 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto space-y-4 text-xs">
+                <!-- Selected Candidates Preview -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-gray-700 text-xs uppercase tracking-wider">Target Recipients (<span id="bulkModalRecipientCount">0</span> Candidates)</span>
+                        <span class="text-[11px] text-[#485d8b] font-semibold">DV Analytics Accredited Master Directory</span>
+                    </div>
+                    <div id="bulkModalRecipientsChips" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2.5 bg-gray-50 rounded-xl border border-gray-200 custom-scrollbar">
+                        <!-- Chips inserted dynamically -->
+                    </div>
+                </div>
+
+                <!-- Counselor Feedback Presets -->
+                <div>
+                    <label class="font-bold text-gray-700 block mb-1.5 uppercase tracking-wider text-[11px]">Counselor Feedback Remarks</label>
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <button type="button" onclick="applyFeedbackPreset('elite')" class="text-[10px] font-bold bg-[#edf1f7] hover:bg-[#cbd5e1] text-[#3c4d73] px-2.5 py-1 rounded-lg border border-[#cbd5e1] transition">
+                            🌟 Distinction &amp; Placement Ready
+                        </button>
+                        <button type="button" onclick="applyFeedbackPreset('progress')" class="text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 transition">
+                            📈 Steady Progress &amp; SQL Focus
+                        </button>
+                        <button type="button" onclick="applyFeedbackPreset('revision')" class="text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 px-2.5 py-1 rounded-lg border border-rose-200 transition">
+                            ⚠️ Milestone Submissions Required
+                        </button>
+                    </div>
+                    <textarea id="bulkFeedbackRemarks" rows="4" placeholder="Enter personalized feedback comments from the academic counselor..." class="w-full p-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#485d8b]/20 focus:border-[#485d8b] font-sans"></textarea>
+                </div>
+
+                <!-- Inclusion Options -->
+                <div class="p-3.5 bg-gray-50 rounded-xl border border-gray-200 space-y-2 text-gray-700 font-medium">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input id="chkIncludeTranscript" type="checkbox" checked class="rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] w-4 h-4">
+                        <span>Include Official Executive Student Performance Transcript (HTML &amp; Print Ready)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input id="chkIncludeDonuts" type="checkbox" checked class="rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] w-4 h-4">
+                        <span>Include 6-Tool Vector SVG Donut Metrics (Excel, SQL, Power BI, Python, Tableau, ML)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input id="chkIncludeDirectorSeal" type="checkbox" checked class="rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] w-4 h-4">
+                        <span>Include Academic Director Authorization Signature &amp; Verified QR Seal</span>
+                    </label>
+                </div>
+
+                <!-- Progress Bar during Dispatch -->
+                <div id="bulkDispatchProgressArea" class="hidden space-y-2 pt-2">
+                    <div class="flex items-center justify-between text-xs font-bold text-gray-700">
+                        <span id="bulkProgressStatusText">Dispatching feedback...</span>
+                        <span id="bulkProgressPercentText">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="bulkProgressBarFill" class="bg-[#ef5323] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3.5 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+                <button onclick="closeBulkFeedbackModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-800 transition">
+                    Cancel
+                </button>
+                <button id="btnExecuteBulkDispatch" onclick="executeBulkFeedbackDispatch()" class="px-5 py-2.5 bg-[#ef5323] hover:bg-[#d94719] text-white font-bold text-xs rounded-xl shadow-md transition flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Dispatch Feedback to Selected</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- ================= MODAL 1: REPORT PREVIEW MODAL ================= -->
     <div id="previewModal" class="fixed inset-0 bg-gray-900/70 backdrop-blur-xs z-50 flex items-center justify-center hidden p-2 sm:p-4">
@@ -1096,8 +1248,395 @@
             }
         }
 
+        
+        // ==============================================================================
+        // USER MANAGEMENT SYSTEM (COUNSELOR ACCOUNTS) - MATCHING ARS SPEC
+        // ==============================================================================
+        const DEFAULT_COUNSELOR_ACCOUNTS = [
+            { id: "c1", name: "Parth", email: "parth.patel@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
+            { id: "c2", name: "Pushkar Rai", email: "pushkar.rai@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
+            { id: "c3", name: "Anuj", email: "anuj.gupta@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false },
+            { id: "c4", name: "Akshitha", email: "akshitha.m@dvdataanalytics.com", created: "26/8/2026", active: true, stopLinks: false }
+        ];
+
+        let counselorAccounts = [];
+
+        function loadCounselorAccounts() {
+            try {
+                const stored = localStorage.getItem("dva_counselor_accounts");
+                if (stored) {
+                    counselorAccounts = JSON.parse(stored);
+                } else {
+                    counselorAccounts = [...DEFAULT_COUNSELOR_ACCOUNTS];
+                    saveCounselorAccounts();
+                }
+            } catch(e) {
+                counselorAccounts = [...DEFAULT_COUNSELOR_ACCOUNTS];
+            }
+            renderCounselorAccounts();
+        }
+
+        function saveCounselorAccounts() {
+            try {
+                localStorage.setItem("dva_counselor_accounts", JSON.stringify(counselorAccounts));
+            } catch(e) {}
+            renderCounselorAccounts();
+        }
+
+        function renderCounselorAccounts() {
+            const container = document.getElementById("counselorsContainer");
+            const badge = document.getElementById("counselorCountBadge");
+            const navBadge = document.getElementById("navCounselorBadge");
+            if (!container) return;
+
+            const activeCount = counselorAccounts.filter(c => c.active).length;
+            if (badge) badge.textContent = `${activeCount} Accounts Active`;
+            if (navBadge) navBadge.textContent = counselorAccounts.length;
+
+            if (counselorAccounts.length === 0) {
+                container.innerHTML = `
+                    <div class="py-8 text-center text-gray-400 text-xs">
+                        No counselor accounts configured. Use the form on the left to add an account.
+                    </div>
+                `;
+                return;
+            }
+
+            let html = "";
+            counselorAccounts.forEach((c) => {
+                const isActive = c.active !== false;
+                const isStopped = c.stopLinks === true;
+
+                html += `
+                    <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:bg-gray-50/50 px-1 rounded-lg">
+                        <!-- Left: Info -->
+                        <div>
+                            <div class="font-bold text-sm text-gray-900">${escapeHtml(c.name)}</div>
+                            <div class="text-xs text-gray-500 font-mono">${escapeHtml(c.email)}</div>
+                            <div class="text-[11px] text-gray-400 mt-0.5">Created: ${escapeHtml(c.created || '26/8/2026')}</div>
+                        </div>
+
+                        <!-- Right: Actions matching screenshot exactly -->
+                        <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
+                            <!-- Active Status Pill -->
+                            <span class="text-xs font-semibold ${isActive ? 'text-emerald-600' : 'text-gray-400'} mr-1">
+                                ${isActive ? 'Active' : 'Inactive'}
+                            </span>
+
+                            <!-- Toggle Switch -->
+                            <button type="button" onclick="toggleCounselorActive('${c.id}')" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? 'bg-emerald-500' : 'bg-gray-300'}" role="switch" aria-checked="${isActive}">
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? 'translate-x-5' : 'translate-x-0'}"></span>
+                            </button>
+
+                            <!-- Stop Links Button -->
+                            <button type="button" onclick="toggleCounselorStopLinks('${c.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border transition ${isStopped ? 'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100' : 'border-amber-200 text-amber-600 bg-amber-50/50 hover:bg-amber-100'}">
+                                <i class="fa-solid ${isStopped ? 'fa-link' : 'fa-triangle-exclamation'} text-[10px]"></i>
+                                <span>${isStopped ? 'Resume Links' : 'Stop Links'}</span>
+                            </button>
+
+                            <!-- Edit Button -->
+                            <button type="button" onclick="editCounselorAccount('${c.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 transition">
+                                <i class="fa-solid fa-pen text-[10px] text-gray-400"></i>
+                                <span>Edit</span>
+                            </button>
+
+                            <!-- Password Button -->
+                            <button type="button" onclick="resetCounselorPassword('${c.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 transition">
+                                <i class="fa-solid fa-key text-[10px] text-gray-400"></i>
+                                <span>Password</span>
+                            </button>
+
+                            <!-- Remove Button -->
+                            <button type="button" onclick="removeCounselorAccount('${c.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border border-red-200 text-red-600 bg-red-50/40 hover:bg-red-100/70 transition">
+                                <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                <span>Remove</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function handleCreateCounselor(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById("newCounselorName");
+            const emailInput = document.getElementById("newCounselorEmail");
+            const passInput = document.getElementById("newCounselorPassword");
+
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const pass = passInput.value.trim();
+
+            if (!name || !email || pass.length < 6) {
+                showToast("Please fill all fields with valid information (password min 6 chars)", "error");
+                return;
+            }
+
+            const today = new Date();
+            const createdDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+
+            const newAcc = {
+                id: "c_" + Date.now(),
+                name: name,
+                email: email,
+                created: createdDate,
+                active: true,
+                stopLinks: false
+            };
+
+            counselorAccounts.push(newAcc);
+            saveCounselorAccounts();
+
+            nameInput.value = "";
+            emailInput.value = "";
+            passInput.value = "";
+
+            showToast(`Counselor account for "${name}" created successfully!`, "success");
+        }
+
+        function toggleCounselorActive(id) {
+            const acc = counselorAccounts.find(c => c.id === id);
+            if (!acc) return;
+            acc.active = !acc.active;
+            saveCounselorAccounts();
+            showToast(`${acc.name} is now ${acc.active ? 'Active' : 'Inactive'}`, "info");
+        }
+
+        function toggleCounselorStopLinks(id) {
+            const acc = counselorAccounts.find(c => c.id === id);
+            if (!acc) return;
+            acc.stopLinks = !acc.stopLinks;
+            saveCounselorAccounts();
+            showToast(`Links ${acc.stopLinks ? 'Stopped' : 'Resumed'} for ${acc.name}`, acc.stopLinks ? "warning" : "success");
+        }
+
+        function editCounselorAccount(id) {
+            const acc = counselorAccounts.find(c => c.id === id);
+            if (!acc) return;
+            const newName = prompt(`Edit Counselor Name:`, acc.name);
+            if (!newName) return;
+            const newEmail = prompt(`Edit Counselor Email:`, acc.email);
+            if (!newEmail) return;
+
+            acc.name = newName.trim();
+            acc.email = newEmail.trim();
+            saveCounselorAccounts();
+            showToast(`Updated counselor details for "${acc.name}"`, "success");
+        }
+
+        function resetCounselorPassword(id) {
+            const acc = counselorAccounts.find(c => c.id === id);
+            if (!acc) return;
+            const newPass = prompt(`Set new password for "${acc.name}" (min 6 chars):`);
+            if (!newPass) return;
+            if (newPass.length < 6) {
+                showToast("Password must be at least 6 characters.", "error");
+                return;
+            }
+            showToast(`Password successfully reset for "${acc.name}"`, "success");
+        }
+
+        function removeCounselorAccount(id) {
+            const acc = counselorAccounts.find(c => c.id === id);
+            if (!acc) return;
+            if (confirm(`Are you sure you want to remove counselor account for "${acc.name}"?`)) {
+                counselorAccounts = counselorAccounts.filter(c => c.id !== id);
+                saveCounselorAccounts();
+                showToast(`Removed account for "${acc.name}"`, "info");
+            }
+        }
+
+        function toggleGeneralBulkTool() {
+            const body = document.getElementById("generalBulkToolBody");
+            const icon = document.getElementById("generalBulkToolIcon");
+            if (!body) return;
+            if (body.classList.contains("hidden")) {
+                body.classList.remove("hidden");
+                if (icon) icon.className = "fa-solid fa-chevron-up text-gray-400";
+            } else {
+                body.classList.add("hidden");
+                if (icon) icon.className = "fa-solid fa-chevron-down text-gray-400";
+            }
+        }
+
+        // ==============================================================================
+        // MANAGEMENT MULTI-STUDENT SELECTION & BULK FEEDBACK DISPATCH CONTROLLER
+        // ==============================================================================
+        let selectedCandidateIds = new Set();
+
+        function toggleSelectAllCandidates(checked) {
+            const checkboxes = document.querySelectorAll(".candidate-select-cb");
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+                const sid = cb.getAttribute("data-sid");
+                if (checked) {
+                    selectedCandidateIds.add(sid);
+                } else {
+                    selectedCandidateIds.delete(sid);
+                }
+            });
+            updateBulkActionBar();
+        }
+
+        function onCandidateSelectionChanged() {
+            selectedCandidateIds.clear();
+            const checkboxes = document.querySelectorAll(".candidate-select-cb:checked");
+            checkboxes.forEach(cb => {
+                selectedCandidateIds.add(cb.getAttribute("data-sid"));
+            });
+            
+            const allCbs = document.querySelectorAll(".candidate-select-cb");
+            const selectAll = document.getElementById("selectAllCandidates");
+            if (selectAll && allCbs.length > 0) {
+                selectAll.checked = checkboxes.length === allCbs.length;
+            }
+            updateBulkActionBar();
+        }
+
+        function updateBulkActionBar() {
+            const bar = document.getElementById("bulkActionBar");
+            const countText = document.getElementById("bulkSelectedCount");
+            if (!bar || !countText) return;
+
+            const count = selectedCandidateIds.size;
+            countText.textContent = `${count} Selected`;
+
+            if (count > 0) {
+                bar.classList.remove("hidden");
+            } else {
+                bar.classList.add("hidden");
+            }
+        }
+
+        function clearCandidateSelection() {
+            selectedCandidateIds.clear();
+            const checkboxes = document.querySelectorAll(".candidate-select-cb");
+            checkboxes.forEach(cb => cb.checked = false);
+            const selectAll = document.getElementById("selectAllCandidates");
+            if (selectAll) selectAll.checked = false;
+            updateBulkActionBar();
+        }
+
+        function openBulkFeedbackModal() {
+            if (selectedCandidateIds.size === 0) {
+                showToast("Please select at least 1 candidate using the checkboxes first.", "error");
+                return;
+            }
+
+            const modal = document.getElementById("bulkFeedbackModal");
+            const countSpan = document.getElementById("bulkModalRecipientCount");
+            const chipsContainer = document.getElementById("bulkModalRecipientsChips");
+            
+            if (countSpan) countSpan.textContent = selectedCandidateIds.size;
+            
+            if (chipsContainer) {
+                let chipsHtml = "";
+                selectedCandidateIds.forEach(sid => {
+                    const cand = allCandidates.find(c => c.student_id === sid);
+                    const name = cand ? cand.student_name : sid;
+                    const cur = cand ? computeClientCurriculum(cand) : { readiness_pct: 90 };
+                    chipsHtml += `
+                        <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-white border border-[#cbd5e1] rounded-lg text-xs font-semibold text-gray-800 shadow-2xs">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#ef5323]"></span>
+                            <span>${escapeHtml(name)}</span>
+                            <span class="text-[10px] text-[#485d8b] font-bold">(${cur.readiness_pct}%)</span>
+                        </span>
+                    `;
+                });
+                chipsContainer.innerHTML = chipsHtml;
+            }
+
+            // Default preset
+            applyFeedbackPreset('elite');
+            modal.classList.remove("hidden");
+        }
+
+        function closeBulkFeedbackModal() {
+            const modal = document.getElementById("bulkFeedbackModal");
+            if (modal) modal.classList.add("hidden");
+        }
+
+        function openSingleFeedbackModal(sid) {
+            clearCandidateSelection();
+            selectedCandidateIds.add(sid);
+            const rowCb = document.querySelector(`.candidate-select-cb[data-sid="${sid}"]`);
+            if (rowCb) rowCb.checked = true;
+            updateBulkActionBar();
+            openBulkFeedbackModal();
+        }
+
+        function applyFeedbackPreset(type) {
+            const area = document.getElementById("bulkFeedbackRemarks");
+            if (!area) return;
+
+            if (type === 'elite') {
+                area.value = "Outstanding practical performance across all weekly LMS milestones. Candidate demonstrates exceptional analytical mastery in Excel, SQL, and Power BI. Profile is officially approved for upcoming Tier-1 placement rounds.";
+            } else if (type === 'progress') {
+                area.value = "Consistent progress noted across core assignments. Good command of SQL query structure and Power BI visualizations. Recommend completing additional practice sessions on Python functions and Tableau parameter controls.";
+            } else if (type === 'revision') {
+                area.value = "Weekly assignment review indicates pending milestone submissions. Please complete and submit the remaining practical tasks by this Sunday to maintain active placement eligibility.";
+            }
+        }
+
+        async function executeBulkFeedbackDispatch() {
+            if (selectedCandidateIds.size === 0) return;
+
+            const btn = document.getElementById("btnExecuteBulkDispatch");
+            const remarks = document.getElementById("bulkFeedbackRemarks").value.trim();
+            const progressArea = document.getElementById("bulkDispatchProgressArea");
+            const progressBar = document.getElementById("bulkProgressBarFill");
+            const progressText = document.getElementById("bulkProgressStatusText");
+            const progressPct = document.getElementById("bulkProgressPercentText");
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Dispatching...`;
+            progressArea.classList.remove("hidden");
+
+            const list = Array.from(selectedCandidateIds);
+            let sentCount = 0;
+
+            for (let i = 0; i < list.length; i++) {
+                const sid = list[i];
+                const cand = allCandidates.find(c => c.student_id === sid);
+                const name = cand ? cand.student_name : sid;
+                const pct = Math.round(((i + 1) / list.length) * 100);
+
+                progressBar.style.width = `${pct}%`;
+                progressPct.textContent = `${pct}%`;
+                progressText.textContent = `Dispatching transcript & feedback to ${name} (${i + 1}/${list.length})...`;
+
+                // Update candidate status in-memory and UI
+                if (cand) {
+                    cand.status = "sent";
+                    cand.last_sent_at = new Date().toLocaleTimeString();
+                    cand.feedback_notes = remarks;
+                }
+
+                // Update status cell in table
+                const cell = document.getElementById(`status-${sid}`);
+                if (cell) {
+                    cell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Feedback & Transcript Dispatched"><i class="fa-solid fa-check mr-1"></i> Sent</span>`;
+                }
+
+                await new Promise(res => setTimeout(res, 350));
+                sentCount++;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1"></i> Dispatch Feedback to Selected`;
+            progressArea.classList.add("hidden");
+            closeBulkFeedbackModal();
+
+            showToast(`Successfully dispatched feedback remarks and executive transcripts to ${sentCount} candidates!`, "success");
+            clearCandidateSelection();
+            updateRemainingPendingCount();
+        }
+
+
         document.addEventListener("DOMContentLoaded", () => {
-            initLampLogin();
+            initLampLogin(); loadCounselorAccounts();
             loadSavedConfig();
             loadClientSideMasterDirectory();
             checkServerStatus();
@@ -1107,16 +1646,23 @@
         // App Mode Switcher
         function switchAppMode(mode) {
             const btnAssignments = document.getElementById("navBtnAssignments");
-            const btnBulk = document.getElementById("navBtnBulk");
+            const btnCounselors = document.getElementById("navBtnCounselors");
             const viewAssignments = document.getElementById("viewAssignments");
-            const viewBulk = document.getElementById("viewBulkEmail");
+            const viewCounselors = document.getElementById("viewCounselorAccounts");
 
             if (mode === 'assignments') {
-                btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
-                btnBulk.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
-                viewAssignments.classList.remove("hidden");
-                viewBulk.classList.add("hidden");
+                if (btnAssignments) btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
+                if (btnCounselors) btnCounselors.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
+                if (viewAssignments) viewAssignments.classList.remove("hidden");
+                if (viewCounselors) viewCounselors.classList.add("hidden");
             } else {
+                if (btnCounselors) btnCounselors.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
+                if (btnAssignments) btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
+                if (viewCounselors) viewCounselors.classList.remove("hidden");
+                if (viewAssignments) viewAssignments.classList.add("hidden");
+                loadCounselorAccounts();
+            }
+        } else {
                 btnBulk.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
                 btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
                 viewBulk.classList.remove("hidden");
@@ -1438,7 +1984,7 @@
             if (candidates.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-400">
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-400">
                             No candidates match the selected search or filter criteria.
                         </td>
                     </tr>
@@ -1478,6 +2024,9 @@
 
                 html += `
                     <tr class="hover:bg-gray-50/80 transition" id="row-${sid}">
+                        <td class="px-3 py-3 text-center">
+                            <input type="checkbox" class="candidate-select-cb rounded border-gray-300 text-[#485d8b] focus:ring-[#485d8b] cursor-pointer" data-sid="${sid}" onchange="onCandidateSelectionChanged()">
+                        </td>
                         <td class="px-4 py-3">
                             <div class="font-bold text-gray-900">${sname}</div>
                             <div class="text-[11px] text-gray-400 font-mono font-semibold">${sid}</div>
@@ -1509,6 +2058,9 @@
                         </td>
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                             <div class="inline-flex items-center space-x-1.5">
+                                <button onclick="openSingleFeedbackModal('${sid}')" class="p-1.5 bg-[#edf1f7] hover:bg-[#cbd5e1] text-[#3c4d73] rounded-lg transition" title="Send Feedback Remarks to Student">
+                                    <i class="fa-solid fa-comment-dots text-xs"></i>
+                                </button>
                                 <button onclick="openPreviewModal('${sid}')" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition" title="Preview Executive Report Card & Mentorship Desk">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                 </button>
@@ -1523,7 +2075,7 @@
             });
 
             if (candidates.length > 250) {
-                html += `<tr><td colspan="7" class="px-4 py-3 text-center text-xs text-gray-400 italic">Showing top 250 rows. Use the search box above to find any candidate immediately.</td></tr>`;
+                html += `<tr><td colspan="8" class="px-4 py-3 text-center text-xs text-gray-400 italic">Showing top 250 rows. Use the search box above to find any candidate immediately.</td></tr>`;
             }
 
             tbody.innerHTML = html;
@@ -1532,7 +2084,7 @@
         function setLoadingCandidateTable(msg) {
             document.getElementById("candidateTableBody").innerHTML = `
                 <tr>
-                    <td colspan="7" class="px-4 py-12 text-center text-gray-500 font-medium">
+                    <td colspan="8" class="px-4 py-12 text-center text-gray-500 font-medium">
                         <i class="fa-solid fa-spinner fa-spin text-2xl text-[#485d8b] mb-2 block"></i>
                         ${escapeHtml(msg)}
                     </td>
@@ -1543,7 +2095,7 @@
         function renderEmptyTable(msg) {
             document.getElementById("candidateTableBody").innerHTML = `
                 <tr>
-                    <td colspan="7" class="px-4 py-12 text-center text-gray-400">
+                    <td colspan="8" class="px-4 py-12 text-center text-gray-400">
                         ${escapeHtml(msg)}
                     </td>
                 </tr>
@@ -2159,6 +2711,7 @@
                             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td width="60%" style="vertical-align:middle;">
+                                        <div style="margin-bottom:12px;"><img src="dv_logo.png" alt="DV Analytics" style="height:36px; width:auto; display:inline-block; filter:brightness(1.05);" onerror="this.src='static/dv_logo.png'"></div>
                                         <div style="display:inline-block; background:rgba(239, 83, 35, 0.15); border:1px solid rgba(239, 83, 35, 0.4); border-radius:20px; padding:3px 12px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; color:#ffedd5;">
                                             <span style="display:inline-block; width:6px; height:6px; background:#ef5323; border-radius:50%; margin-right:6px;"></span>Certified Industrial LMS Transcript
                                         </div>
