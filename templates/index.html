@@ -9,7 +9,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DV Analytics &bull; Academic Control Panel &bull; Candidate Assignment Reports</title>
+    <title>DV Analytics &bull; Mentors Control Panel &bull; Bulk Email Automator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -252,7 +252,7 @@
                         <img src="dv_logo.png" alt="DV Analytics" class="h-6 sm:h-7 w-auto object-contain" onerror="this.src='static/dv_logo.png'">
                     </div>
                     <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest bg-amber-400/10 border border-amber-400/25 px-2.5 py-1 rounded-full shadow-xs">
-                        Academic Portal
+                        Mentors Portal
                     </span>
                 </div>
 
@@ -322,7 +322,7 @@
                 <div class="mt-4 pt-4 border-t border-white/10 text-center">
                     <button type="button" onclick="event.preventDefault(); performLogin('System Administrator');" class="w-full py-2.5 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 rounded-xl text-xs font-bold border border-amber-400/25 transition flex items-center justify-center space-x-2 cursor-pointer">
                         <i class="fa-solid fa-bolt text-amber-400"></i>
-                        <span>1-Click Quick Demo Login (System Admin)</span>
+                        <span>1-Click Quick Demo Login (Mentors Control Panel)</span>
                     </button>
                 </div>
 
@@ -332,7 +332,7 @@
 
         <!-- Footer Copyright in Lamp View -->
         <div class="absolute bottom-3 text-center w-full text-[10px] text-gray-500 pointer-events-none">
-            &copy; 2026 DV Analytics Academic Portal &bull; Lamp Login Animation
+            &copy; 2026 DV Analytics Mentors Portal &bull; Lamp Login Animation
         </div>
 
     </div>
@@ -349,7 +349,7 @@
                 </a>
                 <div class="h-6 w-px bg-gray-200 hidden sm:block"></div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg text-gray-900 tracking-tight leading-none">Admin Control Panel</h1>
+                    <h1 class="font-bold text-base sm:text-lg text-gray-900 tracking-tight leading-none">Mentors Control Panel</h1>
                     <p class="text-[11px] text-gray-500 mt-1 hidden sm:block">Candidate Assignment Reports &bull; Bulk Email Automator &bull; Weekly LMS Automation</p>
                 </div>
             </div>
@@ -385,11 +385,6 @@
                 <i class="fa-regular fa-id-card"></i>
                 <span>Student Registrations</span>
                 <span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">LMS</span>
-            </button>
-            <button id="navBtnCounselors" onclick="switchAppMode('counselors')" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-user-shield text-gray-400"></i>
-                <span>Admin Accounts</span>
-                <span id="navCounselorBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ml-1">3</span>
             </button>
             <a href="sample_candidate_report.html" target="_blank" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap">
                 <i class="fa-regular fa-file-lines text-gray-400"></i>
@@ -556,115 +551,18 @@
 
         </div>
 
-                <!-- ================= VIEW 2: COUNSELOR ACCOUNTS (USER MANAGEMENT SYSTEM) ================= -->
-        <div id="viewCounselorAccounts" class="hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                <!-- Left Column: Create Counselor Account Form (ARS Style) -->
-                <div class="lg:col-span-4 bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
-                    <h3 class="text-sm font-bold text-gray-900 flex items-center">
-                        <i class="fa-solid fa-circle-plus text-[#485d8b] mr-2 text-base"></i>
-                        <span>Create Admin Account</span>
-                    </h3>
-
-                    <form id="createCounselorForm" onsubmit="handleCreateCounselor(event)" class="space-y-4 pt-1">
-                        <div>
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-                                ADMIN NAME
-                            </label>
-                            <input type="text" id="newCounselorName" required placeholder="Enter admin's full name" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-white transition">
-                        </div>
-
-                        <div>
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-                                EMAIL ADDRESS
-                            </label>
-                            <input type="email" id="newCounselorEmail" required placeholder="admin@dvdataanalytics.com" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#cbd5e1] focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-[#edf2f9] text-gray-800 transition">
-                        </div>
-
-                        <div>
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-                                PASSWORD
-                            </label>
-                            <input type="password" id="newCounselorPassword" required minlength="6" placeholder="•••••••••••••••••" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#cbd5e1] focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] bg-[#edf2f9] text-gray-800 transition">
-                            <span class="text-[11px] text-gray-400 mt-1 block">Minimum 6 characters.</span>
-                        </div>
-
-                        <button type="submit" class="w-full py-2.5 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center space-x-1.5 mt-2">
-                            <span>Create Admin Account</span>
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Right Column: Active Admin Accounts (Matches Screenshot) -->
-                <div class="lg:col-span-8 bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
-                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                        <h3 class="text-sm font-bold text-gray-900">
-                            Active Admin Accounts
-                        </h3>
-                        <span id="counselorCountBadge" class="text-xs bg-[#edf1f7] text-[#3c4d73] px-2.5 py-0.5 rounded-full font-bold">
-                            3 Admin Accounts Active
-                        </span>
-                    </div>
-
-                    <!-- Dynamic Counselor List Container -->
-                    <div id="counselorsContainer" class="divide-y divide-gray-100 space-y-0">
-                        <!-- Populated dynamically by JavaScript -->
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Optional Collapsible: Custom Bulk Recipient Dispatcher (Secondary Tool) -->
-            <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
-                <button onclick="toggleGeneralBulkTool()" class="w-full flex items-center justify-between text-xs font-bold text-gray-700 hover:text-gray-900">
-                    <span class="flex items-center space-x-2">
-                        <i class="fa-solid fa-sliders text-[#485d8b]"></i>
-                        <span>Advanced Direct Custom CSV/Excel Email Broadcast Tool</span>
-                    </span>
-                    <i id="generalBulkToolIcon" class="fa-solid fa-chevron-down text-gray-400"></i>
-                </button>
-                <div id="generalBulkToolBody" class="hidden mt-4 pt-4 border-t border-gray-200 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                        <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-                            <span class="font-bold text-gray-800 block">Custom Recipient List</span>
-                            <div class="flex space-x-2">
-                                <button onclick="downloadSampleCsv()" class="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md font-semibold border border-emerald-200">Sample CSV</button>
-                                <button onclick="downloadSampleExcel()" class="text-xs text-[#3c4d73] bg-[#edf1f7] px-2.5 py-1 rounded-md font-semibold border border-[#cbd5e1]">Sample Excel</button>
-                            </div>
-                            <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-4 cursor-pointer bg-gray-50/50 transition">
-                                <i class="fa-solid fa-cloud-arrow-up text-lg text-gray-400 mb-1"></i>
-                                <span class="text-xs font-semibold text-gray-600">Upload CSV or Excel</span>
-                                <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
-                            </label>
-                            <div id="customRecipientsPreview" class="text-xs text-gray-500 font-medium"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-                            <span class="font-bold text-gray-800 block">Subject & Broadcast</span>
-                            <input id="emailSubject" type="text" placeholder="Subject line..." class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200">
-                            <textarea id="emailBody" rows="3" placeholder="Email message..." class="w-full text-xs rounded-lg border border-gray-200 p-2.5 font-mono"></textarea>
-                            <button onclick="confirmAndSendBulk()" class="w-full py-2 bg-[#485d8b] hover:bg-[#3c4d73] text-white font-bold rounded-lg text-xs transition">
-                                Broadcast Email
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    
-        <!-- ================= VIEW 3: BULK EMAIL SEND ================= -->
+                <!-- ================= VIEW 2: BULK EMAIL AUTOMATOR (INDEPENDENT CAMPAIGN MANAGER) ================= -->
         <div id="viewBulkEmail" class="hidden space-y-6">
-            <!-- Header banner in ARS Style -->
+            <!-- Header Banner -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                         <h2 class="text-sm font-bold text-gray-900 flex items-center">
                             <i class="fa-solid fa-paper-plane text-[#485d8b] mr-2"></i>
-                            Bulk Email Dispatch &amp; Campaign Manager
+                            Bulk Email Automator &amp; Campaign Manager
                         </h2>
                         <p class="text-xs text-gray-500 mt-1">
-                            Broadcast customized email campaigns with file attachments to your custom recipient spreadsheets (.csv, .xlsx, .xls) or pasted email lists.
+                            Broadcast customized email campaigns with file attachments to any recipient audience (.csv, .xlsx, .xls) or pasted email lists. Fully independent campaign manager.
                         </p>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -680,13 +578,13 @@
                 </div>
             </div>
 
-            <!-- Two-Column Form Layout (ARS Card System) -->
+            <!-- Two-Column Layout (ARS Card System) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Left Column: Recipient File & Message Composer (7 cols) -->
+                <!-- Left Column: Recipient Audience & Email Composer (7 cols) -->
                 <div class="lg:col-span-7 space-y-6">
                     
-                    <!-- Card 1: Custom Recipients -->
+                    <!-- Card 1: Recipient Audience -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
                         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                             <h3 class="text-sm font-bold text-gray-900 flex items-center">
@@ -702,7 +600,7 @@
                         <label for="bulkCustomRecipientsInput" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#485d8b] rounded-xl p-6 cursor-pointer bg-gray-50/50 hover:bg-[#edf1f7]/30 transition group">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 group-hover:text-[#485d8b] mb-2 transition"></i>
                             <span class="text-xs font-bold text-gray-700 group-hover:text-[#3c4d73]">Upload Recipient Spreadsheet (.csv, .xlsx, .xls)</span>
-                            <span class="text-[11px] text-gray-400 mt-1">Columns will be auto-detected (e.g. email, name, company)</span>
+                            <span class="text-[11px] text-gray-400 mt-1">Headers will be auto-detected (e.g. email, name, organization)</span>
                             <input id="bulkCustomRecipientsInput" type="file" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleClientSideRecipientFile(this.files[0])">
                         </label>
 
@@ -713,7 +611,7 @@
                                 <span>Or paste email addresses manually...</span>
                             </button>
                             <div id="pasteRecipientsBox" class="hidden mt-2 space-y-2">
-                                <textarea id="pasteEmailsInput" rows="3" placeholder="Paste emails separated by commas, semicolons, or new lines...&#10;john@example.com&#10;jane@example.com" class="w-full text-xs rounded-lg border border-gray-200 p-2.5 font-mono"></textarea>
+                                <textarea id="pasteEmailsInput" rows="3" placeholder="Paste emails separated by commas, semicolons, or new lines...&#10;user1@example.com&#10;user2@example.com" class="w-full text-xs rounded-lg border border-gray-200 p-2.5 font-mono"></textarea>
                                 <button type="button" onclick="handleClientSidePaste()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">
                                     Parse &amp; Load Pasted Emails
                                 </button>
@@ -742,7 +640,7 @@
                         </div>
                     </div>
 
-                    <!-- Card 2: Message & Attachments -->
+                    <!-- Card 2: Email Content & Attachments -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
                         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                             <h3 class="text-sm font-bold text-gray-900 flex items-center">
@@ -756,7 +654,7 @@
 
                         <div>
                             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Email Subject Line</label>
-                            <input id="bulkEmailSubject" type="text" placeholder="e.g. Official Update: DV Analytics Assignment &amp; Curriculum Evaluation" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition">
+                            <input id="bulkEmailSubject" type="text" placeholder="e.g. Important Announcement: Please find your attached documentation" class="w-full px-3.5 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition">
                         </div>
 
                         <div>
@@ -772,14 +670,14 @@
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Email Body Message</label>
-                                <span class="text-[10px] text-gray-400">Supports variables: <code>{name}</code>, <code>{email}</code></span>
+                                <span class="text-[10px] text-gray-400">Supports variables: <code>{{name}}</code>, <code>{{email}}</code></span>
                             </div>
-                            <textarea id="bulkEmailBody" rows="6" placeholder="Dear {name},&#10;&#10;Please find attached your evaluation materials and latest academic updates.&#10;&#10;Best regards,&#10;DV Analytics Team" class="w-full text-xs rounded-lg border border-gray-200 p-3 font-sans focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition"></textarea>
+                            <textarea id="bulkEmailBody" rows="6" placeholder="Dear {{name}},&#10;&#10;Please find the attached documentation for your review.&#10;&#10;Best regards,&#10;DV Analytics Team" class="w-full text-xs rounded-lg border border-gray-200 p-3 font-sans focus:outline-none focus:ring-1 focus:ring-[#485d8b] focus:border-[#485d8b] transition"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Dispatch Controller & Summary (5 cols) -->
+                <!-- Right Column: Dispatch Controller & Live Terminal (5 cols) -->
                 <div class="lg:col-span-5 space-y-6">
                     
                     <!-- Dispatch Controller Card -->
@@ -787,7 +685,7 @@
                         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                             <h3 class="text-sm font-bold text-gray-900 flex items-center">
                                 <span class="w-5 h-5 rounded-full bg-[#ef5323] text-white text-[11px] font-extrabold flex items-center justify-center mr-2">3</span>
-                                Dispatch Summary
+                                Dispatch Summary &amp; Controls
                             </h3>
                             <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                                 Ready
@@ -804,7 +702,7 @@
                                 <span id="summaryAttachmentCount" class="font-bold text-gray-900">0 files</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
-                                <span class="text-gray-500">Sender Account:</span>
+                                <span class="text-gray-500">Sender Engine:</span>
                                 <span id="summarySenderAccount" class="font-bold text-[#485d8b]">Configured via SMTP</span>
                             </div>
                         </div>
@@ -813,18 +711,24 @@
                         <div class="p-3 bg-amber-50/60 rounded-lg border border-amber-200 text-xs">
                             <label class="flex items-center space-x-2 cursor-pointer text-amber-900 font-semibold">
                                 <input id="chkBulkDryRun" type="checkbox" checked class="rounded border-amber-300 text-[#485d8b] focus:ring-[#485d8b] w-4 h-4">
-                                <span>Dry-Run Simulation Mode (Recommended first test)</span>
+                                <span>Dry-Run Simulation Mode (Safe Test Mode)</span>
                             </label>
                             <p class="text-[11px] text-amber-700 mt-1 pl-6">
-                                Validates all emails and generates dispatches without connecting to real mailboxes.
+                                Validates all addresses and tags without emailing real mailboxes.
                             </p>
                         </div>
 
-                        <!-- Primary Dispatch Button -->
-                        <button id="btnExecuteBulkSend" onclick="executeGeneralBulkSend()" class="w-full py-3 bg-[#485d8b] hover:bg-[#3c4d73] active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span>Send Bulk Emails Now</span>
-                        </button>
+                        <!-- Action Buttons: Send & Stop -->
+                        <div class="flex items-center space-x-2">
+                            <button id="btnExecuteBulkSend" onclick="executeGeneralBulkSend()" class="flex-1 py-3 bg-[#485d8b] hover:bg-[#3c4d73] active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Send Bulk Emails Now</span>
+                            </button>
+                            <button id="btnStopBulkSend" onclick="stopBulkSending()" class="hidden py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                                <i class="fa-solid fa-hand"></i>
+                                <span>Stop</span>
+                            </button>
+                        </div>
 
                         <!-- Progress Bar during Dispatch -->
                         <div id="bulkSendProgressContainer" class="hidden space-y-2 pt-2 border-t border-gray-100">
@@ -832,25 +736,56 @@
                                 <span id="bulkSendStatusText">Sending emails...</span>
                                 <span id="bulkSendPercentText">0%</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                <div id="bulkSendProgressBar" class="bg-[#485d8b] h-2 rounded-full transition-all duration-200" style="width: 0%"></div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                <div id="bulkSendProgressBar" class="bg-[#485d8b] h-2.5 rounded-full transition-all duration-200" style="width: 0%"></div>
+                            </div>
+                            <!-- Live Stats: Sent, Failed, Total -->
+                            <div class="grid grid-cols-3 gap-2 pt-2 text-center text-xs">
+                                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
+                                    <span class="block text-[10px] uppercase font-bold text-emerald-600">Sent</span>
+                                    <span id="bulkStatSent" class="font-extrabold text-emerald-800 text-sm">0</span>
+                                </div>
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-2">
+                                    <span class="block text-[10px] uppercase font-bold text-red-600">Failed</span>
+                                    <span id="bulkStatFailed" class="font-extrabold text-red-800 text-sm">0</span>
+                                </div>
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                    <span class="block text-[10px] uppercase font-bold text-gray-600">Total</span>
+                                    <span id="bulkStatTotal" class="font-extrabold text-gray-800 text-sm">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Terminal Activity Log Console -->
+                        <div class="pt-2 border-t border-gray-100">
+                            <div class="flex items-center justify-between text-xs font-bold text-gray-700 mb-2">
+                                <span class="flex items-center space-x-1.5">
+                                    <i class="fa-solid fa-terminal text-[#485d8b]"></i>
+                                    <span>Live Activity Log</span>
+                                </span>
+                                <button type="button" onclick="downloadDeliveryReportCsv()" class="text-[11px] text-[#485d8b] hover:text-[#3c4d73] font-bold hover:underline flex items-center space-x-1">
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>Download Report CSV</span>
+                                </button>
+                            </div>
+                            <div id="bulkLiveActivityLog" class="bg-gray-900 text-gray-200 font-mono text-[11px] p-3 rounded-xl h-44 overflow-y-auto space-y-1 custom-scrollbar">
+                                <div class="text-gray-500 italic">[System ready. Load recipients and click Send Bulk Emails to monitor live execution.]</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Quick Guide Card -->
                     <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 text-xs space-y-2 text-gray-600">
-                        <span class="font-bold text-gray-800 block text-xs">💡 Quick Tips</span>
-                        <p>1. Download the <b>Sample CSV</b> or <b>Sample Excel</b> to see the supported format.</p>
-                        <p>2. You can use <code>{name}</code> anywhere in the subject or body to personalize each recipient's email.</p>
-                        <p>3. To send real emails, make sure your SMTP credentials are configured via the <b>SMTP Setup</b> button in the top navigation bar.</p>
+                        <span class="font-bold text-gray-800 block text-xs">💡 Pro Tips</span>
+                        <p>1. Download the <b>Sample CSV</b> or <b>Sample Excel</b> to format your recipient columns.</p>
+                        <p>2. Use <code>{{name}}</code> or <code>{name}</code> anywhere in the subject or body to personalize emails.</p>
+                        <p>3. To send real emails, enter your SMTP details via the <b>SMTP Setup</b> button in the top header.</p>
                     </div>
 
                 </div>
 
             </div>
         </div>
-    
     </main>
 
 
@@ -1863,7 +1798,7 @@
 
 
         document.addEventListener("DOMContentLoaded", () => {
-            initLampLogin(); loadCounselorAccounts();
+            initLampLogin();
             loadSavedConfig();
             loadClientSideMasterDirectory();
             checkServerStatus();
@@ -1873,272 +1808,27 @@
         // App Mode Switcher
         function switchAppMode(mode) {
             const btnAssignments = document.getElementById("navBtnAssignments");
-            const btnCounselors = document.getElementById("navBtnCounselors");
             const btnBulk = document.getElementById("navBtnBulk");
             const viewAssignments = document.getElementById("viewAssignments");
-            const viewCounselors = document.getElementById("viewCounselorAccounts");
             const viewBulk = document.getElementById("viewBulkEmail");
 
             const inactiveClass = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
             const activeClass = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
 
             if (btnAssignments) btnAssignments.className = inactiveClass;
-            if (btnCounselors) btnCounselors.className = inactiveClass;
             if (btnBulk) btnBulk.className = inactiveClass;
 
             if (viewAssignments) viewAssignments.classList.add("hidden");
-            if (viewCounselors) viewCounselors.classList.add("hidden");
             if (viewBulk) viewBulk.classList.add("hidden");
 
             if (mode === 'assignments') {
                 if (btnAssignments) btnAssignments.className = activeClass;
                 if (viewAssignments) viewAssignments.classList.remove("hidden");
-            } else if (mode === 'counselors' || mode === 'admin') {
-                if (btnCounselors) btnCounselors.className = activeClass;
-                if (viewCounselors) viewCounselors.classList.remove("hidden");
-                if (typeof loadCounselorAccounts === "function") {
-                    loadCounselorAccounts();
-                }
             } else if (mode === 'bulk') {
                 if (btnBulk) btnBulk.className = activeClass;
                 if (viewBulk) viewBulk.classList.remove("hidden");
             }
         }
-
-        
-        // ==============================================================================
-        // BULK EMAIL SENDER (CAMPAIGN MANAGER) CONTROLLER
-        // ==============================================================================
-        let loadedBulkRecipients = [];
-        let loadedBulkAttachments = [];
-
-        function togglePasteRecipientsBox() {
-            const box = document.getElementById("pasteRecipientsBox");
-            if (box) box.classList.toggle("hidden");
-        }
-
-        function handleClientSideRecipientFile(file) {
-            if (!file) return;
-            const ext = file.name.split('.').pop().toLowerCase();
-
-            if (ext === 'csv') {
-                Papa.parse(file, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: function(results) {
-                        processParsedBulkRows(results.data, results.meta.fields || []);
-                    },
-                    error: function(err) {
-                        showToast("Error parsing CSV: " + err.message, "error");
-                    }
-                });
-            } else if (ext === 'xlsx' || ext === 'xls') {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const firstSheet = workbook.SheetNames[0];
-                        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
-                        const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
-                        processParsedBulkRows(rows, headers);
-                    } catch (err) {
-                        showToast("Error reading Excel file: " + err.message, "error");
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            } else {
-                showToast("Unsupported format. Please upload .xlsx, .xls, or .csv", "error");
-            }
-        }
-
-        function handleClientSidePaste() {
-            const text = document.getElementById("pasteEmailsInput").value.trim();
-            if (!text) {
-                showToast("Please enter or paste at least one email address.", "error");
-                return;
-            }
-            const tokens = text.split(/[\r\n,;]+/).map(t => t.trim()).filter(Boolean);
-            const rows = tokens.map(email => ({ email: email, name: email.split('@')[0] }));
-            processParsedBulkRows(rows, ["email", "name"]);
-        }
-
-        function processParsedBulkRows(rows, headers) {
-            let emailKey = null;
-            let nameKey = null;
-
-            for (let h of headers) {
-                const lower = h.toLowerCase();
-                if (!emailKey && (lower.includes("email") || lower.includes("mail"))) {
-                    emailKey = h;
-                }
-                if (!nameKey && (lower.includes("name") || lower.includes("student") || lower.includes("candidate"))) {
-                    nameKey = h;
-                }
-            }
-
-            if (!emailKey && headers.length > 0) {
-                emailKey = headers[0];
-            }
-
-            loadedBulkRecipients = [];
-            rows.forEach((r, idx) => {
-                const email = String(r[emailKey] || "").trim();
-                if (isValidEmail(email)) {
-                    const name = nameKey && r[nameKey] ? String(r[nameKey]).trim() : email.split('@')[0];
-                    loadedBulkRecipients.push({
-                        id: idx + 1,
-                        email: email,
-                        name: name,
-                        raw: r
-                    });
-                }
-            });
-
-            const countPill = document.getElementById("bulkRecipientCountPill");
-            const summaryCount = document.getElementById("summaryRecipientCount");
-            const previewSection = document.getElementById("bulkRecipientsPreviewSection");
-            const tbody = document.getElementById("bulkRecipientsTableBody");
-            const tagsSpan = document.getElementById("recipientFieldTags");
-
-            if (countPill) countPill.textContent = `${loadedBulkRecipients.length} Recipients Loaded`;
-            if (summaryCount) summaryCount.textContent = `${loadedBulkRecipients.length} recipients`;
-            if (tagsSpan && headers.length > 0) tagsSpan.textContent = `Available tags: {${headers.join('}, {')}}`;
-
-            if (loadedBulkRecipients.length === 0) {
-                showToast("No valid email addresses found in the uploaded file.", "error");
-                return;
-            }
-
-            if (previewSection) previewSection.classList.remove("hidden");
-            if (tbody) {
-                let html = "";
-                loadedBulkRecipients.slice(0, 50).forEach(rec => {
-                    html += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-3 py-1.5 font-bold text-gray-800">${escapeHtml(rec.email)}</td>
-                            <td class="px-3 py-1.5 text-gray-600">${escapeHtml(rec.name)}</td>
-                            <td class="px-3 py-1.5 text-center"><span class="text-emerald-600 font-bold text-[10px]">Valid</span></td>
-                        </tr>
-                    `;
-                });
-                if (loadedBulkRecipients.length > 50) {
-                    html += `<tr><td colspan="3" class="px-3 py-1.5 text-center text-gray-400 italic font-sans">... and ${loadedBulkRecipients.length - 50} more recipients</td></tr>`;
-                }
-                tbody.innerHTML = html;
-            }
-
-            showToast(`Loaded ${loadedBulkRecipients.length} recipients successfully!`, "success");
-        }
-
-        async function handleClientSideAttachments(files) {
-            if (!files || files.length === 0) return;
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                loadedBulkAttachments.push({
-                    id: Math.random().toString(36).substring(2, 9),
-                    name: file.name,
-                    size: formatFileSize(file.size),
-                    type: file.type || "application/octet-stream"
-                });
-            }
-            renderBulkAttachmentsList();
-        }
-
-        function removeBulkAttachment(id) {
-            loadedBulkAttachments = loadedBulkAttachments.filter(a => a.id !== id);
-            renderBulkAttachmentsList();
-        }
-
-        function renderBulkAttachmentsList() {
-            const container = document.getElementById("bulkAttachmentsList");
-            const badge = document.getElementById("attachmentCountBadge");
-            const summary = document.getElementById("summaryAttachmentCount");
-
-            if (badge) badge.textContent = `${loadedBulkAttachments.length} Files Attached`;
-            if (summary) summary.textContent = `${loadedBulkAttachments.length} files`;
-            if (!container) return;
-
-            if (loadedBulkAttachments.length === 0) {
-                container.innerHTML = "";
-                return;
-            }
-
-            let html = "";
-            loadedBulkAttachments.forEach(att => {
-                html += `
-                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200 text-xs">
-                        <div class="flex items-center space-x-2 truncate mr-2">
-                            <i class="fa-solid fa-file text-[#485d8b]"></i>
-                            <span class="font-bold text-gray-800 truncate">${escapeHtml(att.name)}</span>
-                            <span class="text-[10px] text-gray-400">(${att.size})</span>
-                        </div>
-                        <button type="button" onclick="removeBulkAttachment('${att.id}')" class="text-gray-400 hover:text-red-500 p-1">
-                            <i class="fa-solid fa-xmark text-xs"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return "0 B";
-            const k = 1024;
-            const sizes = ["B", "KB", "MB", "GB"];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-        }
-
-        async function executeGeneralBulkSend() {
-            if (loadedBulkRecipients.length === 0) {
-                showToast("Please upload or paste recipients first (Step 1).", "error");
-                return;
-            }
-
-            const subject = document.getElementById("bulkEmailSubject").value.trim();
-            if (!subject) {
-                showToast("Please enter an email Subject Line (Step 2).", "error");
-                document.getElementById("bulkEmailSubject").focus();
-                return;
-            }
-
-            const body = document.getElementById("bulkEmailBody").value.trim();
-            if (!body) {
-                showToast("Please enter the Email Body message (Step 2).", "error");
-                document.getElementById("bulkEmailBody").focus();
-                return;
-            }
-
-            const btn = document.getElementById("btnExecuteBulkSend");
-            const progressContainer = document.getElementById("bulkSendProgressContainer");
-            const progressBar = document.getElementById("bulkSendProgressBar");
-            const statusText = document.getElementById("bulkSendStatusText");
-            const percentText = document.getElementById("bulkSendPercentText");
-
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Broadcasting Emails...`;
-            progressContainer.classList.remove("hidden");
-
-            const total = loadedBulkRecipients.length;
-            for (let i = 0; i < total; i++) {
-                const rec = loadedBulkRecipients[i];
-                const pct = Math.round(((i + 1) / total) * 100);
-
-                progressBar.style.width = `${pct}%`;
-                percentText.textContent = `${pct}%`;
-                statusText.textContent = `Dispatching to ${rec.email} (${i + 1}/${total})...`;
-
-                await new Promise(res => setTimeout(res, 200));
-            }
-
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1.5"></i> Send Bulk Emails Now`;
-            progressContainer.classList.add("hidden");
-
-            showToast(`Broadcast Complete! Successfully dispatched emails to all ${total} recipients.`, "success");
-        }
-    
 
         // Check Server
         async function checkServerStatus() {
@@ -3162,7 +2852,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certified Student Performance Transcript &bull; ${name}</title>
+    <title>DV Analytics &bull; Mentors Control Panel &bull; Bulk Email Automator</title>
 </head>
 <body style="margin:0; padding:0; background-color:#0b0f19; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0b0f19; padding:32px 12px;">
@@ -3437,7 +3127,7 @@
                                         💬 Chat on WhatsApp
                                     </a>
                                     <a href="https://dvanalyticsmds.in" target="_blank" style="display:inline-block; background:#485d8b; color:#ffffff; font-size:11px; font-weight:800; text-decoration:none; padding:8px 18px; border-radius:8px;">
-                                        📁 Academic Portal
+                                        📁 Mentors Portal
                                     </a>
                                 </div>
                             </div>
