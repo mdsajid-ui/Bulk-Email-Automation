@@ -1676,13 +1676,9 @@
                 if (btnAssignments) btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
                 if (viewCounselors) viewCounselors.classList.remove("hidden");
                 if (viewAssignments) viewAssignments.classList.add("hidden");
-                loadCounselorAccounts();
-            }
-        } else {
-                btnBulk.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-[#485d8b] text-white shadow-xs whitespace-nowrap";
-                btnAssignments.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-2 whitespace-nowrap";
-                viewBulk.classList.remove("hidden");
-                viewAssignments.classList.add("hidden");
+                if (typeof loadCounselorAccounts === "function") {
+                    loadCounselorAccounts();
+                }
             }
         }
 
