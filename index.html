@@ -177,7 +177,7 @@
 
         <!-- Direct Portal Bypass / Guest Toggle (Top Right) -->
         <div class="absolute top-5 right-6 z-30 flex items-center space-x-3">
-            <button onclick="event.preventDefault(); performLogin('System Administrator');" class="text-xs font-semibold text-gray-300 hover:text-white bg-white/10 hover:bg-white/15 px-3.5 py-1.5 rounded-full backdrop-blur-md border border-white/15 transition flex items-center space-x-1.5 shadow-sm">
+            <button onclick="event.preventDefault(); performLogin('sanjana');" class="text-xs font-semibold text-gray-300 hover:text-white bg-white/10 hover:bg-white/15 px-3.5 py-1.5 rounded-full backdrop-blur-md border border-white/15 transition flex items-center space-x-1.5 shadow-sm">
                 <i class="fa-solid fa-arrow-right-to-bracket text-amber-400"></i>
                 <span>Direct Dashboard Access</span>
             </button>
@@ -262,12 +262,12 @@
                 </div>
 
                 <!-- Login Form -->
-                <form id="lampLoginForm" onsubmit="event.preventDefault(); performLogin('System Administrator'); return false;" action="javascript:void(0);" method="POST" class="space-y-3.5">
+                <form id="lampLoginForm" onsubmit="event.preventDefault(); performLogin('sanjana'); return false;" action="javascript:void(0);" method="POST" class="space-y-3.5">
                     <!-- Username Input -->
                     <div>
                         <div class="relative">
                             <i class="fa-regular fa-user absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
-                            <input id="lampLoginUsername" type="text" value="System Administrator" placeholder="Username" required class="w-full pl-10 pr-4 py-2.5 bg-[#222634]/90 border border-white/10 rounded-xl text-xs text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition">
+                            <input id="lampLoginUsername" type="text" value="sanjana" placeholder="Username (sanjana)" required class="w-full pl-10 pr-4 py-2.5 bg-[#222634]/90 border border-white/10 rounded-xl text-xs text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition">
                         </div>
                     </div>
 
@@ -275,7 +275,7 @@
                     <div>
                         <div class="relative">
                             <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
-                            <input id="lampLoginEmail" type="email" value="admin@dv.com" placeholder="Email Address" required class="w-full pl-10 pr-4 py-2.5 bg-[#222634]/90 border border-white/10 rounded-xl text-xs text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition">
+                            <input id="lampLoginEmail" type="email" value="sanjana@dvdataanalytics.com" placeholder="Email Address" required class="w-full pl-10 pr-4 py-2.5 bg-[#222634]/90 border border-white/10 rounded-xl text-xs text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition">
                         </div>
                     </div>
 
@@ -283,7 +283,7 @@
                     <div>
                         <div class="relative">
                             <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
-                            <input id="lampLoginPassword" type="password" value="password123" placeholder="Password" required class="w-full pl-10 pr-10 py-2.5 bg-[#222634]/90 border border-white/10 rounded-xl text-xs text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 font-mono transition">
+                            <input id="lampLoginPassword" type="password" value="@12345" placeholder="Password (@12345)" required class="w-full pl-10 pr-10 py-2.5 bg-[#222634]/90 border border-white/10 rounded-xl text-xs text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 font-mono transition">
                             <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-200 text-xs">
                                 <i class="fa-regular fa-eye" id="pwdToggleIcon"></i>
                             </button>
@@ -291,7 +291,7 @@
                     </div>
 
                     <!-- Primary Sign in Button (Warm Golden Yellow matching reference image) -->
-                    <button type="submit" onclick="event.preventDefault(); performLogin('System Administrator');" class="w-full py-3 bg-[#f59e0b] hover:bg-[#d97706] active:scale-[0.99] text-gray-950 font-extrabold text-xs rounded-xl shadow-lg shadow-amber-500/25 transition-all duration-150 flex items-center justify-center space-x-2 mt-2 cursor-pointer">
+                    <button type="submit" onclick="event.preventDefault(); performLogin('sanjana');" class="w-full py-3 bg-[#f59e0b] hover:bg-[#d97706] active:scale-[0.99] text-gray-950 font-extrabold text-xs rounded-xl shadow-lg shadow-amber-500/25 transition-all duration-150 flex items-center justify-center space-x-2 mt-2 cursor-pointer">
                         <span>Sign in</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
@@ -320,9 +320,9 @@
 
                 <!-- Quick Demo Login Button -->
                 <div class="mt-4 pt-4 border-t border-white/10 text-center">
-                    <button type="button" onclick="event.preventDefault(); performLogin('System Administrator');" class="w-full py-2.5 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 rounded-xl text-xs font-bold border border-amber-400/25 transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <button type="button" onclick="event.preventDefault(); performLogin('sanjana');" class="w-full py-2.5 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 rounded-xl text-xs font-bold border border-amber-400/25 transition flex items-center justify-center space-x-2 cursor-pointer">
                         <i class="fa-solid fa-bolt text-amber-400"></i>
-                        <span>1-Click Quick Demo Login (Mentors Control Panel)</span>
+                        <span>1-Click Quick Demo Login (sanjana / @12345)</span>
                     </button>
                 </div>
 
@@ -357,8 +357,8 @@
             <!-- Right: System Administrator Profile & Actions (Matches ARS Portal) -->
             <div class="flex items-center space-x-3">
                 <div class="text-right hidden sm:block">
-                    <div class="text-xs font-bold text-gray-800 leading-tight">System Administrator</div>
-                    <div class="text-[11px] text-gray-400 font-mono">admin@dv.com</div>
+                    <div id="headerUserName" class="text-xs font-bold text-gray-800 leading-tight">Sanjana</div>
+                    <div id="headerUserEmail" class="text-[11px] text-gray-400 font-mono">sanjana@dvdataanalytics.com</div>
                 </div>
 
                 <!-- Logout Button (Returns smoothly to Lamp Login) -->
@@ -1313,9 +1313,17 @@
                 isLoggedIn = sessionStorage.getItem("dva_auth") === "true" || localStorage.getItem("dva_auth") === "true";
             } catch (e) {}
             const overlay = document.getElementById("lampLoginOverlay");
-            if (isLoggedIn && overlay) {
-                overlay.classList.add("hidden");
-                overlay.style.display = "none";
+            if (isLoggedIn) {
+                const storedUser = sessionStorage.getItem("dva_user") || "Sanjana";
+                const storedEmail = sessionStorage.getItem("dva_email") || "sanjana@dvdataanalytics.com";
+                const headerName = document.getElementById("headerUserName");
+                const headerEmail = document.getElementById("headerUserEmail");
+                if (headerName) headerName.textContent = storedUser;
+                if (headerEmail) headerEmail.textContent = storedEmail;
+                if (overlay) {
+                    overlay.classList.add("hidden");
+                    overlay.style.display = "none";
+                }
             }
         }
 
@@ -1404,35 +1412,69 @@
             performLogin("System Administrator");
         }
 
-        function performLogin(who = "System Administrator") {
+        function performLogin(who = "sanjana") {
+            const userField = document.getElementById("lampLoginUsername");
+            const passField = document.getElementById("lampLoginPassword");
+            const emailField = document.getElementById("lampLoginEmail");
+
+            const enteredUser = userField ? userField.value.trim() : "sanjana";
+            const enteredPass = passField ? passField.value.trim() : "@12345";
+            const enteredEmail = emailField ? emailField.value.trim() : "sanjana@dvdataanalytics.com";
+
+            // If logging in via form (not provider/quick button without inputs)
+            if (enteredPass && enteredPass !== "@12345" && enteredPass !== "password123") {
+                showNotificationToast("Invalid password! Please use default password: @12345", "error");
+                if (passField) passField.focus();
+                return;
+            }
+
+            const displayName = enteredUser ? (enteredUser.charAt(0).toUpperCase() + enteredUser.slice(1)) : "Sanjana";
+            const displayEmail = enteredEmail || "sanjana@dvdataanalytics.com";
+
             try {
                 sessionStorage.setItem("dva_auth", "true");
+                sessionStorage.setItem("dva_user", displayName);
+                sessionStorage.setItem("dva_email", displayEmail);
                 localStorage.setItem("dva_auth", "true");
             } catch (e) {}
 
+            const headerName = document.getElementById("headerUserName");
+            const headerEmail = document.getElementById("headerUserEmail");
+            if (headerName) headerName.textContent = displayName;
+            if (headerEmail) headerEmail.textContent = displayEmail;
+
             const overlay = document.getElementById("lampLoginOverlay");
             if (overlay) {
-                overlay.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+                overlay.style.transition = "opacity 0.35s ease, transform 0.35s ease";
                 overlay.style.opacity = "0";
                 overlay.style.transform = "scale(0.96)";
                 overlay.style.pointerEvents = "none";
                 setTimeout(() => {
                     overlay.classList.add("hidden");
                     overlay.style.display = "none";
-                }, 400);
+                }, 350);
             }
-            showNotificationToast(`Welcome back, ${who}! Logged in successfully.`, "success");
+            showNotificationToast(`Welcome back, ${displayName}! Logged in successfully.`, "success");
         }
 
         function logoutToLampLogin() {
             sessionStorage.removeItem("dva_auth");
+            sessionStorage.removeItem("dva_user");
+            sessionStorage.removeItem("dva_email");
+            localStorage.removeItem("dva_auth");
+
+            // Clear any lingering toasts to avoid spamming the screen
+            const toastContainer = document.getElementById("toastContainer");
+            if (toastContainer) toastContainer.innerHTML = "";
+
             const overlay = document.getElementById("lampLoginOverlay");
             if (overlay) {
                 overlay.classList.remove("hidden");
-                overlay.classList.add("opacity-0");
-                // Trigger reflow
-                void overlay.offsetWidth;
-                overlay.classList.remove("opacity-0");
+                overlay.style.display = "flex";
+                overlay.style.pointerEvents = "auto";
+                overlay.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                overlay.style.opacity = "1";
+                overlay.style.transform = "scale(1)";
                 createFireflies();
             }
             showNotificationToast("Logged out to Lamp Login screen.", "info");
